@@ -1,0 +1,34 @@
+{
+  "name": "ux-ui-agent-skills-codex",
+  "version": "3.0.0-codex.1",
+  "description": "Codex plugin build of HiroshiYoshino/ux-ui-agent-skills: design-system skills (tokens, components, accessibility) and the objective quality gates, ported from the Claude Code skills. A fork of plugin87/ux-ui-agent-skills. Not the npm package of the same name.",
+  "author": {
+    "name": "HiroshiYoshino",
+    "url": "https://github.com/HiroshiYoshino"
+  },
+  "homepage": "https://github.com/HiroshiYoshino/ux-ui-agent-skills/blob/main/docs/CODEX-PLUGIN.md",
+  "repository": "https://github.com/HiroshiYoshino/ux-ui-agent-skills",
+  "license": "MIT",
+  "keywords": [
+    "design-system",
+    "design-tokens",
+    "accessibility",
+    "wcag",
+    "ui",
+    "ux"
+  ],
+  "skills": "./.codex-plugin/skills",
+  "hooks": {},
+  "mcpServers": "./.codex-plugin/mcp.json",
+  "interface": {
+    "displayName": "UX/UI Agent Skills (Codex build, HiroshiYoshino fork)",
+    "shortDescription": "Design-system skills and objective gates. Skills and MCP only: no hooks.",
+    "longDescription": "Design-system skills for Codex: DTCG tokens, component specs, WCAG 2.2 accessibility and the gates that measure the result. This is the Codex build of the HiroshiYoshino fork of plugin87/ux-ui-agent-skills (MIT, original author Thientan Soparat). It ships skills and one MCP server. It does not ship the Claude Code hooks: nothing here records or blocks on your behalf, so run the gates and report what they print. Gates that open a browser need playwright installed separately.",
+    "developerName": "HiroshiYoshino (fork of plugin87/ux-ui-agent-skills)",
+    "category": "Design",
+    "websiteURL": "https://github.com/HiroshiYoshino/ux-ui-agent-skills",
+    "defaultPrompt": [
+      "Use the design-doctrine skill, then design a settings screen."
+    ]
+  }
+}
