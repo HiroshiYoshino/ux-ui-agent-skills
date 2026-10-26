@@ -70,6 +70,10 @@ node scripts/lint_intent.mjs          src/components
 node scripts/slop_tells.mjs --strict  src/pages/index.html
 ```
 
+`accuracy_report.mjs` is a self-test of a checked-out copy of this kit. It
+measures the kit's own `tests/`, `evals/` and `examples/`; it is not the
+consumer-project gate. Use the commands above with paths in your project.
+
 The render gates drive real Chrome:
 
 ```bash

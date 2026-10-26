@@ -100,6 +100,13 @@ def main(argv):
         if not (root / script).exists():
             problems.append(f"AGENTS.md tells the agent to run {script}, which does not exist")
 
+    # The kit self-test points at this repository's tests, evals and examples,
+    # not a consuming project's files.
+    if re.search(r"^\s*\d+\.\s+Run `node scripts/accuracy_report\.mjs`", text, re.M):
+        problems.append(
+            "AGENTS.md tells consuming projects to run the kit self-test; "
+            "use project gates against the user's files instead")
+
     # It must be honest about what it cannot enforce.
     if not re.search(r"hook", text, re.I):
         problems.append(

@@ -58,9 +58,13 @@ test('it does not send a consuming project at the kit self-test', () => {
     'AGENTS.md must say what accuracy_report.mjs actually measures');
   assert.match(text, /17\/50/,
     'the real number from the real run is the evidence; keep it');
+  assert.match(text, /applicable gates against the project's tokens and files/,
+    'the end-to-end workflow must run gates against consuming-project files');
   // and the quick reference must not still offer it as the one command
   assert.ok(!/accuracy_report\.mjs\s+#\s*everything/.test(text),
     'the quick reference still presents the self-test as the command to run');
+  assert.doesNotMatch(text, /^\s*\d+\.\s+Run `node scripts\/accuracy_report\.mjs`/m,
+    'the end-to-end workflow still sends consuming projects at the kit self-test');
 });
 
 test('every gate AGENTS.md names takes the files as an argument', () => {
