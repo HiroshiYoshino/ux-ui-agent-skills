@@ -8,6 +8,19 @@ one, carrying the same doctrine as `CLAUDE.md`.
 npx ux-ui-agent-skills init --agent codex
 ```
 
+The existing command keeps its instruction-and-gates behavior. To also install
+the statically adapted Codex workspace skills under `.agents/skills/`, opt in:
+
+```bash
+npx ux-ui-agent-skills init --agent codex --with-skills
+```
+
+This route writes a compatibility note and a per-skill port report under
+`docs/`. The report marks fallback and unsupported skills separately. Codex CLI
+runtime behavior has not been tested; see `docs/CODEX-COMPATIBILITY.md` in the
+kit repository for source links, platform limits, and the shared adapter
+contract.
+
 That installs `AGENTS.md`, the tokens, the component specs, the accessibility
 reference, the taste doctrine, 2,144 design systems, the framework adapters, and
 all 52 gates. It does **not** install `.claude/`: those are Claude Code
@@ -69,6 +82,10 @@ node scripts/verify_mobile_first.mjs  src
 node scripts/lint_intent.mjs          src/components
 node scripts/slop_tells.mjs --strict  src/pages/index.html
 ```
+
+`accuracy_report.mjs` is a self-test of a checked-out copy of this kit. It
+measures the kit's own `tests/`, `evals/` and `examples/`; it is not the
+consumer-project gate. Use the commands above with paths in your project.
 
 The render gates drive real Chrome:
 

@@ -15,6 +15,7 @@ forward. Re-run the commands and you should get the same ones.
 |---|---|---|
 | **Claude Code** | `/plugin marketplace add plugin87/ux-ui-agent-skills` | 26 skills, hooks, the critic |
 | **Codex, Cursor, Copilot, Aider** | `npx ux-ui-agent-skills init --agent codex` | `AGENTS.md` + every gate |
+| **Codex workspace skills** | `npx ux-ui-agent-skills init --agent codex --with-skills` | `AGENTS.md`, gates, adapted skills + a port report |
 | **Gemini CLI** | `gemini extensions install https://github.com/plugin87/ux-ui-agent-skills` | `GEMINI.md`, 23 ported skills, the MCP server |
 | **Antigravity** (or Gemini CLI, per project) | `npx ux-ui-agent-skills init --agent gemini` | `GEMINI.md` + `.agents/skills/` + every gate |
 | **Any MCP client** | `claude mcp add ux-ui-gates -- npx -y --package=ux-ui-agent-skills ux-ui-mcp` | 6 tools that run the gates |
@@ -67,6 +68,14 @@ fetches every spec, for a machine that will work offline.
 
 It deliberately does **not** write `.claude/`. Skills, rules and the critic are
 Claude Code mechanisms; on this route they would be dead files.
+
+`--with-skills` is a separate opt-in. It writes Codex-format skills to
+`.agents/skills/` and the rule documents they reference to `docs/agent-rules/`.
+One skill is a same-context critique fallback; `observe` and
+`scaffold-project` remain unsupported and are listed in
+`docs/codex-skill-port-report.json`. This is a statically tested conversion,
+not a Codex runtime test. The route does not install plugins, hooks, or Codex
+MCP configuration. See [the compatibility and contract note](CODEX-COMPATIBILITY.md).
 
 **What you lose, stated plainly:** the hooks. On Claude Code three rules are
 enforced without the model choosing to. Here every rule is a request and the

@@ -208,7 +208,9 @@ search <term>`, then `node scripts/library.mjs get <name>` fetches its spec
 1. Write the taste block above. Not in your head - in the reply.
 2. Pick a direction and resolve it into **tokens**, not into per-screen CSS.
 3. Build mobile-first, every value a token, all eight states.
-4. Run `node scripts/accuracy_report.mjs` and report the real `N/N`.
+4. Run the applicable gates against the project's tokens and files, and report
+   their actual output. `scripts/accuracy_report.mjs` is only the kit's
+   self-test; do not use it to measure a consuming project.
 5. Screenshot it and click every control.
 6. Argue against your own work: what would a critic reject first? A passing gate
    is never evidence of taste.
@@ -225,5 +227,6 @@ refusal to end a session that edited UI and measured none of it. There is no
 equivalent here. On this surface every rule above is a request, and the gates run
 when you run them.
 
-That makes step 4 the whole difference between this kit working and not working.
-Run the gate. Report what it printed.
+That makes running the applicable project gates the whole difference between
+this kit working and not working. Run the gates against your files. Report what
+they printed.

@@ -128,13 +128,14 @@ function parseFlags(argv) {
   //   codex  -> AGENTS.md, read by Codex, Cursor, Copilot, Jules, Aider and more
   //   both   -> both files; they are held in step by validate_agents_surface.py
   //   gemini -> GEMINI.md + .agents/skills/, read by Gemini CLI and Antigravity
-  const flags = { force: false, dry: false, noOpen: false, agent: 'claude' };
+  const flags = { force: false, dry: false, noOpen: false, withSkills: false, agent: 'claude' };
   const rest = [];
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--force' || a === '-f') flags.force = true;
     else if (a === '--dry' || a === '--dry-run') flags.dry = true;
     else if (a === '--no-open') flags.noOpen = true;
+    else if (a === '--with-skills') flags.withSkills = true;
     else if (a === '--agent' || a.startsWith('--agent=')) {
       const v = a.includes('=') ? a.split('=')[1] : argv[++i];
       const ok = ['claude', 'codex', 'agents', 'both', 'gemini', 'antigravity'];
@@ -189,6 +190,43 @@ function installGemini(destRoot, flags) {
     writeGenerated(path.join(destRoot, '.agents', 'skills', name, 'SKILL.md'),
       portSkill(fs.readFileSync(file, 'utf8'), ''), flags);
   }
+}
+
+function installCodexSkills(destRoot, flags) {
+  const {
+    portCodexSkill, codexCritiqueFallback, codexSkillPortReport, CODEX_UNSUPPORTED,
+  } = require('./port-skills.js');
+  const source = path.join(ROOT, '.claude', 'skills');
+  const names = fs.readdirSync(source).filter(name =>
+    fs.existsSync(path.join(source, name, 'SKILL.md'))).sort();
+  const report = codexSkillPortReport(names, require(path.join(ROOT, 'package.json')).version);
+
+  copyRecursive(path.join(ROOT, '.claude', 'rules'), path.join(destRoot, 'docs', 'agent-rules'), flags);
+  writeGenerated(path.join(destRoot, 'docs', 'CODEX-COMPATIBILITY.md'),
+    fs.readFileSync(path.join(ROOT, 'docs', 'CODEX-COMPATIBILITY.md'), 'utf8'), flags);
+
+  const skillNames = names.filter(name => !(name in CODEX_UNSUPPORTED));
+  for (const name of skillNames) {
+    const destination = path.join(destRoot, '.agents', 'skills', name);
+    const sourceSkill = fs.readFileSync(path.join(source, name, 'SKILL.md'), 'utf8');
+    const ported = name === 'critique'
+      ? { content: codexCritiqueFallback(), manualOnly: true }
+      : portCodexSkill(sourceSkill, names);
+    const reportEntry = report.skills.find(skill => skill.name === name);
+    if (ported.droppedFrontmatter?.length) reportEntry.droppedFrontmatter = ported.droppedFrontmatter;
+    writeGenerated(path.join(destination, 'SKILL.md'), ported.content, flags);
+    if (ported.manualOnly) {
+      writeGenerated(path.join(destination, 'agents', 'openai.yaml'),
+        'policy:\n  allow_implicit_invocation: false\n', flags);
+    }
+  }
+
+  writeGenerated(path.join(destRoot, 'docs', 'codex-skill-port-report.json'),
+    `${JSON.stringify(report, null, 2)}\n`, flags);
+  const adapted = report.skills.filter(skill => skill.status === 'adapted').length;
+  const fallbacks = report.skills.filter(skill => skill.status === 'fallback').length;
+  const unsupported = report.skills.filter(skill => skill.status === 'unsupported').length;
+  console.log(`\n  ${C.dim}Codex skills: ${adapted} adapted, ${fallbacks} fallback, ${unsupported} unsupported. See docs/codex-skill-port-report.json.${C.reset}`);
 }
 
 function copyRecursive(src, dest, flags) {
@@ -323,6 +361,7 @@ ${C.bold}Flags${C.reset}
   --agent <which> init only: which instruction surface to install
                   ${C.cyan}claude${C.reset} (default)  CLAUDE.md + .claude/ skills, rules, hooks
                   ${C.cyan}codex${C.reset}             AGENTS.md (Codex, Cursor, Copilot, Aider, +more)
+--with-skills   init --agent codex only: also generate Codex workspace skills
                   ${C.cyan}both${C.reset}              both files, held in step by a gate
                   ${C.cyan}gemini${C.reset}            GEMINI.md + .agents/skills/ (Gemini CLI, Antigravity)
   --force, -f     Overwrite existing files
@@ -334,6 +373,7 @@ ${C.bold}Examples${C.reset}
   npx ux-ui-skills init
   npx ux-ui-skills init ./my-app
   npx ux-ui-skills init --agent codex        ${C.dim}# for Codex / Cursor / Copilot${C.reset}
+  npx ux-ui-skills init --agent codex --with-skills
   npx ux-ui-skills init --agent gemini       ${C.dim}# for Gemini CLI / Antigravity${C.reset}
   npx ux-ui-skills new ./my-product
   npx ux-ui-skills add tokens taste design-systems
@@ -383,6 +423,11 @@ function main() {
 
   const { flags, rest } = parseFlags(argv.slice(1));
 
+  if (flags.withSkills && cmd !== 'init') {
+    console.error(`${C.red}--with-skills is only valid with init${C.reset}`);
+    process.exit(1);
+  }
+
   if (!cmd || cmd === 'help' || cmd === '--help' || cmd === '-h') return help();
   if (cmd === 'list' || cmd === 'ls') return cmdList();
 
@@ -396,6 +441,10 @@ function main() {
   }
 
   if (cmd === 'init') {
+    if (flags.withSkills && flags.agent !== 'codex') {
+      console.error(`${C.red}--with-skills requires --agent codex${C.reset}`);
+      process.exit(1);
+    }
     const destRoot = path.resolve(rest[0] || process.cwd());
     console.log(`\n${C.bold}Installing full kit${C.reset} → ${destRoot}${flags.dry ? C.dim + ' (dry run)' + C.reset : ''}\n`);
     // --agent decides which instruction surface lands. Everything else - tokens,
@@ -420,6 +469,7 @@ function main() {
     if (flags.agent === 'codex') {
       console.log(`\n  ${C.dim}AGENTS.md installed. Codex, Cursor, Copilot, Jules and ~25 more read it.${C.reset}`);
       console.log(`  ${C.dim}The .claude/ skills and hooks were not installed - they are Claude Code only.${C.reset}`);
+      if (flags.withSkills) installCodexSkills(destRoot, flags);
     }
     return summary(destRoot, flags.agent);
   }
