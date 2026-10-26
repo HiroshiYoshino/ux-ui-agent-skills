@@ -120,21 +120,17 @@ states. Content first, then the layout that serves it.
 
 ## 5. Gate: run it, never claim it
 
-```bash
-node ${CLAUDE_SKILL_DIR}/../../../scripts/accuracy_report.mjs
-```
-
-Report the real `N/N` line. For a single file, at minimum:
+Set `<project-root>` to the absolute path of the user's project. Run the applicable gates individually against its generated files. For a page or harness, at minimum:
 
 ```bash
-node ${CLAUDE_SKILL_DIR}/../../../scripts/gate.mjs verify_states.mjs <file> [--dark]
-node ${CLAUDE_SKILL_DIR}/../../../scripts/gate.mjs verify_responsive.mjs <file> --scale=1.25
-DS_REQUIRE_BROWSER=1 node ${CLAUDE_SKILL_DIR}/../../../scripts/slop_tells.mjs --strict <file>
-DS_REQUIRE_BROWSER=1 node ${CLAUDE_SKILL_DIR}/../../../scripts/taste_audit.mjs --strict <file>
+DS_REQUIRE_BROWSER=1 UX_UI_PROJECT_ROOT="<project-root>" node ${CLAUDE_SKILL_DIR}/../../../scripts/verify_states.mjs "<project-root>/<path-to-page-or-harness>"
+DS_REQUIRE_BROWSER=1 UX_UI_PROJECT_ROOT="<project-root>" node ${CLAUDE_SKILL_DIR}/../../../scripts/verify_states.mjs "<project-root>/<path-to-page-or-harness>" --dark
+DS_REQUIRE_BROWSER=1 UX_UI_PROJECT_ROOT="<project-root>" node ${CLAUDE_SKILL_DIR}/../../../scripts/verify_responsive.mjs "<project-root>/<path-to-page-or-harness>" --scale=1.25
+DS_REQUIRE_BROWSER=1 UX_UI_PROJECT_ROOT="<project-root>" node ${CLAUDE_SKILL_DIR}/../../../scripts/slop_tells.mjs --strict "<project-root>/<path-to-page-or-harness>"
+DS_REQUIRE_BROWSER=1 UX_UI_PROJECT_ROOT="<project-root>" node ${CLAUDE_SKILL_DIR}/../../../scripts/taste_audit.mjs --strict "<project-root>/<path-to-page-or-harness>"
 ```
 
-A render gate with no browser prints SKIPPED and exits 0. That is not a pass.
-Set `DS_REQUIRE_BROWSER=1` when you run one on its own and intend to trust it.
+For token work, also run `python3 <plugin-root>/scripts/validate_tokens.py "<project-root>/tokens"` and pass the project's color-token file explicitly to `validate_contrast.py`. Report each gate's actual output. A render gate with no Playwright or browser must fail under `DS_REQUIRE_BROWSER=1`; a skip or missing target is not a pass. `accuracy_report.mjs` is the kit's own self-test and must not be used as evidence about the user's project.
 
 ## 6. Render and look
 

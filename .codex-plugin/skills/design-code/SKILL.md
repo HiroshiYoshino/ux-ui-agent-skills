@@ -6,12 +6,19 @@ description: Generate production-ready, accessible, token-driven component code 
 > Ported from the Claude Code skill for the Codex plugin.
 > `<plugin-root>` is the plugin root: three directories above the directory of this
 > SKILL.md (it holds `tokens/`, `scripts/` and `AGENTS.md`). Resolve it to an absolute path
-> before running anything, and run every command from the user's project, never from the
-> plugin root: the project is where the work is, the plugin root only holds the kit.
+> before reading kit references. The plugin root is read-only; `<project-root>` means the
+> absolute path of the user's project. Run commands from that project and pass its output
+> paths explicitly. Never write to or validate the plugin root as if it were the project.
+> Browser gates resolve an already-installed `playwright` from `<project-root>` (or the
+> current working directory); set `UX_UI_PROJECT_ROOT` when launching from another cwd.
+> MCP `run_gate` and `review_ui` calls must pass `project_root` as an absolute path.
+> This does not install dependencies. `DS_REQUIRE_BROWSER=1` makes missing Playwright or a
+> missing browser fail rather than skip; module resolution is not proof that a browser ran.
 > Where it says `CLAUDE.md`, the same rules are in `AGENTS.md`. This plugin ships no hooks, so
 > nothing records or blocks on your behalf: run the gates yourself and report what they print.
-> `accuracy_report.mjs` is the kit's own self-test and measures the kit's examples, not the
-> user's project: for the project, run the individual gates against the project's files.
+> `accuracy_report.mjs` is only the kit's self-test. For a user project, run the individual
+> gates against its explicit token, source, page or harness paths; never report the kit test
+> or an unrelated `npm run verify` as project evidence.
 > `/critique`, `/observe` and `/scaffold-project` exist only in Claude Code: where `/critique`
 > is asked for, run `node <plugin-root>/scripts/taste_audit.mjs <file>` and
 > `node <plugin-root>/scripts/slop_tells.mjs <file>`, report what they print, and say that
@@ -43,7 +50,7 @@ Use tokens (never hardcode) · include a11y on every interactive element · hand
 
 ## Verification (mandatory before declaring done)
 Code is the highest-stakes output. Self-check every time:
-1. **No hardcoded values**: every color/size/radius/shadow/duration/**font** traces to a token (CSS var / theme key / asset). Run `<plugin-root>/scripts/lint_hardcodes.py` over the output; zero raw hex/px/ms AND zero raw Tailwind palette utilities (`bg-gray-500`, `text-blue-600`). Use semantic utilities/tokens (`bg-surface`, `text-primary`). Run `<plugin-root>/scripts/validate_theme_refs.py` so every `var(--…)` resolves to a defined theme token (no floating tokens). One allowed exception: 3rd-party theme-config (MUI/Mantine) mapping our tokens INTO their API.
+1. **No hardcoded values**: every color/size/radius/shadow/duration/**font** traces to a token (CSS var / theme key / asset). Run `python3 <plugin-root>/scripts/lint_hardcodes.py "<project-root>/src"` over the output; zero raw hex/px/ms AND zero raw Tailwind palette utilities (`bg-gray-500`, `text-blue-600`). Use semantic utilities/tokens (`bg-surface`, `text-primary`). Run `python3 <plugin-root>/scripts/validate_theme_refs.py --theme "<project-root>/theme.css" "<project-root>/src"` so every `var(--…)` resolves to a defined theme token (no floating tokens). One allowed exception: 3rd-party theme-config (MUI/Mantine) mapping our tokens INTO their API.
 2. **All applicable states present**: Default, Hover, Focus(-visible ring), Active, Disabled, Loading(+`aria-busy`), Error, Selected, or justified N/A.
 3. **Accessibility wired**: correct role/ARIA per `<plugin-root>/accessibility/aria-patterns.md`, keyboard model, focus management, ≥24px target; verify contrast (`<plugin-root>/scripts/contrast.py`) for any new color pair.
 4. **Dark mode + reduced motion + responsive**: semantic tokens swap; motion has a `prefers-reduced-motion` fallback; layout is mobile-first.
@@ -54,5 +61,5 @@ Code is the highest-stakes output. Self-check every time:
 9. **Semantic token BY INTENT + consistency**: the token's *meaning* must match the action: destructive (Delete/Remove) → `action.destructive` (danger), **never** `action.primary`; secondary = neutral outline/transparent with dark text (**never a colored fill** → no dark-text-on-blue). The SAME action uses the SAME variant **everywhere** (a trigger button and its confirm button must match, not red in one place and blue in another). Gates don't catch this. You must.
 10. **No emoji as icons**: use a real icon set (default **lucide**) as inline SVG with `currentColor`; never an emoji, including in JS that swaps a label (swap the `<svg>`, not a text/emoji string). Mentally run `<plugin-root>/scripts/lint_taste.py` (it flags emoji-as-icon).
 11. **Destructive confirmation UX**: irreversible actions (delete account/data, anything stated "cannot be undone") need real friction per WCAG 3.3.4 / 3.3.6: a confirmation dialog whose **confirm button restates the action** ("Delete account", not "Delete"/"OK"/"Yes") and, for high-stakes, a **type-to-confirm** step. See `<plugin-root>/examples/sample-app/preview.html` and `<plugin-root>/content/voice-tone.md`.
-12. **Taste pre-flight**: run the 12-point aesthetic check in `<plugin-root>/taste/design-taste.md` and, for any rendered HTML, `DS_REQUIRE_BROWSER=1 node <plugin-root>/scripts/taste_audit.mjs <file>` (render-based: flags timid type-scale contrast, uniform repetition, over-wide measure, palette sprawl). Taste is heuristic: treat findings as a strong signal and pair with a real screenshot review; it is NOT auto-provable like correctness.
-13. **Run the gates, then report (mandatory).** Before declaring done, RUN `node <plugin-root>/scripts/gate.mjs verify_states.mjs <file>` + `--dark` (every element, default/hover/focus) and `node <plugin-root>/scripts/accuracy_report.mjs`; report their actual output. Never type a contrast number or "100%" you didn't just measure (AGENTS.md → Verification).
+12. **Taste pre-flight**: run the 12-point aesthetic check in `<plugin-root>/taste/design-taste.md` and, for any rendered HTML, `DS_REQUIRE_BROWSER=1 UX_UI_PROJECT_ROOT="<project-root>" node <plugin-root>/scripts/taste_audit.mjs "<project-root>/<path-to-page>"` (render-based: flags timid type-scale contrast, uniform repetition, over-wide measure, palette sprawl). Taste is heuristic: treat findings as a strong signal and pair with a real screenshot review; it is NOT auto-provable like correctness.
+13. **Run the gates, then report (mandatory).** Set `<project-root>` to the absolute path of the user's project and pass its actual output files to each applicable gate. For a page or harness, run `DS_REQUIRE_BROWSER=1 UX_UI_PROJECT_ROOT="<project-root>" node <plugin-root>/scripts/verify_states.mjs "<project-root>/<path-to-page-or-harness>"`, then repeat with `--dark`; run the responsive, keyboard, and accessibility gates against the same project output as applicable. Validate token files and source directories by passing their explicit project paths. Report each gate's actual output. Do not run the kit's `accuracy_report.mjs` to assess a user's project; it is only for developing the kit itself. Never state a contrast number or pass rate that a gate did not measure (AGENTS.md → Verification).

@@ -252,7 +252,11 @@ function main(argv) {
     // Always set, never optional. A render gate with no browser prints SKIPPED
     // and exits 0, and a receipt saying "pass" for a run that measured nothing
     // would be worse than no receipt at all.
-    env: { ...process.env, DS_REQUIRE_BROWSER: '1' },
+    env: {
+      ...process.env,
+      DS_REQUIRE_BROWSER: '1',
+      UX_UI_PROJECT_ROOT: process.env.UX_UI_PROJECT_ROOT || ROOT,
+    },
   });
 
   const out = (r.stdout || '') + (r.stderr || '');

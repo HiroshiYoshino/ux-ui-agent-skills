@@ -37,6 +37,7 @@ import { readFileSync, existsSync, statSync, readdirSync } from 'node:fs';
 import { join, dirname, resolve, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { requireTargets } from './_targets.mjs';
+import { loadPlaywright } from './_playwright.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const argv = process.argv.slice(2);
@@ -45,7 +46,7 @@ const JSON_OUT = argv.includes('--json');
 const required = process.env.DS_REQUIRE_BROWSER === '1';
 
 let chromium;
-try { ({ chromium } = await import('playwright')); }
+try { ({ chromium } = loadPlaywright()); }
 catch {
   console.log(`verify_screen_economy: playwright not installed: ${required ? 'REQUIRED, FAILING' : 'SKIPPED'}`);
   process.exit(required ? 1 : 0);

@@ -43,14 +43,15 @@ phone in a warehouse, on a laptop with 40 tabs open, colour-blind, in a hurry.>
 
 ## How we verify
 
-Run the gate before calling anything done, and report the real `N/N` line:
+Run the applicable gates before calling anything done, and report their actual output:
 
 ```
 /gate
 ```
 
 It runs the theme checks against `design-tokens.json` and the render checks
-against every harness in `src/components/`. The full command list lives in
+against every harness in `src/components/`. These are project-specific checks,
+not the design kit's `accuracy_report.mjs`. The full command list lives in
 `.claude/commands/gate.md`.
 
 The render gates need headless Chrome: run `npm i -D playwright` once in this

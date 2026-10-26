@@ -208,7 +208,7 @@ search <term>`, then `node scripts/library.mjs get <name>` fetches its spec
 1. Write the taste block above. Not in your head - in the reply.
 2. Pick a direction and resolve it into **tokens**, not into per-screen CSS.
 3. Build mobile-first, every value a token, all eight states.
-4. Run `node scripts/accuracy_report.mjs` and report the real `N/N`.
+4. When developing this kit itself, run `node scripts/accuracy_report.mjs` from the kit root and report its actual output. When working in another project, run applicable individual gates against that project's explicit token, source, and page or harness paths; the kit's self-test is not evidence about that project.
 5. Screenshot it and click every control.
 6. Argue against your own work: what would a critic reject first? A passing gate
    is never evidence of taste.

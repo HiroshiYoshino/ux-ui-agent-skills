@@ -80,7 +80,7 @@ bump the version in `.codex-plugin/plugin.json` (Codex pins installs by version)
 |---|---|---|
 | Skills | 23, namespaced | Claude skills / AGENTS.md route |
 | Claude hooks (edit tracking, stop gate) | **Off** (`"hooks": {}`); never shown as enabled | Claude Code only |
-| Browser gates | Need `playwright` in your project; without it they report failure, never a pass | same |
+| Browser gates | Resolve an already-installed `playwright` from the project root; require a real browser under `DS_REQUIRE_BROWSER=1` | same |
 | MCP `run_gate`, `review_ui` | Absolute paths only; relative paths are refused with "Nothing was measured" | relative paths allowed |
 
 ### Plugin root versus your project
@@ -88,6 +88,17 @@ bump the version in `.codex-plugin/plugin.json` (Codex pins installs by version)
 Skills tell the agent to resolve `<plugin-root>` to an absolute path (three directories
 above the skill's `SKILL.md`) and to run commands from **your project**, so `CLAUDE.md`
 is read as your `AGENTS.md`. Nothing depends on the clone location or the current directory.
+The plugin root is read-only reference material. Generated files and gate targets belong
+to the absolute project root, and validators must receive those project paths explicitly.
+
+Browser gates resolve Node dependencies from the command's working directory, or from
+`UX_UI_PROJECT_ROOT` when set. MCP browser calls require an explicit absolute `project_root`.
+Install Playwright in the project yourself with its package manager (for example,
+`npm install --save-dev playwright`), then install a supported browser separately
+(`npx playwright install chrome`). The plugin does not install or modify project
+dependencies. Finding the Playwright module is not proof that a browser launched or that
+a page was measured; `DS_REQUIRE_BROWSER=1` keeps missing dependencies and browser
+binaries from being reported as a pass.
 
 ## Trust, update, removal, ownership
 
