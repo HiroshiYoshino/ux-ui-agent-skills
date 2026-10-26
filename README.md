@@ -497,6 +497,9 @@ and Antigravity**, which read `GEMINI.md` and `.agents/skills/`.
 
 ```bash
 npx ux-ui-agent-skills init --agent codex    # AGENTS.md + the whole kit
+# Codex plugin, by repository (marketplace, then plugin): docs/CODEX-PLUGIN.md
+# codex plugin marketplace add HiroshiYoshino/ux-ui-agent-skills@<branch-or-tag>
+# codex plugin add ux-ui-agent-skills-codex@hiroshiyoshino-ux-ui-agent-skills
 npx ux-ui-agent-skills init --agent gemini   # GEMINI.md + 23 ported skills: Gemini CLI, Antigravity
 npx ux-ui-agent-skills init --agent both     # CLAUDE.md and AGENTS.md
 npx ux-ui-agent-skills init                  # Claude Code (default)
