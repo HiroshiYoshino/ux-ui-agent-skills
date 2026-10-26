@@ -28,7 +28,7 @@
  */
 import { spawnSync } from 'node:child_process';
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
-import { join, resolve, relative } from 'node:path';
+import { join, resolve, relative, isAbsolute } from 'node:path';
 import { homedir } from 'node:os';
 import { catalogue, byName, KIT } from './gates.mjs';
 import { ensure, loadIndex } from '../scripts/library.mjs';
@@ -158,6 +158,17 @@ function runGate(gate, paths, extra = []) {
   return { ok: r.status === 0, code: r.status, out, gate: g };
 }
 
+/** The Codex plugin runs this server with the plugin root as its working
+    directory, so a relative path would be read against the kit, not the user's
+    project. Where that is set, refuse rather than measure the wrong files. */
+function relativeRefused(paths) {
+  if (process.env.UX_UI_MCP_ABSOLUTE_PATHS !== '1') return null;
+  const rel = paths.filter(p => !isAbsolute(p));
+  if (!rel.length) return null;
+  return text(`Relative path refused: ${rel.join(', ')}\nThis server's working directory is the plugin root, `
+    + 'not your project. Pass absolute paths. Nothing was measured. This is not a pass.', true);
+}
+
 const DOCTRINE = {
   tokens: '.claude/rules/tokens-and-color.md',
   typography: '.claude/rules/typography-and-spacing.md',
@@ -182,6 +193,8 @@ function handle(name, args) {
 
   if (name === 'run_gate') {
     const { gate, paths, args: extra = [] } = args;
+    const refused = relativeRefused(paths);
+    if (refused) return refused;
     const missing = paths.filter(p => !existsSync(p));
     if (missing.length) {
       return text(`Not found: ${missing.join(', ')}\nNothing was measured. This is not a pass.`, true);
@@ -193,6 +206,8 @@ function handle(name, args) {
 
   if (name === 'review_ui') {
     const { paths, tokens, skip_browser } = args;
+    const refused = relativeRefused(tokens ? [...paths, tokens] : paths);
+    if (refused) return refused;
     const missing = paths.filter(p => !existsSync(p));
     if (missing.length) {
       return text(`Not found: ${missing.join(', ')}\nNothing was measured. This is not a pass.`, true);

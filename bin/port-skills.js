@@ -26,10 +26,19 @@ const CLAUDE_ONLY = {
 
 /* A kit file a skill names that this surface ships under another name. */
 const RENAMED = { 'CLAUDE.md': 'GEMINI.md' };
+const RENAMED_CODEX = { 'CLAUDE.md': 'AGENTS.md' };
 
-function portSkill(text, base) {
+/* The Codex plugin: Codex resolves a relative path in SKILL.md against the
+   skill's own directory, but a shell command runs in the user's project. So the
+   kit root is written as a placeholder the model resolves to an absolute path
+   first, and the project root is never the plugin root. */
+const PLUGIN_ROOT = '<plugin-root>';
+
+function portSkill(text, base, target = 'gemini') {
+  const codex = target === 'codex';
+  const renamed = codex ? RENAMED_CODEX : RENAMED;
   let out = text;
-  for (const [from, to] of Object.entries(RENAMED)) {
+  for (const [from, to] of Object.entries(renamed)) {
     out = out.split(`${SKILL_ROOT}/${from}`).join(`${base}${to}`)
       .split(`(${from} → Verification Protocol)`).join(`(${to} → Verification)`);
   }
@@ -43,7 +52,21 @@ function portSkill(text, base) {
   // differs once, at the top, rather than rewrite prose that would then be wrong.
   const end = out.indexOf('\n---\n', 4);
   if (!out.startsWith('---\n') || end < 0) throw new Error('a skill without frontmatter cannot be ported');
-  const note = [
+  const note = codex ? [
+    '> Ported from the Claude Code skill for the Codex plugin.',
+    `> \`${PLUGIN_ROOT}\` is the plugin root: three directories above the directory of this`,
+    '> SKILL.md (it holds `tokens/`, `scripts/` and `AGENTS.md`). Resolve it to an absolute path',
+    '> before running anything, and run every command from the user\'s project, never from the',
+    '> plugin root: the project is where the work is, the plugin root only holds the kit.',
+    '> Where it says `CLAUDE.md`, the same rules are in `AGENTS.md`. This plugin ships no hooks, so',
+    '> nothing records or blocks on your behalf: run the gates yourself and report what they print.',
+    '> `accuracy_report.mjs` is the kit\'s own self-test and measures the kit\'s examples, not the',
+    '> user\'s project: for the project, run the individual gates against the project\'s files.',
+    '> `/critique`, `/observe` and `/scaffold-project` exist only in Claude Code: where `/critique`',
+    `> is asked for, run \`node ${PLUGIN_ROOT}/scripts/taste_audit.mjs <file>\` and`,
+    `> \`node ${PLUGIN_ROOT}/scripts/slop_tells.mjs <file>\`, report what they print, and say that`,
+    '> a human read of the work is still owed.',
+  ].join('\n') : [
     '> Ported from the Claude Code skill.'
       + (base ? '' : ' Every path in it is relative to the project root, where the kit is installed.'),
     '> Where it says `CLAUDE.md`, the same rules are in `GEMINI.md`. A `/name` it mentions is',
@@ -80,4 +103,4 @@ function geminiBrief(agentsMd, where) {
   return `${title}\n\n${persona}\n\n${OPENING[where].join('\n')}\n${agentsMd.slice(cut)}`;
 }
 
-module.exports = { portSkill, geminiBrief, CLAUDE_ONLY, RENAMED };
+module.exports = { portSkill, geminiBrief, CLAUDE_ONLY, RENAMED, RENAMED_CODEX, PLUGIN_ROOT };

@@ -1,0 +1,57 @@
+{
+  "generatedBy": "scripts/build_codex_plugin.mjs",
+  "source": ".claude/skills",
+  "skills": {
+    "included": [
+      "a11y-audit",
+      "apply-aesthetic",
+      "brandkit",
+      "data-dashboard",
+      "design-code",
+      "design-component",
+      "design-doctrine",
+      "design-qa",
+      "design-review",
+      "design-screen",
+      "design-tokens",
+      "figma-integration",
+      "gate",
+      "governance",
+      "grill-me",
+      "image-to-code",
+      "migrate-design-system",
+      "performance",
+      "prototype",
+      "redesign",
+      "ship",
+      "token-build",
+      "ux-writing"
+    ],
+    "explicitInvocationOnly": [
+      "brandkit",
+      "gate",
+      "governance",
+      "grill-me",
+      "image-to-code",
+      "migrate-design-system",
+      "prototype",
+      "redesign",
+      "ship"
+    ],
+    "excluded": {
+      "critique": "runs the design critic as a forked subagent in a fresh context, which is a Claude Code mechanism",
+      "observe": "reports what the Claude Code hooks recorded; nothing else records those events",
+      "scaffold-project": "scaffolds the Claude Code project layout: a CLAUDE.md brief, .claude/settings.json and .claude/rules"
+    }
+  },
+  "hooks": {
+    "enabled": false,
+    "reason": "Codex does not run the Claude Code hooks: they read the Claude Code event shapes (Write|Edit tool names, its stop-hook protocol) and write a ledger only the Claude Code skills read. The plugin therefore declares an empty hooks object, so hooks/hooks.json at the plugin root is not loaded."
+  },
+  "mcp": {
+    "enabled": true,
+    "config": ".codex-plugin/mcp.json",
+    "pathsMustBeAbsolute": "The server runs with the plugin root as its working directory, so a relative path would be read against the plugin, not the project. It refuses relative paths and measures nothing."
+  },
+  "browserGates": "Gates that open a browser need playwright, which the plugin does not install. They report the browser as missing and fail; a missing browser is never a pass."
+}

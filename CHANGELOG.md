@@ -12,6 +12,19 @@ with auto-generated notes instead.
 
 ### Unreleased
 
+**Codex plugin `3.0.0-codex.1`, added by repository.** `codex plugin marketplace add
+HiroshiYoshino/ux-ui-agent-skills` then `codex plugin add
+ux-ui-agent-skills-codex@hiroshiyoshino-ux-ui-agent-skills`. The catalog is
+`.agents/plugins/marketplace.json`, the manifest is `.codex-plugin/plugin.json`, and
+the 23 Codex skills under `.codex-plugin/skills/` are generated from `.claude/skills/`
+by `node scripts/build_codex_plugin.mjs` and committed, because Codex runs no build.
+The plugin ships skills and an MCP server and no hooks. It is a fork build: its name
+and prerelease version cannot be mistaken for the upstream plugin or the npm
+package, and nothing is published to npm. `node scripts/validate_codex_plugin.mjs`
+and `tests/meta/codex-plugin.test.mjs` hold the contract; `docs/CODEX-PLUGIN.md`
+records the official sources and what was run on a real Codex. `init --agent codex`,
+and the Claude Code, Gemini and Copilot routes, are unchanged.
+
 On the live demo now, in the next npm release.
 
 **Five websites, not only dashboards.** `examples/sites/` holds a product launch,

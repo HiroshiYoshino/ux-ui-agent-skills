@@ -51,6 +51,16 @@ a new session.
 
 ## 2. Codex, Cursor, Copilot, Aider: the open convention
 
+**Codex plugin by repository specifier** (Codex CLI verified; see
+[CODEX-PLUGIN.md](CODEX-PLUGIN.md) for versions, limits and removal):
+
+```bash
+codex plugin marketplace add HiroshiYoshino/ux-ui-agent-skills@<branch-or-tag>
+codex plugin add ux-ui-agent-skills-codex@hiroshiyoshino-ux-ui-agent-skills
+```
+
+The published plugin ships 23 skills and no hooks. The `init --agent codex` route below is unchanged.
+
 ```bash
 cd your-project
 npx ux-ui-agent-skills init --agent codex
