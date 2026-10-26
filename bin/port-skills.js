@@ -27,6 +27,156 @@ const CLAUDE_ONLY = {
 /* A kit file a skill names that this surface ships under another name. */
 const RENAMED = { 'CLAUDE.md': 'GEMINI.md' };
 
+const CODEX_UNSUPPORTED = {
+  observe: 'The current observer reads Claude hook events; no Codex event adapter is included.',
+  'scaffold-project': 'The current scaffold creates a Claude Code project; no Codex template is included.',
+};
+
+const CODEX_CLAUDE_FIELDS = new Set([
+  'disable-model-invocation',
+  'user-invocable',
+  'argument-hint',
+  'context',
+  'agent',
+  'background',
+]);
+
+function parseCodexFrontmatter(text) {
+  const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
+  if (!match) throw new Error('a skill without frontmatter cannot be ported');
+
+  let name;
+  let description;
+  let manualOnly = false;
+  const dropped = [];
+  const metadata = [];
+  let inMetadata = false;
+
+  for (const line of match[1].split(/\r?\n/)) {
+    if (!line.trim() || line.trimStart().startsWith('#')) continue;
+    if (/^\s/.test(line)) {
+      if (inMetadata) {
+        const nested = line.match(/^\s+short-description:\s*(.*)$/);
+        if (nested) metadata.push(nested[0].trim());
+        else if (line.trim()) throw new Error(`unsupported Codex skill metadata: ${line.trim()}`);
+      }
+      continue;
+    }
+
+    const field = line.match(/^([a-z][a-z0-9-]*):(?:\s*(.*))?$/);
+    if (!field) throw new Error(`invalid skill frontmatter line: ${line}`);
+    const [, key, value = ''] = field;
+    inMetadata = key === 'metadata';
+    if (key === 'name') name = line;
+    else if (key === 'description') description = line;
+    else if (key === 'metadata') continue;
+    else if (CODEX_CLAUDE_FIELDS.has(key)) {
+      if (key === 'disable-model-invocation' && value.trim() === 'true') manualOnly = true;
+      dropped.push(key);
+    } else {
+      throw new Error(`unsupported skill frontmatter field: ${key}`);
+    }
+  }
+
+  if (!name || !description) throw new Error('a Codex skill needs name and description fields');
+  const skillName = name.slice(name.indexOf(':') + 1).trim();
+  const skillDescription = description.slice(description.indexOf(':') + 1).trim();
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(skillName) || skillName.length > 64) {
+    throw new Error(`invalid Codex skill name: ${skillName}`);
+  }
+  if (!skillDescription || skillDescription.length > 1024) {
+    throw new Error(`invalid Codex skill description: ${skillName}`);
+  }
+
+  return {
+    name: skillName,
+    frontmatter: [name, description, ...(metadata.length ? ['metadata:', ...metadata] : [])].join('\n'),
+    body: text.slice(match[0].length),
+    manualOnly,
+    dropped,
+  };
+}
+
+function portCodexSkill(text, skillNames = []) {
+  const parsed = parseCodexFrontmatter(text);
+  let body = parsed.body
+    .split(`${SKILL_ROOT}/CLAUDE.md`).join('../../../AGENTS.md')
+    .split(`${SKILL_ROOT}/`).join('../../../')
+    .split(SKILL_ROOT).join('..')
+    .split('CLAUDE.md').join('AGENTS.md')
+    .split('.claude/rules/').join('docs/agent-rules/')
+    .split('`$ARGUMENTS`').join("the user's request")
+    .split('$ARGUMENTS').join("the user's request");
+
+  for (const name of skillNames) {
+    const invocation = new RegExp(`(^|[\\s(\\x60])/${name}(?=$|[\\s)\\x60.,;:!?])`, 'g');
+    body = body.replace(invocation, (_, prefix) => `${prefix}$${name}`);
+  }
+
+  if (/\$\{CLAUDE_[A-Z0-9_]+\}|\$CLAUDE_[A-Z0-9_]+|\$ARGUMENTS/.test(body)) {
+    const unresolved = body.match(/\$\{CLAUDE_[A-Z0-9_]+\}|\$CLAUDE_[A-Z0-9_]+|\$ARGUMENTS/)[0];
+    throw new Error(`cannot port "${unresolved}" in skill "${parsed.name}"`);
+  }
+
+  return {
+    name: parsed.name,
+    content: `---\n${parsed.frontmatter}\n---\n\n> Adapted from the Claude Code skill for Codex workspace discovery. This generated skill has not been runtime-tested in Codex.\n\n${body}`,
+    manualOnly: parsed.manualOnly,
+    droppedFrontmatter: parsed.dropped,
+  };
+}
+
+function codexCritiqueFallback() {
+  return `---
+name: critique
+description: Review a UI artifact against its brief and observed evidence. This is a self-review, not an independent-context review.
+---
+
+# Self-review fallback
+
+This skill runs in the same conversation as the work. It cannot provide the independent context guaranteed by a separate reviewer. Do not describe this as an independent critique.
+
+Review only the supplied artifact, brief, screenshots, interaction results, and measured gate output. If screenshots, browser access, interaction results, or required measurements are missing, state what is missing and do not claim a complete review. Separate objective gate findings from subjective design judgments, and cite the artifact or observed evidence for each finding.
+
+If independent review is required, stop and ask for a reviewer that can be given an isolated context.
+`;
+}
+
+function codexSkillPortReport(names, packageVersion) {
+  return {
+    schemaVersion: 1,
+    target: 'codex-workspace-skills',
+    kitVersion: packageVersion,
+    runtimeVerification: 'not-performed',
+    skills: names.map(name => {
+      if (name === 'critique') {
+        return {
+          name,
+          status: 'fallback',
+          verification: 'static-only',
+          generated: true,
+          reason: 'Uses same-context self-review; it cannot guarantee an independent reviewer context.',
+        };
+      }
+      if (name in CODEX_UNSUPPORTED) {
+        return {
+          name,
+          status: 'unsupported',
+          verification: 'not-tested',
+          generated: false,
+          reason: CODEX_UNSUPPORTED[name],
+        };
+      }
+      return {
+        name,
+        status: 'adapted',
+        verification: 'static-only',
+        generated: true,
+      };
+    }),
+  };
+}
+
 function portSkill(text, base) {
   let out = text;
   for (const [from, to] of Object.entries(RENAMED)) {
@@ -80,4 +230,7 @@ function geminiBrief(agentsMd, where) {
   return `${title}\n\n${persona}\n\n${OPENING[where].join('\n')}\n${agentsMd.slice(cut)}`;
 }
 
-module.exports = { portSkill, geminiBrief, CLAUDE_ONLY, RENAMED };
+module.exports = {
+  portSkill, portCodexSkill, codexCritiqueFallback, codexSkillPortReport,
+  CODEX_UNSUPPORTED, geminiBrief, CLAUDE_ONLY, RENAMED,
+};
