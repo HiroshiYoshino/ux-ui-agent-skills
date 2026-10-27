@@ -19,19 +19,20 @@ import { ROOT, gate } from '../helpers/run.mjs';
 /**
  * Gate scripts that actually drive a browser.
  *
- * Both spellings count: a static `import { chromium } from 'playwright'` and
- * the `await import('playwright')` inside a try that lets a gate print SKIPPED
- * when the browser is absent. Matching only the static form found one gate and
- * would have let this whole test pass by measuring almost nothing - which is
- * the exact shape of failure the file is here to prevent, so the count is
- * asserted to be plausible before anything is derived from it.
+ * Browser imports may be direct or routed through scripts/_playwright.mjs.
+ * Matching only direct imports would miss all gates using the shared resolver,
+ * so the count is asserted to be plausible before anything is derived from it.
  */
 function browserGates() {
   const dir = join(ROOT, 'scripts');
   return readdirSync(dir)
     .filter(f => f.endsWith('.mjs'))
-    .filter(f => /(^import[^;]*from '|await import\(')(playwright|playwright-core)'/m
-      .test(readFileSync(join(dir, f), 'utf8')));
+    .filter(f => {
+      if (f === '_playwright.mjs') return false;
+      const source = readFileSync(join(dir, f), 'utf8');
+      return source.includes('loadPlaywright()')
+        || /(^import[^;]*from '|await import\(')(playwright|playwright-core)'/m.test(source);
+    });
 }
 
 /** Every top-level entry of the CHECKS array, as one string each. */

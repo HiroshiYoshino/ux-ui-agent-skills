@@ -17,6 +17,7 @@ import { spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { ROOT, run } from '../helpers/run.mjs';
 import { isolatedCheckout, tempDir } from '../helpers/codex-plugin.mjs';
 import { validate } from '../../scripts/validate_codex_plugin.mjs';
@@ -115,6 +116,27 @@ test('the port keeps the other targets as they were', () => {
   assert.match(portSkill(src, '').split('\n').find((l) => l.startsWith('> Where it says')), /GEMINI\.md/);
 });
 
+test('Codex skill instructions verify project output, not the kit self-test or plugin assets', () => {
+  const generated = skillNames().map((name) => [
+    name,
+    readFileSync(join(ROOT, SKILLS, name, 'SKILL.md'), 'utf8'),
+  ]);
+  const combined = generated.map(([, text]) => text).join('\n');
+  assert.match(combined, /absolute path of the user's project/i);
+  assert.match(combined, /accuracy_report\.mjs` is only the kit's self-test/i);
+  assert.doesNotMatch(combined, /node <plugin-root>\/scripts\/accuracy_report\.mjs/);
+  assert.doesNotMatch(combined, /`npm run verify` is 100%/);
+  assert.match(combined, /DS_REQUIRE_BROWSER=1 UX_UI_PROJECT_ROOT=/);
+  assert.match(combined, /UX_UI_PROJECT_ROOT="<project-root>" node <plugin-root>\/scripts\/gate\.mjs/);
+  assert.match(combined, /<plugin-root>\/scripts\/validate_tokens\.py "<project-root>\/tokens"/);
+  assert.match(combined, /<plugin-root>\/scripts\/validate_contrast\.py "<project-root>\/tokens\/colors\.json"/);
+  assert.match(combined, /<plugin-root>\/scripts\/validate_theme_refs\.py --theme "<project-root>\/theme\.css" "<project-root>\/src"/);
+  assert.match(combined, /<project-root>\/tokens\/\*\.json/);
+  const brandkit = readFileSync(join(ROOT, SKILLS, 'brandkit/SKILL.md'), 'utf8');
+  assert.doesNotMatch(brandkit, /Emit.*<plugin-root>\/tokens/);
+  assert.match(brandkit, /Emit.*<project-root>\/tokens/);
+});
+
 test('generation is reproducible: same input, byte-identical output', () => {
   assert.deepEqual(check(ROOT), []);
   const a = build(ROOT);
@@ -177,6 +199,63 @@ test('from an isolated checkout under a spaced, Japanese path, run from an unrel
   assert.equal(c.status, 0, c.stdout + c.stderr);
   // The kit does not reach back to the repository it was copied from.
   assert.ok(!(v.stdout + c.stdout).includes(ROOT));
+});
+
+test('explicit project token validation finds the bad project tokens and leaves plugin files untouched', () => {
+  const kit = isolatedCheckout();
+  const project = join(tempDir('project'), '利用先 tokens');
+  const elsewhere = tempDir('cwd-elsewhere');
+  mkdirSync(join(project, 'tokens'), { recursive: true });
+  writeFileSync(join(project, 'tokens/colors.json'), JSON.stringify({
+    color: { invalid: { $value: '{missing.reference}' } },
+  }));
+  assert.equal(existsSync(join(kit, 'node_modules')), false, 'the isolated plugin has no node_modules');
+
+  const snapshot = (root) => {
+    const files = [];
+    const walk = (dir) => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const path = join(dir, entry.name);
+        if (entry.isDirectory()) walk(path);
+        else files.push([path.slice(root.length + 1), readFileSync(path)]);
+      }
+    };
+    walk(root);
+    return files.sort(([a], [b]) => a.localeCompare(b));
+  };
+  const pluginFiles = snapshot(kit);
+  const kitValid = spawnSync('python3', [join(kit, 'scripts/validate_tokens.py'), join(kit, 'tokens')], {
+    cwd: elsewhere, encoding: 'utf8',
+  });
+  assert.equal(kitValid.status, 0, kitValid.stdout + kitValid.stderr);
+  const projectInvalid = spawnSync('python3', [
+    join(kit, 'scripts/validate_tokens.py'), join(project, 'tokens'),
+  ], { cwd: elsewhere, encoding: 'utf8' });
+  assert.equal(projectInvalid.status, 1, projectInvalid.stdout + projectInvalid.stderr);
+  assert.match(projectInvalid.stdout + projectInvalid.stderr, /missing\.reference/);
+  assert.deepEqual(snapshot(kit), pluginFiles, 'validation changed a plugin file');
+});
+
+test('browser gate dependency resolution uses project_root from an unrelated cwd', () => {
+  const kit = isolatedCheckout();
+  const project = join(tempDir('project'), '利用先 project');
+  const elsewhere = tempDir('cwd-elsewhere');
+  const moduleDir = join(project, 'node_modules/playwright');
+  mkdirSync(moduleDir, { recursive: true });
+  writeFileSync(join(moduleDir, 'package.json'), JSON.stringify({ name: 'playwright', main: 'index.cjs' }));
+  writeFileSync(join(moduleDir, 'index.cjs'), `module.exports = { source: __dirname };\n`);
+  assert.equal(existsSync(join(kit, 'node_modules')), false, 'the isolated plugin has no node_modules');
+  const probe = [
+    `import { loadPlaywright } from ${JSON.stringify(pathToFileURL(join(kit, 'scripts/_playwright.mjs')).href)};`,
+    "console.log(loadPlaywright().source);",
+  ].join('\n');
+  const loaded = spawnSync('node', ['--input-type=module', '-e', probe], {
+    cwd: elsewhere,
+    encoding: 'utf8',
+    env: { ...process.env, UX_UI_PROJECT_ROOT: project },
+  });
+  assert.equal(loaded.status, 0, loaded.stdout + loaded.stderr);
+  assert.equal(loaded.stdout.trim(), moduleDir);
 });
 
 test('the build refuses to pass when the checkout is out of date, from any cwd', () => {
@@ -244,6 +323,33 @@ test('MCP: outside the plugin the server keeps its documented relative-path beha
   const r = mcpCall(ROOT, project, { UX_UI_MCP_ABSOLUTE_PATHS: '' }, 'run_gate', { gate: 'check_no_emoji', paths: ['page.html'] });
   assert.equal(r.isError, false, JSON.stringify(r));
   assert.match(r.content[0].text, /exited 0/);
+});
+
+test('MCP browser gates require project_root and resolve Playwright from it', () => {
+  const kit = isolatedCheckout();
+  const env = JSON.parse(readFileSync(join(kit, '.codex-plugin/mcp.json'), 'utf8')).mcpServers['ux-ui-kit'].env;
+  const project = join(tempDir('project'), '利用先 project');
+  const moduleDir = join(project, 'node_modules/playwright');
+  mkdirSync(moduleDir, { recursive: true });
+  writeFileSync(join(moduleDir, 'package.json'), JSON.stringify({ name: 'playwright', main: 'index.cjs' }));
+  writeFileSync(join(moduleDir, 'index.cjs'), `module.exports = { chromium: { launch: () => { throw new Error('project-playwright-stub-loaded'); } } };\n`);
+  const page = join(project, 'page.html');
+  writeFileSync(page, '<button>Save</button>\n');
+
+  const missing = mcpCall(kit, kit, env, 'run_gate', { gate: 'verify_states', paths: [page] });
+  assert.equal(missing.isError, true);
+  assert.match(missing.content[0].text, /absolute project_root is required/);
+  assert.match(missing.content[0].text, /Nothing was measured/);
+  const missingReviewRoot = mcpCall(kit, kit, env, 'review_ui', { paths: [page] });
+  assert.equal(missingReviewRoot.isError, true);
+  assert.match(missingReviewRoot.content[0].text, /absolute project_root is required/);
+
+  const result = mcpCall(kit, kit, env, 'run_gate', {
+    gate: 'verify_states', paths: [page], project_root: project,
+  });
+  assert.equal(result.isError, true);
+  assert.match(result.content[0].text, /project-playwright-stub-loaded/);
+  assert.doesNotMatch(result.content[0].text, /playwright not installed/);
 });
 
 /* ------------------------------------------------ the routes that already existed */

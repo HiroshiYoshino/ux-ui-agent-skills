@@ -19,9 +19,9 @@ Turn the DTCG token source of truth into platform-ready outputs. Tokens are auth
 2. Pick the tool: **Style Dictionary** (multi-platform, the default), **Tokens Studio** (Figma-owned tokens; pairs with `figma-integration`), W3C DTCG export, or a small custom script (model on `${CLAUDE_SKILL_DIR}/../../../scripts/validate_tokens.py`).
 3. Honor the resolution rules: resolve aliases to final values per platform; expose semantic + component tokens (primitives stay internal); emit base + dark/brand/density overrides (`${CLAUDE_SKILL_DIR}/../../../tokens/theming.json`) as deltas only; format by `$type`.
 4. Generate the requested target(s): CSS `:root` vars, Tailwind v4 `@theme`, typed JS/TS, iOS Asset Catalog + `Color.DS`/`Spacing`, Android `colors.xml`/Compose theme.
-5. Wire CI: on `${CLAUDE_SKILL_DIR}/../../../tokens/*.json` change, run `${CLAUDE_SKILL_DIR}/../../../scripts/validate_tokens.py`, regenerate, fail if committed artifacts are stale; gate colors with `${CLAUDE_SKILL_DIR}/../../../scripts/contrast.py`.
+5. Wire CI: on `<project-root>/tokens/*.json` changes, run `python3 ${CLAUDE_SKILL_DIR}/../../../scripts/validate_tokens.py "<project-root>/tokens"`, regenerate, fail if committed artifacts are stale; gate the project's color file with `python3 ${CLAUDE_SKILL_DIR}/../../../scripts/validate_contrast.py "<project-root>/tokens/colors.json"`.
 
 ## Verification (definition of done)
-- `python3 ${CLAUDE_SKILL_DIR}/../../../scripts/validate_tokens.py` passes (no unresolved aliases).
+- `python3 ${CLAUDE_SKILL_DIR}/../../../scripts/validate_tokens.py "<project-root>/tokens"` passes (no unresolved aliases).
 - Regenerating produces no diff vs. committed artifacts.
 - Dark/brand/density outputs contain only deltas, not full duplicates.

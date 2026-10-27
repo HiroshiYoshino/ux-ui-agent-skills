@@ -21,7 +21,7 @@ Produce and maintain DTCG (`$type`/`$value`) tokens following the project's 3-ti
    - Primitives = raw values (never used directly). Semantic = purpose aliases. Component = component-scoped.
    - New palettes: generate 11 OKLCH shades; verify 500 ≥ 4.5:1 on white (text), 600 ≥ 3:1 (UI) using the `a11y-audit` skill / `${CLAUDE_SKILL_DIR}/../../../scripts/contrast.py`.
    - Multi-brand/density → `theming.json`.
-4. **Validate**: run `python3 ${CLAUDE_SKILL_DIR}/../../../scripts/validate_tokens.py` (JSON validity + alias resolution).
+4. **Validate**: run `python3 ${CLAUDE_SKILL_DIR}/../../../scripts/validate_tokens.py "<project-root>/tokens"` (JSON validity + alias resolution).
 
 ## Output
-DTCG JSON. Preserve `$description` on every token. Reference, never hardcode.
+Write DTCG JSON under `<project-root>/tokens/`. Preserve `$description` on every token. Reference, never hardcode. Pass the project's token paths explicitly to validators; never rely on their kit-root defaults.

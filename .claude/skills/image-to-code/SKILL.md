@@ -26,12 +26,12 @@ Reconstruct a design from a visual reference as a real design system, not a one-
    - **Radius & depth**: radius language (sharp/soft/pill), shadow vs. hairline separation.
    - **Layout archetype + sequence**: bounded hero / asymmetric split / dense bento / editorial stack (`${CLAUDE_SKILL_DIR}/../../../taste/design-taste.md` → Variance Mandate).
 2. **Anchor to a known system** if it's close: browse `${CLAUDE_SKILL_DIR}/../../../taste/aesthetic-systems.md` / `python3 ${CLAUDE_SKILL_DIR}/../../../scripts/design_systems.py search <term>` and adopt that recipe to stabilize decisions.
-3. **Build the token theme** from the inferred values → 3-tier DTCG (`design-tokens` skill); generate a single `theme.css`. Verify every color pair with `${CLAUDE_SKILL_DIR}/../../../scripts/contrast.py` / `${CLAUDE_SKILL_DIR}/../../../scripts/validate_contrast.py` (light + dark). A sampled brand color that fails AA gets adjusted; taste never overrides POUR.
+3. **Build the token theme** from the inferred values → 3-tier DTCG (`design-tokens` skill) in `<project-root>/tokens`; generate a single `<project-root>/theme.css`. Verify every color pair with `${CLAUDE_SKILL_DIR}/../../../scripts/contrast.py` / `python3 ${CLAUDE_SKILL_DIR}/../../../scripts/validate_contrast.py "<project-root>/tokens/colors.json"` (light + dark). A sampled brand color that fails AA gets adjusted; taste never overrides POUR.
 4. **Rebuild layout + components** token-driven via `${CLAUDE_SKILL_DIR}/../../../frameworks/adapter-protocol.md` + `${CLAUDE_SKILL_DIR}/../../../components/*`: one shared primitive layer, all 8 states, a11y wired, no emoji (lucide), single theme. Apply taste (`design-taste.md`) so it doesn't regress to generic.
-5. **Verify against the reference**: render and screenshot it, compare side-by-side to the reference; run `node ${CLAUDE_SKILL_DIR}/../../../scripts/gate.mjs measure_render.mjs`, `lint_hardcodes.py`, `taste_audit.mjs`, and `npm run verify`.
+5. **Verify against the reference**: render and screenshot it, compare side-by-side to the reference; run the applicable gates against the project's actual output paths. For example, use `DS_REQUIRE_BROWSER=1 UX_UI_PROJECT_ROOT="<project-root>" node ${CLAUDE_SKILL_DIR}/../../../scripts/measure_render.mjs "<project-root>/<path-to-page>"` and `python3 ${CLAUDE_SKILL_DIR}/../../../scripts/lint_hardcodes.py "<project-root>/<source-dir>"`.
 
 ## Verification (definition of done)
-- `npm run verify` is 100% (tokens resolve, contrast AA light+dark, no hardcodes/emoji, real-render WCAG).
+- Report the actual output of each applicable gate. Do not use the kit's `accuracy_report.mjs` or an unrelated `npm run verify` as evidence about the user's project.
 - The rebuilt UI uses ONE inferred token theme; no per-section palettes.
 - A screenshot of the result visibly matches the reference's design language.
 

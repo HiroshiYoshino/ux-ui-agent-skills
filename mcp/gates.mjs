@@ -45,7 +45,9 @@ const WHAT = {
 const usesBrowser = (file) => {
   const p = join(KIT, 'scripts', file);
   if (!existsSync(p)) return false;
-  return /(^import[^;]*from '|await import\(')(playwright|playwright-core)'/m.test(readFileSync(p, 'utf8'));
+  const source = readFileSync(p, 'utf8');
+  return source.includes('loadPlaywright()')
+    || /(^import[^;]*from '|await import\(')(playwright|playwright-core)'/m.test(source);
 };
 
 export function catalogue() {

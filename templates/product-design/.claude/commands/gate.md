@@ -9,9 +9,10 @@ it and re-run rather than reporting a partial pass.
 `<harness>` means the component's `*.states.html` file, or the directory
 `src/components/` to sweep all of them.
 
-One-time setup: the render gates drive headless Chrome, so a fresh project needs
-`npm i -D playwright` once. Without it those scripts print `SKIPPED` and exit 0,
-which looks like a pass and is not one.
+One-time setup: with the user's approval, install Playwright in the project using
+its package manager, then install Chrome separately (`npx playwright install chrome`).
+Set `DS_REQUIRE_BROWSER=1` for render gates. A missing module or browser, `SKIPPED`,
+or a missing target is not a pass.
 
 ## Theme (the source of truth)
 
@@ -27,22 +28,22 @@ python3 scripts/check_no_emoji.py src public
 ## Rendered UI (every component harness)
 
 ```
-node scripts/verify_states.mjs        src/components/<harness>
-node scripts/verify_states.mjs --dark src/components/<harness>
-node scripts/axe_audit.mjs            src/components/<harness>
-node scripts/verify_responsive.mjs    src/components
-node scripts/verify_responsive.mjs    src/components --scale=1.25
-node scripts/verify_target_size.mjs   src/components
-node scripts/verify_keyboard.mjs      src/components
-node scripts/verify_reduced_motion.mjs src/components
-node scripts/verify_overflow.mjs      src/components
-node scripts/lint_intent.mjs          src/components
+DS_REQUIRE_BROWSER=1 UX_UI_PROJECT_ROOT="$PWD" node scripts/verify_states.mjs        src/components/<harness>
+DS_REQUIRE_BROWSER=1 UX_UI_PROJECT_ROOT="$PWD" node scripts/verify_states.mjs --dark src/components/<harness>
+DS_REQUIRE_BROWSER=1 UX_UI_PROJECT_ROOT="$PWD" node scripts/axe_audit.mjs            src/components/<harness>
+DS_REQUIRE_BROWSER=1 UX_UI_PROJECT_ROOT="$PWD" node scripts/verify_responsive.mjs    src/components
+DS_REQUIRE_BROWSER=1 UX_UI_PROJECT_ROOT="$PWD" node scripts/verify_responsive.mjs    src/components --scale=1.25
+DS_REQUIRE_BROWSER=1 UX_UI_PROJECT_ROOT="$PWD" node scripts/verify_target_size.mjs   src/components
+DS_REQUIRE_BROWSER=1 UX_UI_PROJECT_ROOT="$PWD" node scripts/verify_keyboard.mjs      src/components
+DS_REQUIRE_BROWSER=1 UX_UI_PROJECT_ROOT="$PWD" node scripts/verify_reduced_motion.mjs src/components
+DS_REQUIRE_BROWSER=1 UX_UI_PROJECT_ROOT="$PWD" node scripts/verify_overflow.mjs      src/components
+DS_REQUIRE_BROWSER=1 UX_UI_PROJECT_ROOT="$PWD" node scripts/lint_intent.mjs          src/components
 ```
 
 Modals and drawers add:
 
 ```
-node scripts/verify_focustrap.mjs src/components/<harness> --open="#openBtn"
+DS_REQUIRE_BROWSER=1 UX_UI_PROJECT_ROOT="$PWD" node scripts/verify_focustrap.mjs src/components/<harness> --open="#openBtn"
 ```
 
 ## Then look

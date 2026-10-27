@@ -25,4 +25,4 @@ Bridge design (Figma) and code (this repo) in both directions. The token JSON st
 - Every Figma Variable resolves to a token in `${CLAUDE_SKILL_DIR}/../../../tokens/*.json` (no orphan hex in designs).
 - One authoritative direction; the generated side has zero hand edits.
 - Variant sets cover all 8 states; Code Connect points to the right `${CLAUDE_SKILL_DIR}/../../../components/*` file.
-- After any token import: `python3 ${CLAUDE_SKILL_DIR}/../../../scripts/validate_tokens.py` passes.
+- After any token import: `python3 ${CLAUDE_SKILL_DIR}/../../../scripts/validate_tokens.py "<project-root>/tokens"` passes.

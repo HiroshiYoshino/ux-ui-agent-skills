@@ -25,12 +25,18 @@
  *   node scripts/verify_mobile_first.mjs <file> --width 320
  * Exit 0 = the base layout is the mobile layout; 1 = it is not; 2 = bad input.
  */
-import { chromium } from 'playwright';
+import { loadPlaywright } from './_playwright.mjs';
 import { readFileSync, statSync, readdirSync, existsSync } from 'node:fs';
 import { join, extname, relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const REQUIRE_BROWSER = process.env.DS_REQUIRE_BROWSER === '1';
+let chromium;
+try { ({ chromium } = loadPlaywright()); }
+catch {
+  console.log(`verify_mobile_first: playwright not installed: ${REQUIRE_BROWSER ? 'REQUIRED, FAILING' : 'SKIPPED'}`);
+  process.exit(REQUIRE_BROWSER ? 1 : 0);
+}
 const SKIP_DIRS = new Set(['node_modules', '.git', 'dist', '__pycache__', '.ds-receipts']);
 
 function collect(paths) {

@@ -10,12 +10,19 @@ disable-model-invocation: true
 > Ported from the Claude Code skill for the Codex plugin.
 > `<plugin-root>` is the plugin root: three directories above the directory of this
 > SKILL.md (it holds `tokens/`, `scripts/` and `AGENTS.md`). Resolve it to an absolute path
-> before running anything, and run every command from the user's project, never from the
-> plugin root: the project is where the work is, the plugin root only holds the kit.
+> before reading kit references. The plugin root is read-only; `<project-root>` means the
+> absolute path of the user's project. Run commands from that project and pass its output
+> paths explicitly. Never write to or validate the plugin root as if it were the project.
+> Browser gates resolve an already-installed `playwright` from `<project-root>` (or the
+> current working directory); set `UX_UI_PROJECT_ROOT` when launching from another cwd.
+> MCP `run_gate` and `review_ui` calls must pass `project_root` as an absolute path.
+> This does not install dependencies. `DS_REQUIRE_BROWSER=1` makes missing Playwright or a
+> missing browser fail rather than skip; module resolution is not proof that a browser ran.
 > Where it says `CLAUDE.md`, the same rules are in `AGENTS.md`. This plugin ships no hooks, so
 > nothing records or blocks on your behalf: run the gates yourself and report what they print.
-> `accuracy_report.mjs` is the kit's own self-test and measures the kit's examples, not the
-> user's project: for the project, run the individual gates against the project's files.
+> `accuracy_report.mjs` is only the kit's self-test. For a user project, run the individual
+> gates against its explicit token, source, page or harness paths; never report the kit test
+> or an unrelated `npm run verify` as project evidence.
 > `/critique`, `/observe` and `/scaffold-project` exist only in Claude Code: where `/critique`
 > is asked for, run `node <plugin-root>/scripts/taste_audit.mjs <file>` and
 > `node <plugin-root>/scripts/slop_tells.mjs <file>`, report what they print, and say that

@@ -40,8 +40,9 @@
 import { readdirSync, statSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { requireTargets } from './_targets.mjs';
+import { loadPlaywright } from './_playwright.mjs';
 let chromium;
-try { ({ chromium } = await import('playwright')); }
+try { ({ chromium } = loadPlaywright()); }
 catch {
   // A missing browser must not read as a pass. Without DS_REQUIRE_BROWSER the gate
   // stays skippable for local convenience; CI and accuracy_report set it to 1, so a
