@@ -212,6 +212,17 @@ test('design-systems/library.json is what the library generates, at this version
   assert.equal(JSON.parse(want).ref, `v${version}`, 'the index names a tag other than this version');
 });
 
+test('design-system directory names are safe on Windows', () => {
+  const reserved = /^(?:con|prn|aux|nul|com[1-9¹²³]|lpt[1-9¹²³])$/i;
+  assert.ok(reserved.test('COM7'), 'the guard must recognize the reported Windows-reserved name');
+  assert.ok(!reserved.test('com-seven'), 'the replacement slug must remain valid');
+  const dirs = readdirSync(join(ROOT, 'design-systems/library'), { withFileTypes: true })
+    .filter(d => d.isDirectory())
+    .map(d => d.name)
+    .filter(name => reserved.test(name));
+  assert.deepEqual(dirs, [], `Windows reserves these directory names: ${dirs.join(', ')}`);
+});
+
 test('evals/README spells the same number it scores with', () => {
   const WORDS = { 12: 'Twelve', 13: 'Thirteen', 14: 'Fourteen', 15: 'Fifteen', 16: 'Sixteen' };
   const src = read('evals', 'README.md');
