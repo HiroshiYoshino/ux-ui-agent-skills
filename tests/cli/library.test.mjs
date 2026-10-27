@@ -160,6 +160,21 @@ test('get fetches a spec, checks it, and writes it where the skills read it', as
   } finally { await m.close(); }
 });
 
+test('Comseven fetches under a Windows-safe slug', async () => {
+  assert.ok(Object.hasOwn(INDEX.systems, 'com-seven'));
+  assert.equal(Object.hasOwn(INDEX.systems, 'com7'), false, 'the reserved slug must no longer be published');
+  const m = await mirror();
+  try {
+    const dir = project('com-seven');
+    const r = await go('node', [join(pkg, 'scripts/library.mjs'), 'get', 'com-seven', '--into', dir],
+      { env: { UX_UI_LIBRARY_BASE: m.base } });
+    assert.equal(r.status, 0, r.out);
+    const out = join(dir, 'design-systems/library/com-seven/DESIGN.md');
+    assert.ok(readFileSync(out).equals(SPEC('com-seven')), 'the fetched spec differs from the repo');
+    assert.deepEqual(m.hits, [`/${INDEX.ref}/design-systems/library/com-seven/DESIGN.md`]);
+  } finally { await m.close(); }
+});
+
 test('a spec altered by one byte is refused and nothing is written', async () => {
   const m = await mirror(() => 'tamper');
   try {
