@@ -96,7 +96,7 @@ test('validate_instruction_surface refuses a skill that runs a browser gate bare
   // Run bare on a machine with no browser, a gate prints SKIPPED and exits 0,
   // and an agent reading the exit code takes it as a pass (#10).
   const forms = [
-    ['a11y-audit', 'node ${CLAUDE_SKILL_DIR}/../../../scripts/gate.mjs measure_render.mjs', 'node ${CLAUDE_SKILL_DIR}/../../../scripts/measure_render.mjs'],
+    ['a11y-audit', 'DS_REQUIRE_BROWSER=1 UX_UI_PROJECT_ROOT="<project-root>" node ${CLAUDE_SKILL_DIR}/../../../scripts/measure_render.mjs', 'UX_UI_PROJECT_ROOT="<project-root>" node ${CLAUDE_SKILL_DIR}/../../../scripts/measure_render.mjs'],
     ['critique', 'DS_REQUIRE_BROWSER=1 node $KIT/scripts/slop_tells.mjs', 'node $KIT/scripts/slop_tells.mjs'],
   ];
   for (const [name, good, bad] of forms) {

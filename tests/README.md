@@ -1,6 +1,6 @@
 # tests/: the layer that checks the gates
 
-The kit's 51 objective gates all point at `examples/` that already pass. That
+The kit's 52 objective gates all point at `examples/` that already pass. That
 proves a gate says yes to good work. It never proves the gate can still say no.
 
 This directory supplies the other half: input built to be wrong, and the
@@ -13,6 +13,7 @@ tests/
   meta/                  every gate must REJECT a broken fixture, and ACCEPT a clean one
   unit/                  the arithmetic under the contrast gates; build_tokens output
   cli/                   bin/cli.js and the project scaffold, end to end
+  integration/          shell-specific tests, separate from the common gates
   fixtures/bad/          deliberately broken - one file per signal
   fixtures/good/         clean-panel.html survives all sixteen render gates, light and dark
 ```
@@ -27,6 +28,54 @@ npm run test:gates   # everything, including the render meta-gates
 `test:gates` needs Playwright and real Chrome (six gates launch
 `channel: 'chrome'`). `helpers/preflight.mjs` fails loudly if either is missing,
 because a suite that skips is a suite that proves nothing.
+
+The common accuracy report uses argument arrays and checks each expected exit
+code without invoking a shell. Its default is the complete 52-check plan:
+
+```sh
+node scripts/accuracy_report.mjs --json=accuracy-full.json
+node scripts/accuracy_report.mjs --profile=smoke --json=accuracy-smoke.json
+node scripts/accuracy_report.mjs --only="Screen economy" --json=economy.json
+```
+
+The smoke profile selects 18 checks and explicitly reports partial coverage.
+`--list` prints the selected plan without running it. A step normally has a
+180-second budget; the complete screen-economy scan has a 900-second budget.
+`--step-timeout-ms=60000` overrides the budget for each command. A timeout,
+missing executable or skipped measurement fails that check. JSON is saved
+after each completed check as well as at the end, so an interrupted run keeps
+its progress and is never described as complete.
+
+Screen economy prints file and viewport progress with `--progress`; JSON stays
+on stdout and progress goes to stderr. `--page-timeout-ms=15000` bounds each
+viewport measurement, and a measurement timeout exits 2 rather than reporting
+a clean page. The result includes per-viewport timing and measurement errors.
+
+The command printed by the Claude Stop hook uses POSIX shell syntax. Its
+integration test is `tests/integration/hooks-bash.test.mjs`; the common hook
+logic stays in `tests/meta/hooks.test.mjs` on every OS. Linux render CI runs the
+integration with `REQUIRE_BASH=1`. On Windows, set `BASH_BIN` to an installed
+compatible shell to run it. Without a shell it reports NOT verified; with
+`REQUIRE_BASH=1`, absence is a failure. It is not silently counted as a common
+accuracy check.
+
+On every push and PR, Linux CI keeps the quality, render and meta-gate suites,
+plus the Codex plugin checks and Bash integration. Windows CI runs the unit,
+packaging, CRLF, isolated-project and real Codex npm-shim regressions, then the
+common hook and small screen-economy fixtures. These fixtures exercise clean and
+broken pages, progress output and measurement timeouts without scanning every
+example. Runner unit tests cover expected failures, skipped measurements,
+timeouts, partial reports and receipt errors. Neither OS runs the accuracy
+report on every PR, avoiding repeated gates and broad example scans.
+
+For the complete 52-check audit, use **Actions > Full objective report (manual)
+> Run workflow** and choose the branch to audit. The workflow is defined in
+`.github/workflows/full-report.yml`, runs only through `workflow_dispatch`, and
+uploads `accuracy-full.json`, including partial progress if a check is
+interrupted. GitHub requires a manual workflow to exist on the default branch
+before its Run workflow button is available. Until this workflow is merged,
+run the full-report command above locally. The full plan and the optional local
+18-check smoke profile remain available; a smoke pass is not a full audit.
 
 ## What a meta-test asserts
 

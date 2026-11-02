@@ -39,10 +39,12 @@
   },
   "devDependencies": {
     "axe-core": "4.10.2",
+    "cross-spawn": "^7.0.6",
     "esbuild": "^0.28.2",
     "playwright": "^1.40.0",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react-dom": "^19.3.0",
+    "tar": "^7.5.22"
   },
   "files": [
     "bin/",

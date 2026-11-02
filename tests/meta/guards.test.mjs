@@ -20,7 +20,7 @@ const BROWSER_GATES = readdirSync(join(ROOT, 'scripts'))
 
 test('every browser gate is accounted for', () => {
   // If a new render gate lands, it must be covered by the guard below.
-  assert.equal(BROWSER_GATES.length, 17, `browser gates changed: ${BROWSER_GATES.join(', ')}`);
+  assert.equal(BROWSER_GATES.length, 18, `browser gates changed: ${BROWSER_GATES.join(', ')}`);
 });
 
 test('a missing browser fails loudly under DS_REQUIRE_BROWSER, and only skips without it', () => {
@@ -28,20 +28,19 @@ test('a missing browser fails loudly under DS_REQUIRE_BROWSER, and only skips wi
   // playwright, the state a clean CI runner or a fresh npx install is in.
   const dir = mkdtempSync(join(tmpdir(), 'ds-nobrowser-'));
   try {
-    // _targets.mjs and _color.mjs travel with them: the gates import them, and a
-    // missing import would fail for the wrong reason and still look like the right answer.
-    for (const helper of ['_targets.mjs', '_color.mjs']) copyFileSync(join(ROOT, 'scripts', helper), join(dir, helper));
+    // Copy every imported helper so missing dependencies fail for the right reason.
+    for (const helper of ['_targets.mjs', '_playwright.mjs', '_color.mjs']) copyFileSync(join(ROOT, 'scripts', helper), join(dir, helper));
     for (const g of BROWSER_GATES) {
       copyFileSync(join(ROOT, 'scripts', g), join(dir, g));
       const target = join(ROOT, 'examples', 'sample-app', 'preview.html');
 
       const required = run('node', [join(dir, g), target, '--open=#delBtn'],
-        { env: { DS_REQUIRE_BROWSER: '1' } });
+        { env: { DS_REQUIRE_BROWSER: '1', UX_UI_PROJECT_ROOT: dir } });
       assert.equal(required.status, 1, `${g} exited ${required.status} with no browser and DS_REQUIRE_BROWSER=1`);
       assert.match(required.out, /REQUIRED, FAILING/, `${g} did not say why it failed`);
 
       const optional = run('node', [join(dir, g), target, '--open=#delBtn'],
-        { env: { DS_REQUIRE_BROWSER: '' } });
+        { env: { DS_REQUIRE_BROWSER: '', UX_UI_PROJECT_ROOT: dir } });
       assert.equal(optional.status, 0, `${g} should stay skippable when the browser is not required`);
       assert.match(optional.out, /SKIPPED/);
     }

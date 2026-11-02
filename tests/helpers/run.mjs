@@ -1,26 +1,24 @@
 /**
  * Run a gate and keep its NUMERIC exit status.
  *
- * The repo's two runners (evals/run.mjs, scripts/accuracy_report.mjs) both use
- * execSync, which throws on non-zero and reduces the status to a boolean. A
- * suite whose whole job is "prove the gate still fails" needs the number, and
+ * A suite whose whole job is "prove the gate still fails" needs the number, and
  * needs to tell a real finding apart from a crash or a usage message, so this
  * uses spawnSync and exposes status, stdout and stderr.
  */
-import { spawnSync } from 'node:child_process';
+import spawn from 'cross-spawn';
 import { fileURLToPath } from 'node:url';
 
 export const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 
 export function run(cmd, args = [], opts = {}) {
-  const r = spawnSync(cmd, args, {
+  const r = spawn.sync(cmd, args, {
     cwd: ROOT,
     encoding: 'utf8',
     env: { ...process.env, ...(opts.env || {}) },
     timeout: opts.timeout ?? 120000,
   });
   const stdout = r.stdout || '';
-  const stderr = r.stderr || '';
+  const stderr = r.stderr || r.error?.message || '';
   return { status: r.status, stdout, stderr, out: stdout + stderr, signal: r.signal };
 }
 

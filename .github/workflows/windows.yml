@@ -1,0 +1,50 @@
+name: Windows compatibility
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tools-and-plugin:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - name: Generated skills and plugin contract
+        run: |
+          node scripts/build_codex_plugin.mjs --check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node scripts/validate_codex_plugin.mjs
+      - name: Packaging, CRLF and isolated-project regression tests
+        run: |
+          $unitTests = @(Get-ChildItem tests/unit -Filter *.test.mjs | ForEach-Object FullName)
+          node --test --test-concurrency=2 --test-timeout=300000 @unitTests tests/cli/gemini.test.mjs tests/cli/library.test.mjs tests/meta/codex-plugin.test.mjs tests/meta/registry.test.mjs
+      - name: Install the pinned Codex client
+        run: npm install --prefix "$env:RUNNER_TEMP/codex" @openai/codex@0.164.0
+      - name: Real Codex client through the Windows npm shim
+        env:
+          REQUIRE_CODEX: '1'
+        run: |
+          $env:CODEX_BIN = Join-Path $env:RUNNER_TEMP 'codex/node_modules/.bin/codex.cmd'
+          node --test --test-timeout=300000 tests/cli/codex-plugin-live.test.mjs
+      - name: Install render-test browsers
+        run: npx playwright install chromium chrome
+      # Small fixtures cover browser success, known defects, progress and timeout
+      # handling; the Linux render job covers the full set of UI gates.
+      - name: Common hook and focused browser regressions
+        run: node --test --test-timeout=180000 tests/meta/hooks.test.mjs tests/meta/screen-economy.test.mjs

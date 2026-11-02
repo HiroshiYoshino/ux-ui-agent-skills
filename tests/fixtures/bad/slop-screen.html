@@ -32,10 +32,11 @@
   }
   .panel h2 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
   .panel p { font-size: 14px; color: #9ca3af; margin-bottom: 16px; }
-  .row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+  /* Keep the negative target-size fixture crowded on every platform. */
+  .row { display: flex; align-items: center; gap: 4px; margin-bottom: 16px; }
   .icon-btn {
     width: 16px; height: 16px; border: none; background: transparent;
-    padding: 0; cursor: pointer; font-size: 12px; line-height: 1;
+    padding: 0; cursor: pointer; font-size: 12px; line-height: 1; flex: 0 0 16px;
   }
   input[type=text] {
     width: 100%; padding: 8px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px;

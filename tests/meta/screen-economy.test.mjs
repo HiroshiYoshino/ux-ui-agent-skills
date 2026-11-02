@@ -17,7 +17,8 @@
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { ROOT, gate, rejects, accepts } from '../helpers/run.mjs';
 
@@ -47,6 +48,31 @@ for (const [file, expect] of Object.entries(EXPECTED)) {
 
 test('it accepts a clean page', { timeout: 180000 }, () => {
   accepts(gate('verify_screen_economy.mjs', ['tests/fixtures/good/clean-panel.html']), /OK/);
+});
+
+test('progress stays on stderr and JSON records each measured viewport', () => {
+  const result = gate('verify_screen_economy.mjs', ['tests/fixtures/good/clean-panel.html', '--json', '--progress']);
+  assert.equal(result.status, 0, result.out);
+  const data = JSON.parse(result.stdout);
+  assert.deepEqual(data.errors, []);
+  assert.equal(data.timings.length, 2);
+  assert.ok(data.timings.every(t => t.status === 'measured' && t.elapsedMs > 0));
+  assert.match(result.stderr, /screen-economy: START.*@phone/);
+  assert.match(result.stderr, /screen-economy: DONE.*@desktop/);
+});
+
+test('a page exceeding its measurement budget is an error, not a clean finding', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'economy-timeout-'));
+  try {
+    const page = join(dir, 'busy.html');
+    writeFileSync(page, '<!doctype html><html lang="en"><title>Busy fixture</title><body data-harness aria-busy="true"><main>Loading</main></body></html>');
+    const result = gate('verify_screen_economy.mjs', [page, '--json', '--page-timeout-ms=2500']);
+    assert.equal(result.status, 2, result.out);
+    const data = JSON.parse(result.stdout);
+    assert.equal(data.errors.length, 2);
+    assert.ok(data.errors.every(e => /timeout/i.test(e)));
+    assert.ok(data.timings.every(t => t.status === 'error'));
+  } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
 /**

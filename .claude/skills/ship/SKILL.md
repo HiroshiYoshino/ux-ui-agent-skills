@@ -19,9 +19,10 @@ Gate first, then prepare the release. Do nothing destructive without explicit
 confirmation (no tag, no publish). This command verifies and drafts only.
 
 1. Quality gate (must be fully green before continuing):
-   - `node ${CLAUDE_SKILL_DIR}/../../../scripts/accuracy_report.mjs`: report the real N/N.
-   - `node ${CLAUDE_SKILL_DIR}/../../../scripts/verify_responsive.mjs examples`: no overflow from 280 to 951px, hinge clear when folded.
-   - `python3 ${CLAUDE_SKILL_DIR}/../../../scripts/check_no_emoji.py`: UI + taste + instruction surface.
+   - Set `<project-root>` to the absolute path of the repository being released.
+   - Only when that repository is this design-system kit, run `node "<project-root>/scripts/accuracy_report.mjs"` from its root and report its actual output.
+   - For any other project, run applicable individual gates against its explicit token, source, and page or harness paths. Do not use the kit's `accuracy_report.mjs` or an unrelated `npm run verify` as release evidence.
+   - For rendered files, set `DS_REQUIRE_BROWSER=1 UX_UI_PROJECT_ROOT="<project-root>"` and require a real measured result. A missing target, dependency, browser, or `SKIPPED` output is not a pass.
    If anything fails, stop and fix; do not proceed to the checklist.
 
 2. Release checklist (per the project release rule):
@@ -30,6 +31,6 @@ confirmation (no tag, no publish). This command verifies and drafts only.
    - Confirm `examples/apple-home` stays gitignored (local IP).
    - List the commits since the last tag so the changelog is accurate.
 
-3. Output a ready-to-review summary: the green N/N line, the proposed version,
+3. Output a ready-to-review summary: the actual gate output, the proposed version,
    and the drafted changelog entry. Wait for the user to approve before any
    `git tag` / publish step.

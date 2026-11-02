@@ -160,21 +160,24 @@ def main():
                               "${CLAUDE_SKILL_DIR}/../../../ - it will not resolve on a plugin install")
                 break
 
-    # A skill must not run a browser gate bare (#10). The list is every script
-    # that imports playwright, so a new gate is covered the day it lands.
+    # A skill must not run a browser gate without requiring a real browser (#10).
+    # Gates use the shared project-root resolver, so detect that import too.
     browser_gates = sorted(p.name for p in (ROOT / "scripts").glob("*.mjs")
-                           if re.search(r"""import\(['"]playwright['"]\)|from ['"]playwright['"]""",
-                                        p.read_text(encoding="utf-8")))
-    direct = re.compile(r"(?<!DS_REQUIRE_BROWSER=1 )node (?:\$\{CLAUDE_SKILL_DIR\}/\.\./\.\./\.\./|\$KIT/)?scripts/("
+                           if p.name != "_playwright.mjs"
+                           and (p.read_text(encoding="utf-8").count("loadPlaywright()")
+                                or re.search(r"""import\(['"]playwright['"]\)|from ['"]playwright['"]""",
+                                             p.read_text(encoding="utf-8"))))
+    direct = re.compile(r"((?:[A-Za-z_][A-Za-z0-9_]*=\S+\s+)*)node "
+                        r"(?:\$\{CLAUDE_SKILL_DIR\}/\.\./\.\./\.\./|\$KIT/)?scripts/("
                         + "|".join(re.escape(g) for g in browser_gates) + r")")
     for skill in sorted((ROOT / ".claude" / "skills").glob("*/SKILL.md")):
         if skill.parent.name in repo_only:
             continue
-        m = direct.search(skill.read_text(encoding="utf-8"))
-        if m:
+        for m in direct.finditer(skill.read_text(encoding="utf-8")):
+            if re.search(r"(?:^|\s)DS_REQUIRE_BROWSER=1(?:\s|$)", m.group(1)):
+                continue
             issues.append(f"browser gate: {skill.relative_to(ROOT)} runs {m.group(1)} directly - "
-                          "with no browser that is SKIPPED and exit 0; use scripts/gate.mjs, "
-                          "or DS_REQUIRE_BROWSER=1 for a taste heuristic")
+                          "without requiring a browser; use scripts/gate.mjs or set DS_REQUIRE_BROWSER=1")
 
     # A version the install ships must be a version the release actually cut.
     versions = {}

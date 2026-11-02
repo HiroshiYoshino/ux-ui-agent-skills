@@ -16,6 +16,7 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:http';
+import { extract } from 'tar';
 import { mkdtempSync, rmSync, readFileSync, existsSync, writeFileSync, mkdirSync, readdirSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -26,13 +27,13 @@ const SPEC = (slug) => readFileSync(join(ROOT, 'design-systems/library', slug, '
 
 let work, pkg;
 
-before(() => {
-  work = mkdtempSync(join(tmpdir(), 'ds-lib-'));
+before(async () => {
+  work = mkdtempSync(join(tmpdir(), 'ds lib 日本語-'));
   const p = run('npm', ['pack', '--pack-destination', work, '--json'], { timeout: 300000 });
   assert.equal(p.status, 0, `npm pack failed:\n${p.out}`);
   const tgz = join(work, JSON.parse(p.stdout)[0].filename);
-  const x = run('tar', ['-xzf', tgz, '-C', work]);
-  assert.equal(x.status, 0, `could not unpack the tarball:\n${x.out}`);
+  // Native Windows tar can lose non-ASCII paths under an English code page.
+  await extract({ file: tgz, cwd: work, strict: true });
   pkg = join(work, 'package');
 });
 
@@ -157,6 +158,21 @@ test('get fetches a spec, checks it, and writes it where the skills read it', as
     const again = await go('node', [join(pkg, 'bin/cli.js'), 'library', 'get', 'stripe'],
       { cwd: dir, env: { UX_UI_LIBRARY_BASE: DEAD } });
     assert.equal(again.status, 0, `a spec already present needed the network:\n${again.out}`);
+  } finally { await m.close(); }
+});
+
+test('Comseven fetches under a Windows-safe slug', async () => {
+  assert.ok(Object.hasOwn(INDEX.systems, 'com-seven'));
+  assert.equal(Object.hasOwn(INDEX.systems, 'com7'), false, 'the reserved slug must no longer be published');
+  const m = await mirror();
+  try {
+    const dir = project('com-seven');
+    const r = await go('node', [join(pkg, 'scripts/library.mjs'), 'get', 'com-seven', '--into', dir],
+      { env: { UX_UI_LIBRARY_BASE: m.base } });
+    assert.equal(r.status, 0, r.out);
+    const out = join(dir, 'design-systems/library/com-seven/DESIGN.md');
+    assert.ok(readFileSync(out).equals(SPEC('com-seven')), 'the fetched spec differs from the repo');
+    assert.deepEqual(m.hits, [`/${INDEX.ref}/design-systems/library/com-seven/DESIGN.md`]);
   } finally { await m.close(); }
 });
 

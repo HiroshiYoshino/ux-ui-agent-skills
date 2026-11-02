@@ -23,8 +23,7 @@ then load the rule file for the territory you are actually in.
    have not run it, say "not verified yet."
 2. **Verify every state, not just resting.** `node ${CLAUDE_SKILL_DIR}/../../../scripts/gate.mjs verify_states.mjs <file> [--dark]`
    measures default, hover and focus - a button that passes at rest can fail on hover.
-3. **One command before reporting done:** `node ${CLAUDE_SKILL_DIR}/../../../scripts/accuracy_report.mjs`.
-   Report the real `N/N` line. It is all-or-nothing.
+3. **Verify the work, not the kit.** Run the applicable individual gates against the files produced in the user's project. For tokens, pass the project's token directory or token file explicitly to `validate_tokens.py`; for rendered work, pass the project's page or harness to the render gates with `DS_REQUIRE_BROWSER=1`. Report each gate's actual output. `accuracy_report.mjs` is only the kit's self-test when developing the kit itself; it is not evidence about a user's project.
 4. **Build with the gates, not after them.** Fix and re-run until green; never
    announce success between failures.
 5. **Render and LOOK.** Gates pass while a UI is still visibly broken. Screenshot

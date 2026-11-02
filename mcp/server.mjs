@@ -64,6 +64,10 @@ const TOOLS = [
           type: 'array', items: { type: 'string' }, minItems: 1,
           description: 'Files or directories to measure, absolute or relative to the working directory.',
         },
+        project_root: {
+          type: 'string',
+          description: 'Absolute project root used to resolve browser-gate dependencies such as Playwright.',
+        },
         args: {
           type: 'array', items: { type: 'string' },
           description: 'Extra flags the gate accepts, such as --dark or --scale=1.25.',
@@ -86,6 +90,10 @@ const TOOLS = [
       properties: {
         paths: { type: 'array', items: { type: 'string' }, minItems: 1 },
         tokens: { type: 'string', description: 'Optional path to the project\'s token JSON or theme CSS, for the gates that need one.' },
+        project_root: {
+          type: 'string',
+          description: 'Absolute project root used to resolve browser-gate dependencies such as Playwright.',
+        },
         skip_browser: { type: 'boolean', description: 'Run only the gates that read files. Use when no browser is installed; the result then covers less.' },
       },
       required: ['paths'],
@@ -140,7 +148,7 @@ const TOOLS = [
 const text = (s, isError = false) => ({ content: [{ type: 'text', text: s }], isError });
 
 /** Run a gate the way the kit insists gates are run. */
-function runGate(gate, paths, extra = []) {
+function runGate(gate, paths, extra = [], projectRoot) {
   const g = byName(gate);
   if (!g) {
     return { ok: false, out: `Unknown gate "${gate}". Call list_gates for the names it accepts.`, code: null };
@@ -152,10 +160,25 @@ function runGate(gate, paths, extra = []) {
     // Never optional. A render gate with no browser prints SKIPPED and exits 0,
     // and a "pass" from a run that measured nothing is the one failure this
     // whole kit is written against.
-    env: { ...process.env, DS_REQUIRE_BROWSER: '1' },
+    env: {
+      ...process.env,
+      DS_REQUIRE_BROWSER: '1',
+      ...(projectRoot ? { UX_UI_PROJECT_ROOT: projectRoot } : {}),
+    },
   });
   const out = ((r.stdout || '') + (r.stderr || '')).trim();
   return { ok: r.status === 0, code: r.status, out, gate: g };
+}
+
+function projectRootRefused(projectRoot, needed) {
+  if (!needed) return null;
+  if (!projectRoot) {
+    return text('An absolute project_root is required for browser gates. Nothing was measured. This is not a pass.', true);
+  }
+  if (!isAbsolute(projectRoot) || !existsSync(projectRoot) || !statSync(projectRoot).isDirectory()) {
+    return text(`Invalid project_root: ${projectRoot}. Pass an existing absolute project directory. Nothing was measured. This is not a pass.`, true);
+  }
+  return null;
 }
 
 /** The Codex plugin runs this server with the plugin root as its working
@@ -192,20 +215,22 @@ function handle(name, args) {
   }
 
   if (name === 'run_gate') {
-    const { gate, paths, args: extra = [] } = args;
+    const { gate, paths, args: extra = [], project_root } = args;
     const refused = relativeRefused(paths);
     if (refused) return refused;
     const missing = paths.filter(p => !existsSync(p));
     if (missing.length) {
       return text(`Not found: ${missing.join(', ')}\nNothing was measured. This is not a pass.`, true);
     }
-    const r = runGate(gate, paths, extra);
+    const rootRefused = projectRootRefused(project_root, Boolean(byName(gate)?.browser));
+    if (rootRefused) return rootRefused;
+    const r = runGate(gate, paths, extra, project_root);
     if (r.code === null && !r.gate) return text(r.out, true);
     return text(`${r.gate.name} exited ${r.code}\n\n${r.out}`, !r.ok);
   }
 
   if (name === 'review_ui') {
-    const { paths, tokens, skip_browser } = args;
+    const { paths, tokens, skip_browser, project_root } = args;
     const refused = relativeRefused(tokens ? [...paths, tokens] : paths);
     if (refused) return refused;
     const missing = paths.filter(p => !existsSync(p));
@@ -213,6 +238,11 @@ function handle(name, args) {
       return text(`Not found: ${missing.join(', ')}\nNothing was measured. This is not a pass.`, true);
     }
     const html = paths.some(p => statSync(p).isDirectory() || /\.html?$/i.test(p));
+    const rootRefused = projectRootRefused(
+      project_root,
+      !skip_browser && html && catalogue().some(g => g.browser),
+    );
+    if (rootRefused) return rootRefused;
     const results = [];
     for (const g of catalogue()) {
       if (g.browser && skip_browser) continue;
@@ -220,11 +250,11 @@ function handle(name, args) {
       if (g.name === 'validate_theme_refs' && !tokens) continue;  // it needs a theme to check against
       if (g.name === 'validate_tokens' || g.name === 'validate_contrast') {
         if (!tokens) continue;
-        results.push({ g, r: runGate(g.name, [tokens]) });
+        results.push({ g, r: runGate(g.name, [tokens], [], project_root) });
         continue;
       }
       const extra = g.name === 'validate_theme_refs' ? ['--theme', tokens] : [];
-      results.push({ g, r: runGate(g.name, extra.length ? [...extra, ...paths] : paths) });
+      results.push({ g, r: runGate(g.name, extra.length ? [...extra, ...paths] : paths, [], project_root) });
     }
     const failed = results.filter(x => !x.r.ok);
     const head = `${results.length - failed.length}/${results.length} gates passed`
@@ -305,7 +335,8 @@ function dispatch(msg) {
         'Design-system doctrine and the objective gates that check work against it.\n\n'
         + 'Before building a screen: get_doctrine for the rules that apply, and get_tokens for the '
         + 'token source.\n'
-        + 'After building: review_ui on what you produced, and report what it printed.\n\n'
+        + 'After building: review_ui on what you produced, and report what it printed. For browser gates, '
+        + 'pass the absolute project_root so Playwright is resolved from the project, not this plugin.\n\n'
         + 'Never state a contrast ratio, a WCAG verdict or a pass rate that a gate did not just '
         + 'print. If you have not run it, "not verified yet" is the correct answer and is always '
         + 'acceptable. A gate exiting 2 means it could not look - that is not a pass.',

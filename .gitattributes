@@ -1,0 +1,4 @@
+# Keep generated text and byte-verified library specs consistent on every OS.
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf

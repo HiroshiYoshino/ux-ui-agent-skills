@@ -29,4 +29,4 @@ Keep the system consistent as it grows. Apply versioning, contribution, and depr
 - Change has a SemVer level **and** a changelog entry.
 - Removals have a deprecation window, a replacement, and a migration table.
 - New spec meets the 8-state + a11y + token-mapping bar and is reachable via the router.
-- `python3 ${CLAUDE_SKILL_DIR}/../../../scripts/validate_tokens.py` passes; contrast re-checked if colors changed.
+- `python3 ${CLAUDE_SKILL_DIR}/../../../scripts/validate_tokens.py "<project-root>/tokens"` passes; contrast re-checked against `"<project-root>/tokens/colors.json"` if colors changed.

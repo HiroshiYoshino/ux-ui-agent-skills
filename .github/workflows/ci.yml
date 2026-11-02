@@ -33,6 +33,9 @@ jobs:
         with:
           node-version: 20
 
+      - name: Install development dependencies
+        run: npm ci
+
       - name: Token validity + alias resolution
         run: python3 scripts/validate_tokens.py
 
@@ -156,6 +159,11 @@ jobs:
         # against a gate reporting green without having looked.
         run: npm run test:gates
 
+      - name: Bash-specific hook command integration
+        env:
+          REQUIRE_BASH: "1"
+        run: node --test tests/integration/hooks-bash.test.mjs
+
   codex-plugin:
     # The Codex plugin on a real Codex client. REQUIRE_CODEX=1 turns a missing
     # binary into a failure: a skipped run verified nothing.
@@ -170,6 +178,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: Install development dependencies
+        run: npm ci
 
       - name: Generated Codex skills match their source
         run: node scripts/build_codex_plugin.mjs --check

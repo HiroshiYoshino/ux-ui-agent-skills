@@ -1,0 +1,38 @@
+name: Full objective report (manual)
+
+# Broad example coverage is useful for an audit, but duplicates many PR gates.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Keep manual audits independent of the fast PR workflow.
+concurrency:
+  group: full-report-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  full-report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install development dependencies and browsers
+        run: npm ci && npx playwright install --with-deps chromium chrome
+      - name: Full common objective report (52 checks)
+        timeout-minutes: 45
+        run: node scripts/accuracy_report.mjs --json=accuracy-full.json
+      - name: Preserve full-report results and partial progress
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: accuracy-full
+          path: accuracy-full.json
+          if-no-files-found: warn

@@ -35,17 +35,24 @@
  */
 import { readFileSync, existsSync, statSync, readdirSync } from 'node:fs';
 import { join, dirname, resolve, extname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { requireTargets } from './_targets.mjs';
+import { loadPlaywright } from './_playwright.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const argv = process.argv.slice(2);
 const DARK = argv.includes('--dark');
 const JSON_OUT = argv.includes('--json');
+const PROGRESS = argv.includes('--progress');
+const PAGE_TIMEOUT = Number(argv.find(a => a.startsWith('--page-timeout-ms='))?.split('=')[1] ?? 15000);
+if (!Number.isFinite(PAGE_TIMEOUT) || PAGE_TIMEOUT <= 0) {
+  console.error('verify_screen_economy: page-timeout-ms must be positive. Nothing was measured.');
+  process.exit(2);
+}
 const required = process.env.DS_REQUIRE_BROWSER === '1';
 
 let chromium;
-try { ({ chromium } = await import('playwright')); }
+try { ({ chromium } = loadPlaywright()); }
 catch {
   console.log(`verify_screen_economy: playwright not installed: ${required ? 'REQUIRED, FAILING' : 'SKIPPED'}`);
   process.exit(required ? 1 : 0);
@@ -252,6 +259,16 @@ const MEASURE = ({ T }) => {
 
 const problems = [];
 const warnings = [];
+const errors = [];
+const timings = [];
+async function deadline(action, ms, label) {
+  let timer;
+  try {
+    return await Promise.race([Promise.resolve().then(action), new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error(`${label}: timeout after ${ms}ms`)), ms);
+    })]);
+  } finally { clearTimeout(timer); }
+}
 const browser = await chromium.launch({ channel: 'chrome' });
 
 for (const f of files) {
@@ -263,30 +280,44 @@ for (const f of files) {
   const html = readFileSync(abs, 'utf8');
 
   for (const [w, h, label] of [[390, 844, 'phone'], [1280, 900, 'desktop']]) {
-    const page = await browser.newPage({
-      viewport: { width: w, height: h },
-      colorScheme: DARK ? 'dark' : 'light',
-    });
-    await page.goto('file://' + abs);
-    /* Wait for the page to finish, not for a constant.
-     *
-     * A flat wait reads a loading state as the page. verify_reduced_motion had
-     * exactly this bug - it compared a half-loaded render against a finished
-     * one - and this gate was written afterwards with the same flat timer and
-     * repeated it: a blind agent's dashboard held a skeleton for 700ms, so at
-     * 400ms the heading was still inside a display:none block and this reported
-     * "no visible h1 above the fold" on a page whose h1 is its hero.
-     *
-     * The page says when it is done. Believe it, with a cap. */
-    let r = null, prevKeys = null;
-    for (let waited = 0; waited <= 4000; waited += 250) {
-      await page.waitForTimeout(250);
-      r = await page.evaluate(MEASURE, { T });
-      const keys = JSON.stringify([r.firstScreen, r.media.length, r.boxes.length]);
-      if (!r.busy && keys === prevKeys) break;
-      prevKeys = keys;
+    const started = performance.now();
+    const target = `${f} @${label}`;
+    if (PROGRESS) console.error(`screen-economy: START [${files.indexOf(f) + 1}/${files.length}] ${target}`);
+    let page, r;
+    try {
+      r = await deadline(async () => {
+        page = await browser.newPage({ viewport: { width: w, height: h }, colorScheme: DARK ? 'dark' : 'light' });
+        await page.goto(pathToFileURL(abs).href, { timeout: PAGE_TIMEOUT });
+        /* Wait for the page to finish, not for a constant.
+         *
+         * A flat wait reads a loading state as the page. verify_reduced_motion had
+         * exactly this bug - it compared a half-loaded render against a finished
+         * one - and this gate was written afterwards with the same flat timer and
+         * repeated it: a blind agent's dashboard held a skeleton for 700ms, so at
+         * 400ms the heading was still inside a display:none block and this reported
+         * "no visible h1 above the fold" on a page whose h1 is its hero.
+         *
+         * The page says when it is done. Believe it, with a cap. */
+        let measured = null, prevKeys = null;
+        for (let waited = 0; waited <= 4000; waited += 250) {
+          await page.waitForTimeout(250);
+          measured = await page.evaluate(MEASURE, { T });
+          const keys = JSON.stringify([measured.firstScreen, measured.media.length, measured.boxes.length]);
+          if (!measured.busy && keys === prevKeys) break;
+          prevKeys = keys;
+        }
+        return measured;
+      }, PAGE_TIMEOUT, target);
+      timings.push({ file: f, viewport: label, elapsedMs: performance.now() - started, status: 'measured' });
+      if (PROGRESS) console.error(`screen-economy: DONE ${target} ${(performance.now() - started).toFixed(0)}ms`);
+    } catch (e) {
+      errors.push(`${target}: ${e.message}`);
+      timings.push({ file: f, viewport: label, elapsedMs: performance.now() - started, status: 'error' });
+      if (PROGRESS) console.error(`screen-economy: ERROR ${target}: ${e.message}`);
+      continue;
+    } finally {
+      if (page) await deadline(() => page.close(), 2000, `closing ${target}`).catch(e => errors.push(e.message));
     }
-    await page.close();
 
     for (const m of r.media) {
       problems.push(`${base} @${label}  [1 oversized media]  ${m.el} is ${m.w}x${m.h}, past the ${Math.round(T.mediaMaxBlock * 100)}vh cap or wider than the viewport`);
@@ -320,8 +351,14 @@ for (const f of files) {
 await browser.close();
 
 if (JSON_OUT) {
-  console.log(JSON.stringify({ files: files.length, problems, warnings }, null, 2));
-  process.exit(problems.length ? 1 : 0);
+  console.log(JSON.stringify({ files: files.length, problems, warnings, errors, timings }, null, 2));
+  process.exit(errors.length ? 2 : problems.length ? 1 : 0);
+}
+
+if (errors.length) {
+  console.error('verify_screen_economy: ERROR: some pages could not be measured. This is not a pass.');
+  for (const error of errors) console.error('  x ' + error);
+  process.exit(2);
 }
 
 if (problems.length) {

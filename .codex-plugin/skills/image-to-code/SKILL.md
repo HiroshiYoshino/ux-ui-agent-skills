@@ -10,12 +10,19 @@ disable-model-invocation: true
 > Ported from the Claude Code skill for the Codex plugin.
 > `<plugin-root>` is the plugin root: three directories above the directory of this
 > SKILL.md (it holds `tokens/`, `scripts/` and `AGENTS.md`). Resolve it to an absolute path
-> before running anything, and run every command from the user's project, never from the
-> plugin root: the project is where the work is, the plugin root only holds the kit.
+> before reading kit references. The plugin root is read-only; `<project-root>` means the
+> absolute path of the user's project. Run commands from that project and pass its output
+> paths explicitly. Never write to or validate the plugin root as if it were the project.
+> Browser gates resolve an already-installed `playwright` from `<project-root>` (or the
+> current working directory); set `UX_UI_PROJECT_ROOT` when launching from another cwd.
+> MCP `run_gate` and `review_ui` calls must pass `project_root` as an absolute path.
+> This does not install dependencies. `DS_REQUIRE_BROWSER=1` makes missing Playwright or a
+> missing browser fail rather than skip; module resolution is not proof that a browser ran.
 > Where it says `CLAUDE.md`, the same rules are in `AGENTS.md`. This plugin ships no hooks, so
 > nothing records or blocks on your behalf: run the gates yourself and report what they print.
-> `accuracy_report.mjs` is the kit's own self-test and measures the kit's examples, not the
-> user's project: for the project, run the individual gates against the project's files.
+> `accuracy_report.mjs` is only the kit's self-test. For a user project, run the individual
+> gates against its explicit token, source, page or harness paths; never report the kit test
+> or an unrelated `npm run verify` as project evidence.
 > `/critique`, `/observe` and `/scaffold-project` exist only in Claude Code: where `/critique`
 > is asked for, run `node <plugin-root>/scripts/taste_audit.mjs <file>` and
 > `node <plugin-root>/scripts/slop_tells.mjs <file>`, report what they print, and say that
@@ -40,12 +47,12 @@ Reconstruct a design from a visual reference as a real design system, not a one-
    - **Radius & depth**: radius language (sharp/soft/pill), shadow vs. hairline separation.
    - **Layout archetype + sequence**: bounded hero / asymmetric split / dense bento / editorial stack (`<plugin-root>/taste/design-taste.md` → Variance Mandate).
 2. **Anchor to a known system** if it's close: browse `<plugin-root>/taste/aesthetic-systems.md` / `python3 <plugin-root>/scripts/design_systems.py search <term>` and adopt that recipe to stabilize decisions.
-3. **Build the token theme** from the inferred values → 3-tier DTCG (`design-tokens` skill); generate a single `theme.css`. Verify every color pair with `<plugin-root>/scripts/contrast.py` / `<plugin-root>/scripts/validate_contrast.py` (light + dark). A sampled brand color that fails AA gets adjusted; taste never overrides POUR.
+3. **Build the token theme** from the inferred values → 3-tier DTCG (`design-tokens` skill) in `<project-root>/tokens`; generate a single `<project-root>/theme.css`. Verify every color pair with `<plugin-root>/scripts/contrast.py` / `python3 <plugin-root>/scripts/validate_contrast.py "<project-root>/tokens/colors.json"` (light + dark). A sampled brand color that fails AA gets adjusted; taste never overrides POUR.
 4. **Rebuild layout + components** token-driven via `<plugin-root>/frameworks/adapter-protocol.md` + `<plugin-root>/components/*`: one shared primitive layer, all 8 states, a11y wired, no emoji (lucide), single theme. Apply taste (`design-taste.md`) so it doesn't regress to generic.
-5. **Verify against the reference**: render and screenshot it, compare side-by-side to the reference; run `node <plugin-root>/scripts/gate.mjs measure_render.mjs`, `lint_hardcodes.py`, `taste_audit.mjs`, and `npm run verify`.
+5. **Verify against the reference**: render and screenshot it, compare side-by-side to the reference; run the applicable gates against the project's actual output paths. For example, use `DS_REQUIRE_BROWSER=1 UX_UI_PROJECT_ROOT="<project-root>" node <plugin-root>/scripts/measure_render.mjs "<project-root>/<path-to-page>"` and `python3 <plugin-root>/scripts/lint_hardcodes.py "<project-root>/<source-dir>"`.
 
 ## Verification (definition of done)
-- `npm run verify` is 100% (tokens resolve, contrast AA light+dark, no hardcodes/emoji, real-render WCAG).
+- Report the actual output of each applicable gate. Do not use the kit's `accuracy_report.mjs` or an unrelated `npm run verify` as evidence about the user's project.
 - The rebuilt UI uses ONE inferred token theme; no per-section palettes.
 - A screenshot of the result visibly matches the reference's design language.
 

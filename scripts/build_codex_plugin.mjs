@@ -42,7 +42,7 @@ export function build(kit) {
   for (const name of readdirSync(src).sort()) {
     const file = join(src, name, 'SKILL.md');
     if (name in CLAUDE_ONLY || !existsSync(file)) continue;
-    const text = readFileSync(file, 'utf8');
+    const text = readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
     files.set(`${SKILLS_DIR}/${name}/SKILL.md`, portSkill(text, `${PLUGIN_ROOT}/`, 'codex'));
     included.push(name);
     const frontmatter = text.slice(0, text.indexOf('\n---\n', 4));
@@ -90,7 +90,7 @@ export function check(kit) {
   for (const [rel, text] of want) {
     const p = join(kit, rel);
     if (!existsSync(p)) problems.push(`missing: ${rel}`);
-    else if (readFileSync(p, 'utf8') !== text) problems.push(`differs: ${rel}`);
+    else if (readFileSync(p, 'utf8').replace(/\r\n/g, '\n') !== text) problems.push(`differs: ${rel}`);
   }
   for (const rel of [...onDisk(kit), CAPABILITIES_FILE]) {
     if (!want.has(rel) && existsSync(join(kit, rel))) problems.push(`stale: ${rel}`);

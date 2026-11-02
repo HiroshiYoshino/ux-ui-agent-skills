@@ -17,11 +17,12 @@
  *   node evals/run.mjs --self-test            prove the runner works (reference app)
  * Exit 0 only if every objective gate passes.
  */
-import { execSync } from 'node:child_process';
-import { readdirSync, statSync, existsSync } from 'node:fs';
+import { readdirSync, statSync, existsSync, readFileSync } from 'node:fs';
 import { resolve, dirname, join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { runCheck } from '../scripts/_check_runner.mjs';
 
-const ROOT = resolve(dirname(new URL(import.meta.url).pathname), '..');
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const BRIEFS = join(ROOT, 'evals', 'briefs');
 const argv = process.argv.slice(2);
 const flag = (n) => {
@@ -37,7 +38,7 @@ const idOf = (f) => f.replace(/^\d+-/, '').replace(/\.md$/, '');
 if (has('list') || (!briefId && !has('self-test'))) {
   console.log('\nBriefs (evals/briefs/):\n');
   for (const f of briefFiles) {
-    const title = execSync(`head -1 ${JSON.stringify(join(BRIEFS, f))}`).toString().replace(/^#\s*/, '').trim();
+    const title = readFileSync(join(BRIEFS, f), 'utf8').split(/\r?\n/, 1)[0].replace(/^#\s*/, '').trim();
     console.log(`  ${idOf(f).padEnd(22)} ${title}`);
   }
   console.log('\n  node evals/run.mjs <brief-id>            score evals/out/<brief-id>/');
@@ -63,27 +64,29 @@ if (!files.length) {
   console.error(`\nNo .html files in ${relative(ROOT, dir)}: nothing to measure.\n`);
   process.exit(1);
 }
-const q = (p) => JSON.stringify(relative(ROOT, p));
-const each = (cmd) => files.map(f => cmd(q(f))).join(' && ');
-const D = q(dir);
+const node = (script, ...args) => ({ command: 'node', args: [`scripts/${script}`, ...args] });
+const python = (script, ...args) => ({ command: 'python3', args: [`scripts/${script}`, ...args] });
+const each = (script) => files.map(f => node(script, relative(ROOT, f)));
+const themes = (script) => files.flatMap(f => [node(script, relative(ROOT, f)), node(script, '--dark', relative(ROOT, f))]);
+const D = relative(ROOT, dir) || '.';
 
 // Objective gates. Every one of these is a real measurement on the real render.
 const GATES = [
-  ['No hardcoded values (hex/px/ms/font)', `python3 scripts/lint_hardcodes.py ${D}`],
-  ['No emoji anywhere in the output', `python3 scripts/check_no_emoji.py ${D}`],
-  ['REAL-render WCAG (light + dark)', each(f => `node scripts/measure_render.mjs ${f} && node scripts/measure_render.mjs --dark ${f}`)],
-  ['State-aware WCAG, default/hover/focus (light + dark)', each(f => `node scripts/verify_states.mjs ${f} && node scripts/verify_states.mjs --dark ${f}`)],
-  ['axe-core a11y: roles, names, landmarks (light + dark)', each(f => `node scripts/axe_audit.mjs ${f} && node scripts/axe_audit.mjs --dark ${f}`)],
-  ['Responsive: no overflow from 280 to 951px, then folded', `node scripts/verify_responsive.mjs ${D}`],
-  ['Responsive under wider font metrics (1.25x root)', `node scripts/verify_responsive.mjs ${D} --scale=1.25`],
-  ['Target size (WCAG 2.5.8), mobile + desktop', `node scripts/verify_target_size.mjs ${D} && node scripts/verify_target_size.mjs --dark ${D}`],
-  ['Keyboard (WCAG 2.1.1): reach and operate', `node scripts/verify_keyboard.mjs ${D}`],
-  ['Reduced motion: stopped, and no content lost', `node scripts/verify_reduced_motion.mjs ${D}`],
-  ['Content overflow: nothing clipped or overlapping', `node scripts/verify_overflow.mjs ${D}`],
-  ['Token by intent: destructive never wears primary', `node scripts/lint_intent.mjs ${D}`],
-  ['Interactive truth: a declared state contract is honoured', `node scripts/verify_interactive.mjs ${D}`],
-  ['Slop tells: no HIGH tell (light + dark)', `node scripts/slop_tells.mjs --strict ${files.map(q).join(' ')} && node scripts/slop_tells.mjs --strict --dark ${files.map(q).join(' ')}`],
-  ['Screen economy: media bounded, no hollow boxes, the first screen earns itself', `node scripts/verify_screen_economy.mjs ${files.map(q).join(' ')}`],
+  ['No hardcoded values (hex/px/ms/font)', [python('lint_hardcodes.py', D)]],
+  ['No emoji anywhere in the output', [python('check_no_emoji.py', D)]],
+  ['REAL-render WCAG (light + dark)', themes('measure_render.mjs')],
+  ['State-aware WCAG, default/hover/focus (light + dark)', themes('verify_states.mjs')],
+  ['axe-core a11y: roles, names, landmarks (light + dark)', themes('axe_audit.mjs')],
+  ['Responsive: no overflow from 280 to 951px, then folded', [node('verify_responsive.mjs', D)]],
+  ['Responsive under wider font metrics (1.25x root)', [node('verify_responsive.mjs', D, '--scale=1.25')]],
+  ['Target size (WCAG 2.5.8), mobile + desktop', [node('verify_target_size.mjs', D), node('verify_target_size.mjs', '--dark', D)]],
+  ['Keyboard (WCAG 2.1.1): reach and operate', [node('verify_keyboard.mjs', D)]],
+  ['Reduced motion: stopped, and no content lost', [node('verify_reduced_motion.mjs', D)]],
+  ['Content overflow: nothing clipped or overlapping', [node('verify_overflow.mjs', D)]],
+  ['Token by intent: destructive never wears primary', [node('lint_intent.mjs', D)]],
+  ['Interactive truth: a declared state contract is honoured', [node('verify_interactive.mjs', D)]],
+  ['Slop tells: no HIGH tell (light + dark)', [node('slop_tells.mjs', '--strict', ...files.map(f => relative(ROOT, f))), node('slop_tells.mjs', '--strict', '--dark', ...files.map(f => relative(ROOT, f)))]],
+  ['Screen economy: media bounded, no hollow boxes, the first screen earns itself', [node('verify_screen_economy.mjs', ...files.map(f => relative(ROOT, f)), '--progress')]],
 ];
 
 const label = selfTest ? 'SELF-TEST (kit reference app)' : `EVAL: ${briefId}`;
@@ -94,10 +97,13 @@ console.log('='.repeat(64));
 
 let pass = 0;
 const fails = [];
-for (const [name, cmd] of GATES) {
-  let ok = true, out = '';
-  try { out = execSync(cmd, { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'], env: { ...process.env, DS_REQUIRE_BROWSER: '1' } }).toString(); }
-  catch (e) { ok = false; out = (e.stdout?.toString() || '') + (e.stderr?.toString() || ''); }
+for (const [name, steps] of GATES) {
+  const measured = await runCheck(steps, { cwd: ROOT,
+    onStart: step => console.log(`  RUN ${step.command} ${JSON.stringify(step.args)}`),
+    onOutput: text => { if (text.includes('screen-economy:')) console.error(text.trimEnd()); },
+  });
+  const ok = measured.status === 'pass';
+  const out = measured.steps.map(s => s.error || s.output || s.status).join('\n');
   console.log(`  ${ok ? 'PASS' : 'FAIL'}  ${name}`);
   if (ok) pass++;
   else fails.push([name, out.trim().split('\n').filter(l => l.trim()).slice(-6).join('\n      ')]);
@@ -106,7 +112,8 @@ for (const [name, cmd] of GATES) {
 // Advisory: taste signals. Reported, never scored - taste is not a percentage.
 let taste = '';
 try {
-  taste = execSync(each(f => `node scripts/taste_audit.mjs ${f}`), { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'], env: { ...process.env, DS_REQUIRE_BROWSER: '1' } }).toString();
+  const advisory = await runCheck(each('taste_audit.mjs'), { cwd: ROOT });
+  taste = advisory.steps.map(s => s.error || s.output || s.status).join('\n');
 } catch (e) { taste = (e.stdout?.toString() || ''); }
 const signals = (taste.match(/\b(HIGH|MED)\b/g) || []).length;
 
@@ -123,7 +130,7 @@ console.log(' brief\'s Requirements section by hand. No number in this repo cove
 if (!selfTest) {
   const bf = briefFiles.find(f => idOf(f) === briefId);
   if (bf) {
-    const text = execSync(`cat ${JSON.stringify(join(BRIEFS, bf))}`).toString();
+    const text = readFileSync(join(BRIEFS, bf), 'utf8');
     const req = text.split('## Requirements')[1]?.split('\n## ')[0] || '';
     const items = req.split('\n').filter(l => l.trim().startsWith('- '));
     if (items.length) {

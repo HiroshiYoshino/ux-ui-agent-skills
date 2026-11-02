@@ -6,12 +6,19 @@ description: Design a UI component spec to the house quality bar (anatomy, varia
 > Ported from the Claude Code skill for the Codex plugin.
 > `<plugin-root>` is the plugin root: three directories above the directory of this
 > SKILL.md (it holds `tokens/`, `scripts/` and `AGENTS.md`). Resolve it to an absolute path
-> before running anything, and run every command from the user's project, never from the
-> plugin root: the project is where the work is, the plugin root only holds the kit.
+> before reading kit references. The plugin root is read-only; `<project-root>` means the
+> absolute path of the user's project. Run commands from that project and pass its output
+> paths explicitly. Never write to or validate the plugin root as if it were the project.
+> Browser gates resolve an already-installed `playwright` from `<project-root>` (or the
+> current working directory); set `UX_UI_PROJECT_ROOT` when launching from another cwd.
+> MCP `run_gate` and `review_ui` calls must pass `project_root` as an absolute path.
+> This does not install dependencies. `DS_REQUIRE_BROWSER=1` makes missing Playwright or a
+> missing browser fail rather than skip; module resolution is not proof that a browser ran.
 > Where it says `CLAUDE.md`, the same rules are in `AGENTS.md`. This plugin ships no hooks, so
 > nothing records or blocks on your behalf: run the gates yourself and report what they print.
-> `accuracy_report.mjs` is the kit's own self-test and measures the kit's examples, not the
-> user's project: for the project, run the individual gates against the project's files.
+> `accuracy_report.mjs` is only the kit's self-test. For a user project, run the individual
+> gates against its explicit token, source, page or harness paths; never report the kit test
+> or an unrelated `npm run verify` as project evidence.
 > `/critique`, `/observe` and `/scaffold-project` exist only in Claude Code: where `/critique`
 > is asked for, run `node <plugin-root>/scripts/taste_audit.mjs <file>` and
 > `node <plugin-root>/scripts/slop_tells.mjs <file>`, report what they print, and say that
@@ -41,10 +48,10 @@ Spec with: anatomy diagram, variants table, sizes table, all 8 applicable states
 
 ## Accuracy: verify every state, don't assume (mandatory when code is produced)
 A component is only "correct" when **every variant × state** renders right, not just the resting default. Build a **states harness**: render the component in each applicable state (default, hover, focus, active, disabled, loading `aria-busy`, error `aria-invalid`, selected `aria-pressed`/`aria-selected`) × each variant in one HTML file (see `<plugin-root>/examples/component-states/button.html`). Then RUN the gates and report their real output (AGENTS.md → Verification):
-- `node <plugin-root>/scripts/gate.mjs verify_states.mjs <harness> [--dark]`: contrast of every element in default/hover/focus
-- `node <plugin-root>/scripts/gate.mjs axe_audit.mjs <harness> [--dark]`: ARIA/role/name/label correctness
-- `node <plugin-root>/scripts/gate.mjs measure_render.mjs <harness> [--dark]`: every text element AA
-- overlays/modals also: `node <plugin-root>/scripts/gate.mjs verify_focustrap.mjs <harness> --open=<trigger>`
+- `UX_UI_PROJECT_ROOT="<project-root>" node <plugin-root>/scripts/gate.mjs verify_states.mjs <harness> [--dark]`: contrast of every element in default/hover/focus
+- `UX_UI_PROJECT_ROOT="<project-root>" node <plugin-root>/scripts/gate.mjs axe_audit.mjs <harness> [--dark]`: ARIA/role/name/label correctness
+- `UX_UI_PROJECT_ROOT="<project-root>" node <plugin-root>/scripts/gate.mjs measure_render.mjs <harness> [--dark]`: every text element AA
+- overlays/modals also: `UX_UI_PROJECT_ROOT="<project-root>" node <plugin-root>/scripts/gate.mjs verify_focustrap.mjs <harness> --open=<trigger>`
 Every state must pass in light AND dark before the component is "done". Never claim a state is correct without a gate proving it.
 
 ## Gates prove contrast/a11y. They do NOT prove pixels. RENDER AND LOOK.
@@ -68,7 +75,7 @@ Read the PNG. Then look for, specifically:
 Real `<input>` underneath (keeps native a11y + keyboard); a drawn `.box` overlay with `pointer-events:none`; check + dash as two `<path>` in one `<svg>` toggled by `:checked` / `:indeterminate`; 1.5px `border-strong`, `.25rem` radius, `.62rem` glyph, `stroke-width:2` round caps. Reference: `<plugin-root>/examples/component-states/form-controls.html` and `data-table.html` (select-all uses `indeterminate`). Native `accent-color` renders too heavy. Do not use it when the house look is "thin".
 
 ## Responsive: every component, no sideways scroll (gated)
-Build mobile-first; a fixed-px width that can't shrink is a bug. Run `node <plugin-root>/scripts/gate.mjs verify_responsive.mjs <file|dir>`. It loads each harness at 280/320/414px and fails on any horizontal overflow. The four recurring causes and their fixes:
+Build mobile-first; a fixed-px width that can't shrink is a bug. Run `UX_UI_PROJECT_ROOT="<project-root>" node <plugin-root>/scripts/gate.mjs verify_responsive.mjs <file|dir>`. It loads each harness at 280/320/414px and fails on any horizontal overflow. The four recurring causes and their fixes:
 - **fixed `inline-size:Npx`** → `inline-size:100%;max-inline-size:Npx` (cap, don't pin).
 - **`<ul>`/`<ol>` default 40px inline-start padding** (a `*{margin:0}` reset does NOT clear padding) → `padding:0;margin:0` on every list. This also silently mis-aligns a list's edge vs a sibling block (looks like unequal widths). Same fix.
 - **non-wrapping flex rows** (breadcrumb, stepper, tabs) → `flex-wrap:wrap`, or for tabs `overflow-x:auto` + `.tab{flex:none}`.
