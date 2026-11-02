@@ -491,6 +491,8 @@ caught two real defects the 34-check gate had missed. See `evals/README.md`.
 
 ## Not using Claude Code?
 
+Codex向けの日本語導入手順: [README_codex.md](README_codex.md)。
+
 The kit works with **Codex, Cursor, Copilot, Jules, Aider, VS Code and about
 twenty more**, through the open `AGENTS.md` convention, and with **Gemini CLI
 and Antigravity**, which read `GEMINI.md` and `.agents/skills/`.
