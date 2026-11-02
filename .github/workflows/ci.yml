@@ -164,17 +164,6 @@ jobs:
           REQUIRE_BASH: "1"
         run: node --test tests/integration/hooks-bash.test.mjs
 
-      - name: Full common objective report
-        timeout-minutes: 45
-        run: node scripts/accuracy_report.mjs --json=accuracy-full.json
-
-      - name: Preserve full-report results and partial progress
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: accuracy-full
-          path: accuracy-full.json
-
   codex-plugin:
     # The Codex plugin on a real Codex client. REQUIRE_CODEX=1 turns a missing
     # binary into a failure: a skipped run verified nothing.

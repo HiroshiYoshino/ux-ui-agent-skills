@@ -57,8 +57,25 @@ logic stays in `tests/meta/hooks.test.mjs` on every OS. Linux render CI runs the
 integration with `REQUIRE_BASH=1`. On Windows, set `BASH_BIN` to an installed
 compatible shell to run it. Without a shell it reports NOT verified; with
 `REQUIRE_BASH=1`, absence is a failure. It is not silently counted as a common
-accuracy check. Windows CI runs the common gates and the explicit smoke profile;
-Linux render CI also runs the full report.
+accuracy check.
+
+On every push and PR, Linux CI keeps the quality, render and meta-gate suites,
+plus the Codex plugin checks and Bash integration. Windows CI runs the unit,
+packaging, CRLF, isolated-project and real Codex npm-shim regressions, then the
+common hook and small screen-economy fixtures. These fixtures exercise clean and
+broken pages, progress output and measurement timeouts without scanning every
+example. Runner unit tests cover expected failures, skipped measurements,
+timeouts, partial reports and receipt errors. Neither OS runs the accuracy
+report on every PR, avoiding repeated gates and broad example scans.
+
+For the complete 52-check audit, use **Actions > Full objective report (manual)
+> Run workflow** and choose the branch to audit. The workflow is defined in
+`.github/workflows/full-report.yml`, runs only through `workflow_dispatch`, and
+uploads `accuracy-full.json`, including partial progress if a check is
+interrupted. GitHub requires a manual workflow to exist on the default branch
+before its Run workflow button is available. Until this workflow is merged,
+run the full-report command above locally. The full plan and the optional local
+18-check smoke profile remain available; a smoke pass is not a full audit.
 
 ## What a meta-test asserts
 

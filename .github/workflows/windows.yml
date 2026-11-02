@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: windows-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   tools-and-plugin:
     runs-on: windows-latest
@@ -40,14 +44,7 @@ jobs:
           node --test --test-timeout=300000 tests/cli/codex-plugin-live.test.mjs
       - name: Install render-test browsers
         run: npx playwright install chromium chrome
-      - name: Common hook and render regressions, then the explicit smoke profile
-        run: |
-          node --test --test-timeout=180000 tests/meta/hooks.test.mjs tests/meta/screen-economy.test.mjs
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          node scripts/accuracy_report.mjs --profile=smoke --json=windows-smoke.json
-      - name: Preserve Windows smoke results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-smoke
-          path: windows-smoke.json
+      # Small fixtures cover browser success, known defects, progress and timeout
+      # handling; the Linux render job covers the full set of UI gates.
+      - name: Common hook and focused browser regressions
+        run: node --test --test-timeout=180000 tests/meta/hooks.test.mjs tests/meta/screen-economy.test.mjs
