@@ -32,7 +32,24 @@ a two-page shop, a long read in Thai, a neighbourhood restaurant and a Thai publ
 service page. Each takes its visual language from one design system in the
 library, every brand, person and figure on them is fictional and says so, and each
 page passes the same gates as every other example. The design critic reviewed all
-five and each was revised against its findings.
+five twice, and each was revised against both rounds of findings. The long read
+names no real city, river, flood or app, and each footer says in plain words what
+was tested.
+
+**The contrast gates read oklch.** Chrome reports a computed colour in the syntax
+it was written in, and `measure_render.mjs` and `verify_states.mjs` pulled the
+numbers out of the string, so `oklch(0.2 0.014 30)` read as `rgb(0.2, 0.014, 30)`.
+A page whose theme is written in oklch, which every Tailwind v4 palette is, failed
+contrast everywhere: a live site checked against the kit came back with 364
+failures that were not there. `scripts/_color.mjs` paints each colour into one
+canvas pixel and reads it back, so oklch, oklab, lab, lch, `color()` and
+`color-mix()` all arrive as the sRGB the screen shows. `lint_intent.mjs`,
+`slop_tells.mjs` and `taste_audit.mjs` read colours through it too. A pair of oklch
+fixtures holds it: the old gates failed the good one on 6 lines and reported every
+line of the bad one as 1.00:1; the new ones pass the good page in light and dark
+and report the bad grey at its real 2.01:1. Reading colours right exposed one
+thing the misreading had hidden: `measure_render` measured `.sr-only` labels, which
+are clipped to 1px and have no contrast to meet, so it now skips them.
 
 **Spacing is a rule, and a gate.** `.claude/rules/components.md` has a new section,
 "Spacing: rows, gaps and gutters", and `scripts/verify_spacing.mjs` measures the
@@ -48,6 +65,28 @@ critic, not the gate: both were tried on all 56 example pages and both failed go
 pages. The gate runs on every example page in both themes inside the existing
 overflow check, so the report still has 52 checks. Fixing what it found touched
 seven existing pages and the two shared template stylesheets.
+
+The design critic's second pass found two rows the gate let through, a tile held at
+the top of a row of product cards that draw no box of their own, so the rule now
+also compares a boxed card with a neighbour that carries a picture, and it reads
+rows inside lists. That found two more on the banking and logistics templates.
+
+**Thai text is a rule, and a gate.** `.claude/rules/typography-and-spacing.md` has
+a new section, "Thai text", and `scripts/verify_thai.mjs` checks every page with
+Thai on it:
+- **No compound or count split at a line end.** Chrome breaks Thai with ICU's
+  dictionary, which holds the parts of a compound and not the compound, so
+  ใบ / อนุญาต is a legal break to the browser. The gate knows a list of compounds,
+  the noun prefixes ความ, การ, ผู้ and ชาว, and numbers with their classifiers.
+  A name it does not know still needs a Thai reader.
+- **Lines far enough apart for Thai.** Measured in the page's loaded font: the room
+  a Thai line needs above (ที่, นี้) and below (ุ) may not reach the next line. The
+  first public service page set its heading at 1.3 in Sukhumvit Set; the ink
+  cleared by 12px and the critic still read the tone marks as part of the line
+  above. The gate fails that heading and passes the 1.48 it ships with.
+
+It runs inside the same overflow and spacing check, so the report still has 52
+checks.
 
 ---
 

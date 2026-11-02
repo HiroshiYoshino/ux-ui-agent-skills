@@ -20,7 +20,7 @@ const BROWSER_GATES = readdirSync(join(ROOT, 'scripts'))
 
 test('every browser gate is accounted for', () => {
   // If a new render gate lands, it must be covered by the guard below.
-  assert.equal(BROWSER_GATES.length, 17, `browser gates changed: ${BROWSER_GATES.join(', ')}`);
+  assert.equal(BROWSER_GATES.length, 18, `browser gates changed: ${BROWSER_GATES.join(', ')}`);
 });
 
 test('a missing browser fails loudly under DS_REQUIRE_BROWSER, and only skips without it', () => {
@@ -28,10 +28,8 @@ test('a missing browser fails loudly under DS_REQUIRE_BROWSER, and only skips wi
   // playwright, the state a clean CI runner or a fresh npx install is in.
   const dir = mkdtempSync(join(tmpdir(), 'ds-nobrowser-'));
   try {
-    // _targets.mjs travels with them: the gates import it, and a missing import
-    // would fail for the wrong reason and still look like the right answer.
-    copyFileSync(join(ROOT, 'scripts', '_targets.mjs'), join(dir, '_targets.mjs'));
-    copyFileSync(join(ROOT, 'scripts', '_playwright.mjs'), join(dir, '_playwright.mjs'));
+    // Copy every imported helper so missing dependencies fail for the right reason.
+    for (const helper of ['_targets.mjs', '_playwright.mjs', '_color.mjs']) copyFileSync(join(ROOT, 'scripts', helper), join(dir, helper));
     for (const g of BROWSER_GATES) {
       copyFileSync(join(ROOT, 'scripts', g), join(dir, g));
       const target = join(ROOT, 'examples', 'sample-app', 'preview.html');
@@ -89,7 +87,7 @@ test('every render gate REFUSES a missing path, rather than crashing into one', 
     'verify_target_size.mjs', 'verify_overflow.mjs', 'verify_interactive.mjs',
     'lint_intent.mjs', 'verify_reduced_motion.mjs', 'verify_rtl.mjs', 'slop_tells.mjs',
     'taste_audit.mjs', 'verify_responsive.mjs', 'verify_mobile_first.mjs',
-    'verify_focustrap.mjs', 'verify_spacing.mjs',
+    'verify_focustrap.mjs', 'verify_spacing.mjs', 'verify_thai.mjs',
   ];
   for (const g of RENDER_GATES) {
     const r = node(g, ['tests/fixtures/nope.html'], { env: { DS_REQUIRE_BROWSER: '1' } });

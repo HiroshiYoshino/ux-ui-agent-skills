@@ -7,7 +7,9 @@
   /* The other half of the pair. verify_spacing.mjs must accept every one of these:
      cards in a row share a height; text sits clear of its buttons; buttons are
      8px apart; a label sits 4px from its own field; the segments of one control
-     join inside the box that draws them; a lead tile spans two grid rows. */
+     join inside the box that draws them; a lead tile spans two grid rows; a
+     boxed tile in a list of product cards stretches to the row; a text column
+     beside a card is copy, not a card, and a sticky column has to sit at the top. */
   .row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
   .card { border:1px solid #d0d5d9; border-radius:12px; padding:16px; }
   .address { margin:0 0 16px; }
@@ -19,6 +21,10 @@
   .seg button { border:0; padding:6px 12px; }
   .bento { display:grid; grid-template-columns:2fr 1fr; gap:16px; }
   .bento .lead { grid-row:span 2; }
+  .shop { list-style:none; margin:0; padding:0; display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .picture { block-size:160px; background:#e8e2d8; border-radius:8px; }
+  .split { display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start; }
+  .sticky { position:sticky; top:0; }
 </style></head>
 <body><main>
   <div class="row">
@@ -35,5 +41,17 @@
     <article class="card lead"><h2>Tuning</h2><p>The lead tile spans both rows.</p></article>
     <article class="card"><h2>Charging</h2><p>65 W over one cable.</p></article>
     <article class="card"><h2>Mute</h2><p>Hold the dial for a second.</p></article>
+  </div>
+  <ul class="shop">
+    <li><div class="picture"></div><h2>Cord Stool</h2><p>Oak and paper cord.</p></li>
+    <li class="card"><h2>Repairs</h2><p>Send it back and we mend it.</p></li>
+  </ul>
+  <div class="split">
+    <div><h2>Find us</h2><p>Two streets from the market.</p></div>
+    <article class="card"><h2>Opening hours</h2><p>Tuesday to Saturday.</p><p>11:30 to 22:00.</p><p>Closed on Mondays.</p></article>
+  </div>
+  <div class="split">
+    <div class="sticky"><h2>Book a table</h2><div class="picture"></div></div>
+    <article class="card"><h2>Your booking</h2><p>Pick a day.</p><p>Pick a time.</p><p>Tell us how many.</p></article>
   </div>
 </main></body></html>

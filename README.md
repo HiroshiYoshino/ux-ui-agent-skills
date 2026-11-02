@@ -341,7 +341,9 @@ The 2,144 design-system specs are 27.6MB, and a project uses one or two, so
 and the agent fetches the one it picks with `node scripts/library.mjs get
 <name>`. A fetched file whose sha256 does not match the index is refused and
 nothing is written. `library pull` fetches all of them for offline work. The
-plugin (Option A) and a clone carry every spec already.
+plugin (Option A) and a clone carry every spec already. To browse all 2,144, open
+[design-systems/catalog.md](design-systems/catalog.md): GitHub's folder view lists
+only the first 1,000.
 
 Working on the kit itself, or want it vendored? [Clone and copy](docs/GUIDE.md#install-from-a-clone) instead.
 

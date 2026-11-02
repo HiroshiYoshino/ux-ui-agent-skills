@@ -107,7 +107,10 @@ Three rules a reviewer sees at a glance and no colour or contrast gate measures.
    grid or flex row stretches its items by default, so the bug is almost always an
    `align-items:start` someone added. Remove it, and push a card's last line (a
    note, an action) to its bottom edge so the endings align too. An item that
-   deliberately spans two rows (a bento lead tile) is the exception.
+   deliberately spans two rows (a bento lead tile) is the exception. The rule holds
+   when only one of them draws a box: a repairs tile at the end of a row of product
+   cards ends where the cards end. A plain text column beside a card is copy, not a
+   card, and a sticky column has to sit at the top to stick.
 2. **Nothing touches.** A button, a field, a badge or a card keeps at least
    `--space-2` (8px) from the thing next to it, stacked or side by side, and that
    includes what happens when a row wraps on a phone: a badge that drops under its

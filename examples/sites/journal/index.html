@@ -350,6 +350,7 @@
     color: var(--color-text-secondary);
     font-size: var(--text-lg);
     line-height: var(--leading-reading);
+    text-wrap: pretty;
   }
   .byline {
     display: flex;
@@ -375,13 +376,14 @@
   .byline-name { color: var(--color-text-primary); }
   .byline-name strong { font-weight: var(--weight-semibold); color: var(--color-text-heading); }
   .byline-meta { color: var(--color-text-secondary); }
-  .notes-lede { max-inline-size: var(--measure-notes); color: var(--color-text-secondary); }
+  .byline p { text-wrap: balance; }
   .lead-art { display: grid; gap: var(--space-3); align-content: end; }
   .lead-art svg { display: block; inline-size: 100%; block-size: auto; max-inline-size: var(--lead-art-max); }
   .lead-art figcaption, .chart figcaption {
     color: var(--color-text-secondary);
     font-size: var(--text-sm);
     line-height: var(--leading-ui);
+    text-wrap: pretty;
   }
 
   /* Illustration strokes and fills */
@@ -415,6 +417,8 @@
   .story-body[data-size="lg"] { font-size: var(--reading-lg); }
   .story-body section { display: grid; gap: 1em; padding-block-end: var(--space-10); }
   .story-body section > p, .story-body .author-note { max-inline-size: var(--measure-reading); }
+  /* pretty keeps a last line from being one short word; it never stretches the rag. */
+  .story-body section > p { text-wrap: pretty; }
   .story-body h2 {
     display: flex;
     align-items: baseline;
@@ -424,6 +428,7 @@
     font-weight: var(--weight-semibold);
     line-height: var(--leading-heading);
     color: var(--color-text-heading);
+    text-wrap: balance;
   }
   /* Section rules are drawn elements, sized to the measure, never a border on
      one side of a box. */
@@ -470,6 +475,8 @@
     color: var(--color-text-heading);
     text-wrap: balance;
   }
+  /* When the two clauses do not fit on one line, the second starts its own. */
+  .pullquote .clause { display: inline-block; }
   .pullquote figcaption {
     font-family: var(--font-ui);
     font-size: var(--text-sm);
@@ -496,7 +503,7 @@
     line-height: var(--leading-heading);
     color: var(--color-text-heading);
   }
-  .chart-sub { color: var(--color-text-secondary); font-size: var(--text-sm); }
+  .chart-sub { color: var(--color-text-secondary); font-size: var(--text-sm); text-wrap: pretty; }
   .chart > p, .kicker, .part-date, .chart figcaption, .legend { max-inline-size: var(--measure-standfirst); }
   .table-scroll { max-inline-size: var(--measure-table); }
   .legend {
@@ -511,6 +518,8 @@
   .swatch-canal { background: repeating-linear-gradient(45deg, var(--color-chart-canal) 0 0.2em, var(--color-chart-canal-hatch) 0.2em 0.3em); outline: var(--border-width-thin) solid var(--color-chart-canal); }
   .swatch-floor { background: var(--color-chart-floor); }
   .chart-svg { display: block; inline-size: 100%; overflow: visible; }
+  .chart-plotwrap { display: grid; grid-template-columns: var(--chart-label-col) minmax(0, 1fr); }
+  .chart-years { display: block; inline-size: 100%; overflow: visible; }
   .chart-grid { stroke: var(--color-chart-grid); stroke-width: 1; }
   .chart-tick, .chart-year, .chart-val {
     fill: var(--color-chart-text);
@@ -560,9 +569,13 @@
   .chart-data th:first-child, .chart-data td:first-child { text-align: start; }
   .chart-data thead th { color: var(--color-text-secondary); font-weight: var(--weight-semibold); }
 
+  /* The note's box keeps the body size, so its hairline runs to the same
+     measure as the section rules; only the text inside is set small. */
   .author-note {
     padding-block-start: var(--space-4);
     border-block-start: var(--border-width-thin) solid var(--color-border-subtle);
+  }
+  .author-note p {
     font-family: var(--font-ui);
     font-size: var(--text-sm);
     color: var(--color-text-secondary);
@@ -577,7 +590,7 @@
     font-family: var(--font-ui);
     line-height: var(--leading-reading);
   }
-  .notes ol, .notes-lede { font-size: var(--text-sm); }
+  .notes ol { font-size: var(--text-sm); }
   .story-body .notes h2 {
     display: block;
     padding-block-start: 0;
@@ -588,7 +601,7 @@
     color: var(--color-text-heading);
   }
   .notes ol { list-style-type: thai; max-inline-size: var(--measure-notes); padding-inline-start: var(--space-8); display: grid; gap: var(--space-3); }
-  .notes li { padding-inline-start: var(--space-1); }
+  .notes li { padding: var(--space-1) var(--space-2); }
   .notes li::marker { color: var(--color-text-kicker); font-weight: var(--weight-semibold); }
   .notes li:target { background: var(--color-surface-panel); }
   .backref {
@@ -631,7 +644,7 @@
     line-height: var(--leading-heading);
     color: var(--color-text-heading);
   }
-  .series-head p { color: var(--color-text-secondary); font-size: var(--text-sm); max-inline-size: var(--measure-standfirst); }
+  .series-head p { color: var(--color-text-secondary); font-size: var(--text-sm); max-inline-size: var(--measure-standfirst); text-wrap: balance; }
   .series-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
   .next-part {
     display: grid;
@@ -648,6 +661,7 @@
     font-weight: var(--weight-semibold);
     line-height: var(--leading-display);
     color: var(--color-text-heading);
+    text-wrap: balance;
   }
   .next-part p { font-family: var(--font-reading); font-size: var(--text-lg); line-height: var(--leading-reading); }
   .part-date { color: var(--color-text-secondary); font-size: var(--text-sm); font-family: var(--font-ui); }
@@ -655,6 +669,7 @@
   .parts { list-style: none; padding: 0; display: grid; align-content: start; }
   .parts li {
     display: grid;
+    align-content: start;
     gap: var(--space-1);
     padding-block: var(--space-4);
     border-block-end: var(--border-width-thin) solid var(--color-border-subtle);
@@ -666,6 +681,7 @@
     font-weight: var(--weight-semibold);
     line-height: var(--leading-heading);
     color: var(--color-text-heading);
+    text-wrap: balance;
   }
   .next-part .part-kicker { font-family: var(--font-ui); font-size: var(--text-sm); line-height: var(--leading-ui); }
   .parts .now { color: var(--color-text-kicker); font-size: var(--text-sm); font-weight: var(--weight-semibold); }
@@ -708,21 +724,19 @@
     .wrap { padding-inline: var(--gutter-wide); }
     .size-label { display: inline; }
     .wordmark { font-size: var(--text-5xl); }
-    .mark { inline-size: 1.05em; block-size: 1.05em; flex: none; overflow: visible; }
-  .mark-frame { fill: none; stroke: currentColor; stroke-width: 3; }
-  .mark-land { stroke: var(--color-text-kicker); stroke-width: 5; }
-  .mark-water { fill: none; stroke: var(--color-text-link); stroke-width: 2.5; stroke-linecap: round; }
-  .wordmark-text { letter-spacing: normal; }
-  .tagline { display: flex; gap: var(--space-3); font-size: var(--text-sm); }
+    .tagline { display: flex; gap: var(--space-3); font-size: var(--text-sm); }
     .issue { font-size: var(--text-sm); }
     .headline { font-size: var(--text-6xl); }
     .story-body { margin-inline: auto; max-inline-size: calc(var(--measure-reading) + var(--space-16)); }
     .legend { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); }
-    .footer-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
   }
   @media (min-width: 48rem) {
     .lead { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--space-10); padding-block: var(--space-10) var(--space-12); }
     .series-grid { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--space-10); }
+    /* Equal rows: the list's last hairline lands on the panel's bottom edge. */
+    .parts { grid-auto-rows: 1fr; }
+    /* The footer splits on the same column line as the lead and the series. */
+    .footer-grid { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: var(--space-10); }
   }
   @media (min-width: 64rem) {
     .headline { font-size: var(--text-7xl); }
@@ -769,7 +783,7 @@
 
 <header class="masthead">
   <div class="masthead-util wrap">
-    <p class="issue"><strong>ฉบับที่ 214</strong> <time datetime="2026-10-26">วันจันทร์ที่ 26 ตุลาคม 2569</time></p>
+    <p class="issue"><strong><span class="keep">ฉบับที่ 214</span></strong> <time datetime="2026-10-26"><span class="keep">วันจันทร์ที่ 26 ตุลาคม 2569</span></time></p>
     <button class="btn btn-icon theme-toggle" type="button" aria-pressed="false" aria-label="โหมดมืด" title="โหมดมืด">
       <svg class="ico" aria-hidden="true"><use href="#i-moon"/></svg>
     </button>
@@ -781,9 +795,9 @@
         <line class="mark-land" x1="1.5" y1="25" x2="38.5" y2="25"/>
         <path class="mark-water" d="M6 32 q 3.5 -3 7 0 t 7 0 t 7 0 t 7 0"/>
       </svg>
-      <span class="wordmark-text">แผ่นดินต่ำ</span>
+      <span class="wordmark-text"><span class="keep">แผ่นดินต่ำ</span></span>
     </p>
-    <p class="tagline"><span lang="en" class="label-latin">The Lowland Review</span> <span>นิตยสารรายสัปดาห์ว่าด้วยเมือง น้ำ และคนที่อยู่ระหว่างนั้น</span></p>
+    <p class="tagline"><span lang="en" class="label-latin">The Lowland Review</span> <span>นิตยสาร<span class="keep">รายสัปดาห์</span>ว่าด้วยเมือง น้ำ และคนที่อยู่ระหว่างนั้น</span></p>
   </div>
   <div class="wrap"><div class="masthead-rule" role="presentation"></div></div>
 </header>
@@ -798,15 +812,15 @@
       <nav id="toc-panel" class="toc toc-panel" aria-label="สารบัญ" hidden>
         <ol>
           <li><a href="#s1"><span class="toc-num">๑</span><span class="toc-text">คืนที่น้ำมาก่อนประกาศ</span></a></li>
-          <li><a href="#s2"><span class="toc-num">๒</span><span class="toc-text">ยกบ้านขึ้นทีละหลัง</span></a></li>
-          <li><a href="#s3"><span class="toc-num">๓</span><span class="toc-text">สมุดระดับน้ำของครูประเสริฐ</span></a></li>
-          <li><a href="#s4"><span class="toc-num">๔</span><span class="toc-text">เวรเรือ</span></a></li>
+          <li><a href="#s2"><span class="toc-num">๒</span><span class="toc-text">ยกบ้านขึ้น<span class="keep">ทีละหลัง</span></span></a></li>
+          <li><a href="#s3"><span class="toc-num">๓</span><span class="toc-text">สมุดระดับน้ำของ<span class="keep">ครูประเสริฐ</span></span></a></li>
+          <li><a href="#s4"><span class="toc-num">๔</span><span class="toc-text"><span class="keep">เวรเรือ</span></span></a></li>
           <li><a href="#s5"><span class="toc-num">๕</span><span class="toc-text">สิ่งที่บ้านสูงแก้ไม่ได้</span></a></li>
-          <li><a href="#s6"><span class="toc-num">๖</span><span class="toc-text">ความรู้ที่ไม่มีใครเขียนไว้</span></a></li>
+          <li><a href="#s6"><span class="toc-num">๖</span><span class="toc-text"><span class="keep">ความรู้</span>ที่ไม่มีใครเขียนไว้</span></a></li>
         </ol>
       </nav>
     </div>
-    <p class="readbar-title"><strong>แผ่นดินต่ำ</strong> <span>บ้านที่ยอมให้น้ำผ่าน</span></p>
+    <p class="readbar-title"><strong><span class="keep">แผ่นดินต่ำ</span></strong> <span>บ้านที่ยอมให้น้ำผ่าน</span></p>
     <p class="fiction-badge">เรื่องสมมติ</p>
     <div class="size-group" role="group" aria-labelledby="size-label">
       <span id="size-label" class="size-label">ขนาดตัวอักษร</span>
@@ -822,22 +836,22 @@
   <article class="story">
     <header class="lead wrap">
       <div class="lead-text">
-        <p class="kicker"><a href="#series">เมืองกับน้ำ <span class="keep">ตอนที่ ๑</span> ใน <span class="keep">๔ ตอน</span></a></p>
+        <p class="kicker"><a href="#series">เมืองกับน้ำ <span class="keep">ตอนที่ ๑ ใน ๔ ตอน</span></a></p>
         <h1 class="headline">บ้านที่ยอมให้น้ำผ่าน</h1>
-        <p class="standfirst"><span class="keep">15 ปี</span>หลังน้ำท่วมใหญ่ ชาวชุมชนริมคลอง<span class="keep">พลับพลึงเงิน</span>เลิกก่อกำแพงกั้นน้ำ แล้วหันมา<span class="keep">ยกบ้าน</span> จดระดับน้ำด้วยมือ และจัดเวรเรือกันเอง น้ำในคลองไม่ได้ลดลงเลย แต่จำนวนวันที่น้ำขึ้นถึง<span class="keep">ห้องนอน</span>ของพวกเขาเหลือไม่ถึง <span class="keep">1 ใน 6</span> ของ<span class="keep">เมื่อก่อน</span></p>
+        <p class="standfirst"><span class="keep">15 ปี</span>หลัง<span class="keep">น้ำท่วม</span>ใหญ่ <span class="keep">ชาวชุมชน</span>ริมคลอง<span class="keep">พลับพลึงเงิน</span>เลิกก่อกำแพงกั้นน้ำ แล้วหันมายกบ้าน จดระดับน้ำ<span class="keep">ด้วยมือ</span> และจัด<span class="keep">เวรเรือ</span>กันเอง น้ำในคลองไม่ได้ลดลงเลย แต่จำนวนวันที่น้ำขึ้นถึง<span class="keep">ห้องนอน</span>ของพวกเขาเหลือ<span class="keep">ไม่ถึง</span> <span class="keep">1 ใน 6</span> ของเมื่อก่อน</p>
         <div class="byline">
           <span class="avatar" aria-hidden="true">ป</span>
           <div>
-            <p class="byline-name">เรื่อง <strong><span class="keep">ปริยา จันทร์หอม</span></strong> ภาพประกอบ <span class="keep">ฝ่ายกราฟิก</span><span class="keep">แผ่นดินต่ำ</span></p>
+            <p class="byline-name">เรื่อง <strong><span class="keep">ปริยา</span> <span class="keep">จันทร์หอม</span></strong> <span class="keep">ภาพประกอบ</span> <span class="keep">ฝ่ายกราฟิก</span><span class="keep">แผ่นดินต่ำ</span></p>
             <p class="byline-meta"><time datetime="2026-10-26"><span class="keep">26 ตุลาคม 2569</span></time> <span aria-hidden="true">·</span> อ่านราว <span class="keep">12 นาที</span></p>
-            <p class="byline-meta">ตัวอย่างการออกแบบ เรื่องและตัวเลขสมมติ</p>
+            <p class="byline-meta">ตัวอย่าง<span class="keep">การออกแบบ</span> เรื่องและตัวเลขสมมติ</p>
           </div>
         </div>
       </div>
       <figure class="lead-art">
         <svg viewBox="0 0 400 300" role="img" aria-labelledby="art-title art-desc">
           <title id="art-title">ภาพตัดบ้านไม้หลังยกสูง</title>
-          <desc id="art-desc">บ้านไม้ 2 ชั้นตั้งบนเสาสูง พื้นใหม่อยู่สูงกว่าพื้นเดิม 1.40 เมตร และอยู่เหนือเส้นระดับน้ำปี 2554 ใต้ถุนเปิดโล่ง มีลูกศรแสดงน้ำไหลผ่านใต้บ้านลงคลองทางขวา</desc>
+          <desc id="art-desc">บ้านไม้ 2 ชั้นตั้งบนเสาสูง พื้นใหม่อยู่สูงกว่าพื้นเดิม 1.40 เมตร และอยู่เหนือเส้นระดับน้ำท่วมใหญ่ ใต้ถุนเปิดโล่ง มีลูกศรแสดงน้ำไหลผ่านใต้บ้านลงคลองทางขวา</desc>
           <rect class="il-flood" x="0" y="150" width="400" height="150"/>
           <polygon class="il-ground" points="0,232 300,232 318,300 0,300"/>
           <polygon class="il-water" points="306,252 400,252 400,300 318,300"/>
@@ -869,13 +883,13 @@
           <line class="il-line" x1="82" y1="224" x2="94" y2="224"/>
           <path class="il-solid" d="M322 244 h62 l-8 8 h-46 z"/>
           <text class="il-label" x="8" y="122">พื้นใหม่</text>
-          <text class="il-label il-label-flood" x="8" y="144">น้ำปี 2554</text>
+          <text class="il-label il-label-flood" x="8" y="144">น้ำท่วมใหญ่</text>
           <text class="il-label" x="8" y="184">+1.40 ม.</text>
           <text class="il-label" x="8" y="218">พื้นเดิม</text>
           <text class="il-label" x="20" y="266">ซอย</text>
           <text class="il-label" x="346" y="284">คลอง</text>
         </svg>
-        <figcaption>ภาพตัดบ้านของ<span class="keep">ลุงเชิด ทองดี</span> หลังยกขึ้น <span class="keep">1.40 เมตร</span>ใน<span class="keep">ปี 2557</span> พื้นใหม่อยู่เหนือระดับน้ำ<span class="keep">ปี 2554</span> และ<span class="keep">ใต้ถุน</span><span class="keep">เปิดโล่ง</span>ให้น้ำไหลผ่านลงคลอง <span class="keep">(ภาพประกอบสมมติ)</span></figcaption>
+        <figcaption>ภาพตัดบ้านของ<span class="keep">ลุงเชิด</span> <span class="keep">ทองดี</span> หลังยกขึ้น <span class="keep">1.40 เมตร</span>ใน<span class="keep">ปี 2557</span> พื้นใหม่อยู่เหนือระดับ<span class="keep">น้ำท่วม</span>ใหญ่ และใต้ถุน<span class="keep">เปิดโล่ง</span>ให้น้ำไหลผ่านลงคลอง</figcaption>
       </figure>
     </header>
 
@@ -886,124 +900,129 @@
           <li><a href="#s1"><span class="toc-num">๑</span><span class="toc-text">คืนที่น้ำมาก่อนประกาศ</span></a></li>
           <li><a href="#s2"><span class="toc-num">๒</span><span class="toc-text">ยกบ้านขึ้น<span class="keep">ทีละหลัง</span></span></a></li>
           <li><a href="#s3"><span class="toc-num">๓</span><span class="toc-text">สมุดระดับน้ำของ<span class="keep">ครูประเสริฐ</span></span></a></li>
-          <li><a href="#s4"><span class="toc-num">๔</span><span class="toc-text">เวรเรือ</span></a></li>
+          <li><a href="#s4"><span class="toc-num">๔</span><span class="toc-text"><span class="keep">เวรเรือ</span></span></a></li>
           <li><a href="#s5"><span class="toc-num">๕</span><span class="toc-text">สิ่งที่บ้านสูงแก้ไม่ได้</span></a></li>
-          <li><a href="#s6"><span class="toc-num">๖</span><span class="toc-text">ความรู้ที่ไม่มีใครเขียนไว้</span></a></li>
+          <li><a href="#s6"><span class="toc-num">๖</span><span class="toc-text"><span class="keep">ความรู้</span>ที่ไม่มีใครเขียนไว้</span></a></li>
         </ol>
       </nav>
 
       <div class="story-body" id="article-body" data-size="md" tabindex="-1">
         <section id="s1" aria-labelledby="s1-h">
           <h2 id="s1-h"><span class="sec-num">๑</span><span>คืนที่น้ำมาก่อนประกาศ</span></h2>
-          <p class="opening"><span class="keep">ป้าสายหยุด ศรีเมือง</span> วัย <span class="keep">72 ปี</span> จำได้ว่าคืนนั้นเสียงแรกที่ได้ยินไม่ใช่เสียงฝน แต่เป็นเสียง<span class="keep">กะละมัง</span><span class="keep">สังกะสี</span>ลอยไปกระทบเสาบ้าน ตอนนั้นราว<span class="keep">ตี 2</span> ป้าเปิด<span class="keep">ไฟฉาย</span>ส่องลงไปที่บันได น้ำคลองที่เมื่อ<span class="keep">หัวค่ำ</span>ยังอยู่ต่ำกว่า<span class="keep">ตลิ่ง</span>ไม่ถึงคืบ ขึ้นมาถึง<span class="keep">ขั้นที่ 3</span> แล้ว ข้อความเตือนน้ำท่วมมาถึงโทรศัพท์ของ<span class="keep">ลูกชาย</span>ตอน <span class="keep">6 โมงเช้า</span> หลังจากที่<span class="keep">ตู้เย็น</span> <span class="keep">เตาแก๊ส</span> และ<span class="keep">โฉนดที่ดิน</span>ทั้งแฟ้มจมอยู่ใต้น้ำไปแล้ว <span class="keep">4 ชั่วโมง</span><sup class="fnref"><a id="fnref1" href="#fn1" aria-label="เชิงอรรถ ๑">๑</a></sup></p>
-          <p>“ตอนนั้นเราคิดว่าต้องสู้” ป้าเล่าขณะนั่งบนแคร่ไม้ใต้ชายคาบ้านที่ยกสูงขึ้นแล้ว “ทุกบ้านซื้อ<span class="keep">กระสอบทราย</span> <span class="keep">ก่ออิฐ</span>กั้นหน้าประตู บางบ้านเทปูนยก<span class="keep">ธรณีประตู</span>ขึ้นไปอีก ปีต่อมาน้ำมาอีก มันก็ข้ามกำแพงเข้ามาเหมือนเดิม แต่คราวนี้มันออกไปไม่ได้ เพราะเราสร้างอ่างให้มันเอง”</p>
-          <p>ชุมชนริมคลอง<span class="keep">พลับพลึงเงิน</span>มีบ้านเรือนราว <span class="keep">140 หลังคาเรือน</span> เรียงยาวเกือบ <span class="keep">2 กิโลเมตร</span>ตามคลองสายเล็กที่ไหลลงแม่น้ำ<span class="keep">เจ้าพระยา</span> คนที่นี่อยู่กับน้ำมาหลาย<span class="keep">ชั่วอายุคน</span> บ้าน<span class="keep">รุ่นปู่</span>ย่ายก<span class="keep">ใต้ถุน</span>สูงเพราะรู้ว่าน้ำหลากทุกปลายฝน แต่ในช่วง <span class="keep">30 ปี</span>ก่อนน้ำท่วมใหญ่ <span class="keep">ใต้ถุน</span>เหล่านั้นถูก<span class="keep">ก่ออิฐ</span>ปิด<span class="keep">ทีละหลัง</span>เพื่อทำ<span class="keep">ห้องเช่า</span> <span class="keep">ร้านขายของชำ</span> และ<span class="keep">ที่จอด</span><span class="keep">มอเตอร์ไซค์</span> บ้านทั้งซอยจึงค่อยๆ ลงมาอยู่บนพื้นดินโดยไม่มีใครตั้งใจ</p>
-          <p>น้ำท่วมใหญ่<span class="keep">ปี 2554</span> ทำให้ทุกคนเห็นพร้อมกันว่าการเปลี่ยนแปลงเล็กๆ ที่สะสมมาหลายสิบปีนั้นมีราคาเท่าไร บ้านที่ปิด<span class="keep">ใต้ถุน</span>เสียหายหนักกว่าบ้านที่ยัง<span class="keep">เปิดโล่ง</span>เกือบ<span class="keep">ทุกหลัง</span> และกำแพงกั้นน้ำที่สร้างกันในปีต่อๆ มาก็ทำให้น้ำขังนานขึ้นแทนที่จะสั้นลง</p>
+          <p class="opening"><span class="keep">ป้าสายหยุด</span> <span class="keep">ศรีเมือง</span> วัย <span class="keep">72 ปี</span> จำได้ว่าคืนนั้นเสียงแรกที่ได้ยินไม่ใช่เสียงฝน แต่เป็นเสียงกะละมังสังกะสีลอยไปกระทบเสาบ้าน ตอนนั้นราว<span class="keep">ตี 2</span> ป้าเปิดไฟฉายส่องลงไปที่บันได น้ำคลองที่เมื่อหัวค่ำยังอยู่ต่ำกว่าตลิ่ง<span class="keep">ไม่ถึง</span>คืบ ขึ้นมาถึง<span class="keep">ขั้นที่ 3</span> แล้ว ข้อความเตือน<span class="keep">น้ำท่วม</span>มาถึงโทรศัพท์ของลูกชายตอน <span class="keep">6 โมงเช้า</span> หลังจากที่ตู้เย็น เตาแก๊ส และโฉนดที่ดินทั้งแฟ้มจมอยู่ใต้น้ำไปแล้ว <span class="keep">4 ชั่วโมง</span><sup class="fnref"><a id="fnref1" href="#fn1" aria-label="เชิงอรรถ ๑">๑</a></sup></p>
+          <p>“ตอนนั้นเราคิดว่าต้องสู้” ป้าเล่าขณะนั่งบนแคร่ไม้ใต้ชายคาบ้านที่ยกสูงขึ้นแล้ว “<span class="keep">ทุกบ้าน</span>ซื้อ<span class="keep">กระสอบทราย</span> <span class="keep">ก่ออิฐ</span>กั้นหน้าประตู บางบ้านเทปูนยก<span class="keep">ธรณีประตู</span>ขึ้นไปอีก ปี<span class="keep">ต่อมา</span>น้ำมาอีก มันก็ข้ามกำแพงเข้ามาเหมือนเดิม แต่คราวนี้มันออกไปไม่ได้ เพราะเราสร้างอ่างให้มันเอง”</p>
+          <p>ชุมชนริมคลอง<span class="keep">พลับพลึงเงิน</span>มี<span class="keep">บ้านเรือน</span>ราว <span class="keep">140 หลังคาเรือน</span> เรียงยาวเกือบ <span class="keep">2 กิโลเมตร</span>ตามคลองสายเล็กที่ไหลลงแม่น้ำสายใหญ่ของเมือง คนที่นี่อยู่กับน้ำมาหลาย<span class="keep">ชั่วอายุคน</span> บ้าน<span class="keep">รุ่นปู่ย่า</span>ยกใต้ถุนสูงเพราะรู้ว่า<span class="keep">น้ำหลาก</span>ทุกปลายฝน แต่ในช่วง <span class="keep">30 ปี</span>ก่อน<span class="keep">น้ำท่วม</span>ใหญ่ ใต้ถุนเหล่านั้นถูก<span class="keep">ก่ออิฐ</span>ปิด<span class="keep">ทีละหลัง</span>เพื่อทำ<span class="keep">ห้องเช่า</span> ร้านขายของชำ และที่จอดมอเตอร์ไซค์ บ้านทั้งซอยจึงค่อยๆ ลงมาอยู่บนพื้นดินโดยไม่มีใครตั้งใจ</p>
+          <p><span class="keep">น้ำท่วม</span>ใหญ่เมื่อ <span class="keep">15 ปี</span>ก่อนทำให้ทุกคนเห็นพร้อมกันว่าการเปลี่ยนแปลงเล็กๆ ที่สะสมมา<span class="keep">หลายสิบปี</span>นั้นมีราคาเท่าไร บ้านที่ปิดใต้ถุนเสียหายหนักกว่าบ้านที่ยัง<span class="keep">เปิดโล่ง</span>เกือบ<span class="keep">ทุกหลัง</span> และกำแพงกั้นน้ำที่สร้างกันในปีต่อๆ มาก็ทำให้น้ำขังนานขึ้นแทนที่จะสั้นลง</p>
         </section>
 
         <section id="s2" aria-labelledby="s2-h">
           <h2 id="s2-h"><span class="sec-num">๒</span><span>ยกบ้านขึ้น<span class="keep">ทีละหลัง</span></span></h2>
-          <p>การเปลี่ยนแปลงเริ่มจาก<span class="keep">ช่างไม้</span><span class="keep">คนหนึ่ง</span> <span class="keep">ลุงเชิด ทองดี</span> ยกบ้านของ<span class="keep">ตัวเอง</span>ขึ้นใน<span class="keep">ปี 2557</span> ด้วย<span class="keep">แม่แรง</span><span class="keep">ไฮดรอลิก</span>ที่เช่ามา <span class="keep">8 ตัว</span> กับ<span class="keep">เพื่อนบ้าน</span>อีก <span class="keep">5 คน</span>ที่มาช่วยแลก<span class="keep">ข้าวกลางวัน</span> บ้านไม้ <span class="keep">2 ชั้น</span><span class="keep">ทั้งหลัง</span>ถูกดันขึ้นวันละ<span class="keep">ไม่เกิน</span> <span class="keep">10 เซนติเมตร</span> เพื่อไม่ให้<span class="keep">ข้อต่อไม้</span>ร้าว ใช้เวลา <span class="keep">19 วัน</span>กว่าจะสูงขึ้น <span class="keep">1.40 เมตร</span> แล้วจึงหล่อ<span class="keep">ตอม่อ</span>ใหม่รองรับ</p>
-          <p>“คนมายืนดู<span class="keep">ทุกวัน</span> บางคนก็หัวเราะ” <span class="keep">ลุงเชิด</span>ว่า “ไม่มีใครเชื่อว่าบ้าน<span class="keep">ทั้งหลัง</span>จะขึ้นไปได้โดยไม่ต้องรื้อ จนน้ำมาปีถัดไป บ้านผมเป็น<span class="keep">หลังเดียว</span>ในซอยที่ยังหุงข้าวได้”</p>
-          <p>ถึงวันนี้ <span class="keep">ลุงเชิด</span>กับทีมช่างที่ฝึกกันขึ้นในชุมชนยกบ้านไปแล้ว <span class="keep">41 หลัง</span> <span class="keep">ค่าใช้จ่าย</span>เฉลี่ยตกหลังละราว <span class="keep">180,000 บาท</span> <span class="keep">ชาวบ้าน</span>จ่ายผ่านกองทุน<span class="keep">ออมทรัพย์</span>ที่ตั้งกันเองใน<span class="keep">ปี 2558</span> สมาชิกฝากเดือนละ <span class="keep">300 บาท</span> และกู้ได้โดยไม่ต้องมี<span class="keep">หลักทรัพย์</span>ค้ำ ใช้<span class="keep">เพื่อนบ้าน</span> <span class="keep">2 คน</span>รับรองแทน<sup class="fnref"><a id="fnref2" href="#fn2" aria-label="เชิงอรรถ ๒">๒</a></sup> ตลอด <span class="keep">11 ปี</span>ที่ผ่านมามี<span class="keep">หนี้เสีย</span>เพียง <span class="keep">2 ราย</span></p>
-          <p>ที่สำคัญกว่าตัวบ้านคือสิ่งที่<span class="keep">ชาวบ้าน</span>ตกลงร่วมกันว่าจะไม่ทำ <span class="keep">ใต้ถุน</span>ที่ได้มาใหม่ต้อง<span class="keep">เปิดโล่ง</span> ห้ามก่อ<span class="keep">ผนังทึบ</span> ห้ามเทพื้นสูงกว่าถนน และของที่วางไว้<span class="keep">ใต้ถุน</span>ต้องยกขึ้นได้ภายใน <span class="keep">2 ชั่วโมง</span> <span class="keep">กติกา</span>ข้อนี้ไม่มี<span class="keep">กฎหมาย</span>รองรับ แต่<span class="keep">บังคับใช้</span>ได้จริง เพราะทุกบ้านรู้ว่า<span class="keep">ผนังทึบ</span><span class="keep">หลังเดียว</span>จะดันน้ำไปท่วม<span class="keep">บ้านข้างๆ</span></p>
-          <p><span class="keep">ป้าสายหยุด</span>สรุปเรื่องทั้งหมดนี้ไว้ใน<span class="keep">ประโยคเดียว</span> “เราไม่ได้ชนะน้ำ เราแค่เลิกทำตัวเป็นกำแพง”</p>
+          <p><span class="keep">การเปลี่ยนแปลง</span>เริ่มจากช่างไม้<span class="keep">คนหนึ่ง</span> <span class="keep">ลุงเชิด</span> <span class="keep">ทองดี</span> ยกบ้านของ<span class="keep">ตัวเอง</span>ขึ้นใน<span class="keep">ปี 2557</span> ด้วย<span class="keep">แม่แรง</span><span class="keep">ไฮดรอลิก</span>ที่เช่ามา <span class="keep">8 ตัว</span> กับ<span class="keep">เพื่อนบ้าน</span>อีก <span class="keep">5 คน</span>ที่มาช่วยแลก<span class="keep">ข้าวกลางวัน</span> บ้านไม้ <span class="keep">2 ชั้น</span>ทั้งหลังถูกดันขึ้น<span class="keep">วันละ</span><span class="keep">ไม่เกิน</span> <span class="keep">10 เซนติเมตร</span> เพื่อไม่ให้<span class="keep">ข้อต่อ</span>ไม้ร้าว ใช้เวลา <span class="keep">19 วัน</span>กว่าจะสูงขึ้น <span class="keep">1.40 เมตร</span> แล้วจึงหล่อตอม่อใหม่รองรับ</p>
+          <p>“คนมายืนดูทุกวัน บางคนก็หัวเราะ” <span class="keep">ลุงเชิด</span>ว่า “ไม่มีใครเชื่อว่าบ้านทั้งหลังจะขึ้นไปได้โดยไม่ต้องรื้อ จนน้ำมาปีถัดไป บ้านผมเป็นหลังเดียวในซอยที่ยังหุงข้าวได้”</p>
+          <p>ถึงวันนี้ <span class="keep">ลุงเชิด</span>กับทีมช่างที่ฝึกกันขึ้นในชุมชนยกบ้านไปแล้ว <span class="keep">41 หลัง</span> <span class="keep">ค่าใช้จ่าย</span>เฉลี่ย<span class="keep">หลังละ</span>ราว <span class="keep">180,000 บาท</span> <span class="keep">ชาวบ้าน</span>จ่ายผ่านกองทุน<span class="keep">ออมทรัพย์</span>ที่ตั้งกันเองใน<span class="keep">ปี 2558</span> สมาชิกฝาก<span class="keep">เดือนละ</span> <span class="keep">300 บาท</span> และกู้ได้โดยไม่ต้องมี<span class="keep">หลักทรัพย์</span>ค้ำ ใช้<span class="keep">เพื่อนบ้าน</span> <span class="keep">2 คน</span>รับรองแทน<sup class="fnref"><a id="fnref2" href="#fn2" aria-label="เชิงอรรถ ๒">๒</a></sup> ตลอด <span class="keep">11 ปี</span>ที่ผ่านมามี<span class="keep">หนี้เสีย</span>เพียง <span class="keep">2 ราย</span></p>
+          <p>ที่สำคัญกว่าตัวบ้านคือสิ่งที่<span class="keep">ชาวบ้าน</span>ตกลงร่วมกันว่าจะไม่ทำ ใต้ถุนที่ได้มาใหม่ต้อง<span class="keep">เปิดโล่ง</span> ห้ามก่อผนังทึบ ห้ามเทพื้นสูงกว่าถนน และของที่วางไว้ใต้ถุนต้องยกขึ้นได้ภายใน <span class="keep">2 ชั่วโมง</span> กติกาข้อนี้ไม่มีกฎหมายรองรับ แต่บังคับใช้ได้จริง เพราะ<span class="keep">ทุกบ้าน</span>รู้ว่าผนังทึบหลังเดียวจะดันน้ำไปท่วมบ้านข้างๆ</p>
           <figure class="pullquote">
             <span class="pullquote-mark" aria-hidden="true">“</span>
-            <blockquote><p>เราไม่ได้ชนะน้ำ เราแค่เลิกทำตัวเป็นกำแพง</p></blockquote>
-            <figcaption><strong><span class="keep">ป้าสายหยุด ศรีเมือง</span></strong> อายุ <span class="keep">72 ปี</span> ชาวชุมชน<span class="keep">พลับพลึงเงิน</span></figcaption>
+            <blockquote><p><span class="clause">เราไม่ได้ชนะน้ำ</span> <span class="clause">เราแค่เลิก<span class="keep">ทำตัวเป็นกำแพง</span></span></p></blockquote>
+            <figcaption><strong><span class="keep">ป้าสายหยุด</span> <span class="keep">ศรีเมือง</span></strong> อายุ <span class="keep">72 ปี</span> <span class="keep">ชาวชุมชน</span><span class="keep">พลับพลึงเงิน</span></figcaption>
           </figure>
         </section>
 
         <section id="s3" aria-labelledby="s3-h">
           <h2 id="s3-h"><span class="sec-num">๓</span><span>สมุดระดับน้ำของ<span class="keep">ครูประเสริฐ</span></span></h2>
-          <p>ทุกเช้าเวลา <span class="keep">6 โมงครึ่ง</span> <span class="keep">ครูประเสริฐ พรหมมา</span> ครู<span class="keep">วิทยาศาสตร์</span><span class="keep">เกษียณ</span>วัย <span class="keep">69 ปี</span> เดินไปที่ท่าน้ำหน้า<span class="keep">ศาลาวัด</span> อ่านตัวเลขบน<span class="keep">ไม้วัดระดับ</span>ที่ทาสี<span class="keep">ขาวสลับแดง</span>ทุก <span class="keep">10 เซนติเมตร</span> แล้วจดลงสมุด<span class="keep">ปกแข็ง</span><span class="keep">สีน้ำเงิน</span> เขาทำแบบนี้มาตั้งแต่<span class="keep">ปี 2555</span> สมุด<span class="keep">เล่มที่ 15</span> วางอยู่บนโต๊ะในบ้านของเขาขณะที่เราคุยกัน</p>
-          <p><span class="keep">ข้อมูล</span>ในสมุดเหล่านี้คือ<span class="keep">หลักฐาน</span>ชิ้นเดียวที่ชุมชนมี เพราะไม่มีจุดวัดระดับน้ำอยู่ที่คลองสายนี้โดยตรง <span class="keep">ครูประเสริฐ</span>นับตัวเลขชุดเดิม<span class="keep">ทุกปี</span> คือจำนวนวันที่น้ำในคลองสูงเกิน<span class="keep">ตลิ่ง</span> กับจำนวนวันที่น้ำขึ้นถึงพื้น<span class="keep">ห้องนอน</span>ของบ้าน<span class="keep">หลังกลางๆ</span> ในชุมชน ซึ่งเขาหาจากการสำรวจบ้าน<span class="keep">ทุกหลัง</span><span class="keep">ทุกปี</span>ร่วมกับ<span class="keep">นักเรียนอาสา</span><sup class="fnref"><a id="fnref3" href="#fn3" aria-label="เชิงอรรถ ๓">๓</a></sup></p>
+          <p>ทุกเช้าเวลา <span class="keep">6 โมงครึ่ง</span> <span class="keep">ครูประเสริฐ</span> <span class="keep">พรหมมา</span> <span class="keep">ครูวิทยาศาสตร์</span>เกษียณวัย <span class="keep">69 ปี</span> เดินไปที่ท่าน้ำหน้าศาลาวัด อ่านตัวเลขบนไม้วัดระดับที่ทาสีขาว<span class="keep">สลับแดง</span>ทุก <span class="keep">10 เซนติเมตร</span> แล้วจดลงสมุด<span class="keep">ปกแข็ง</span>สีน้ำเงิน เขาทำแบบนี้มาตั้งแต่<span class="keep">ปี 2555</span> สมุด<span class="keep">เล่มที่ 15</span> วางอยู่บนโต๊ะในบ้านของเขาขณะที่เราคุยกัน</p>
+          <p>ข้อมูลในสมุดเหล่านี้คือ<span class="keep">หลักฐาน</span><span class="keep">ชิ้นเดียว</span>ที่ชุมชนมี เพราะไม่มีจุดวัดระดับน้ำอยู่ที่คลองสายนี้โดยตรง <span class="keep">ครูประเสริฐ</span>นับตัวเลขชุดเดิม<span class="keep">ทุกปี</span> คือจำนวนวันที่น้ำในคลองสูงเกินตลิ่ง กับจำนวนวันที่น้ำขึ้นถึงพื้น<span class="keep">ห้องนอน</span>ของบ้าน<span class="keep">หลังกลางๆ</span> ในชุมชน ซึ่งเขาหาจาก<span class="keep">การสำรวจ</span>บ้าน<span class="keep">ทุกหลัง</span><span class="keep">ทุกปี</span>ร่วมกับนักเรียนอาสา<sup class="fnref"><a id="fnref3" href="#fn3" aria-label="เชิงอรรถ ๓">๓</a></sup></p>
 
           <figure class="chart" aria-labelledby="chart-title">
             <p class="chart-label"><span class="keep">แผนภาพ ๑</span></p>
             <h3 class="chart-title" id="chart-title">น้ำไม่ได้ลด แต่บ้านพ้นทางน้ำ</h3>
-            <p class="chart-sub">จำนวนวันต่อปี ปีเว้นปี ตั้งแต่ <span class="keep">2555 ถึง 2567</span> <span class="keep">(ข้อมูลสมมติ)</span></p>
+            <p class="chart-sub">จำนวนวันต่อปี ปีเว้นปี ตั้งแต่ 2555 ถึง 2567 <span class="keep">(ข้อมูลสมมติ)</span></p>
             <ul class="legend">
-              <li><span class="swatch swatch-canal" aria-hidden="true"></span><span>แท่งลายเส้น วันที่น้ำในคลองสูงเกิน<span class="keep">ตลิ่ง</span></span></li>
+              <li><span class="swatch swatch-canal" aria-hidden="true"></span><span>แท่งลายเส้น วันที่น้ำในคลองสูงเกินตลิ่ง</span></li>
               <li><span class="swatch swatch-floor" aria-hidden="true"></span><span>แท่งทึบ วันที่น้ำขึ้นถึงพื้น<span class="keep">ห้องนอน</span>ของบ้าน<span class="keep">หลังกลางๆ</span></span></li>
             </ul>
-            <svg class="chart-svg" width="100%" height="384" role="img" aria-labelledby="chart-title chart-desc">
-              <desc id="chart-desc">ข้อมูลสมมติเพื่อสาธิตการออกแบบ แผนภูมิแท่งแนวนอน 7 ปี วันที่น้ำล้นตลิ่งอยู่ระหว่าง 29 ถึง 44 วันต่อปีโดยไม่ลดลง สูงสุด 44 วันในปี 2565 ส่วนวันที่น้ำขึ้นถึงพื้นห้องนอนลดลงทุกช่วงจาก 31 วันในปี 2555 เหลือ 5 วันในปี 2567</desc>
-              <defs>
-                <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-                  <rect class="hatch-bg" width="6" height="6"/>
-                  <line class="hatch-line" x1="0" y1="0" x2="0" y2="6"/>
-                </pattern>
-              </defs>
-              <line class="chart-grid" x1="18.00%" x2="18.00%" y1="26" y2="376"/>
-              <text class="chart-tick" x="18.00%" y="16" text-anchor="middle">0</text>
-              <line class="chart-grid" x1="32.80%" x2="32.80%" y1="26" y2="376"/>
-              <text class="chart-tick" x="32.80%" y="16" text-anchor="middle">10</text>
-              <line class="chart-grid" x1="47.60%" x2="47.60%" y1="26" y2="376"/>
-              <text class="chart-tick" x="47.60%" y="16" text-anchor="middle">20</text>
-              <line class="chart-grid" x1="62.40%" x2="62.40%" y1="26" y2="376"/>
-              <text class="chart-tick" x="62.40%" y="16" text-anchor="middle">30</text>
-              <line class="chart-grid" x1="77.20%" x2="77.20%" y1="26" y2="376"/>
-              <text class="chart-tick" x="77.20%" y="16" text-anchor="middle">40</text>
-              <line class="chart-grid" x1="92.00%" x2="92.00%" y1="26" y2="376"/>
-              <text class="chart-tick" x="92.00%" y="16" text-anchor="middle">50</text>
-              <g class="chart-row">
-              <text class="chart-year" x="0" y="55">2555</text>
-              <rect class="bar-canal" x="18%" y="34" width="50.32%" height="14"/>
-              <text class="chart-val" x="68.32%" dx="6" y="46">34</text>
-              <rect class="bar-floor" x="18%" y="52" width="45.88%" height="14"/>
-              <text class="chart-val chart-val-floor" x="63.88%" dx="6" y="64">31</text>
-              </g>
-              <g class="chart-row">
-              <text class="chart-year" x="0" y="105">2557</text>
-              <rect class="bar-canal" x="18%" y="84" width="42.92%" height="14"/>
-              <text class="chart-val" x="60.92%" dx="6" y="96">29</text>
-              <rect class="bar-floor" x="18%" y="102" width="35.52%" height="14"/>
-              <text class="chart-val chart-val-floor" x="53.52%" dx="6" y="114">24</text>
-              </g>
-              <g class="chart-row">
-              <text class="chart-year" x="0" y="155">2559</text>
-              <rect class="bar-canal" x="18%" y="134" width="54.76%" height="14"/>
-              <text class="chart-val" x="72.76%" dx="6" y="146">37</text>
-              <rect class="bar-floor" x="18%" y="152" width="32.56%" height="14"/>
-              <text class="chart-val chart-val-floor" x="50.56%" dx="6" y="164">22</text>
-              </g>
-              <g class="chart-row">
-              <text class="chart-year" x="0" y="205">2561</text>
-              <rect class="bar-canal" x="18%" y="184" width="60.68%" height="14"/>
-              <text class="chart-val" x="78.68%" dx="6" y="196">41</text>
-              <rect class="bar-floor" x="18%" y="202" width="22.20%" height="14"/>
-              <text class="chart-val chart-val-floor" x="40.20%" dx="6" y="214">15</text>
-              </g>
-              <g class="chart-row">
-              <text class="chart-year" x="0" y="255">2563</text>
-              <rect class="bar-canal" x="18%" y="234" width="53.28%" height="14"/>
-              <text class="chart-val" x="71.28%" dx="6" y="246">36</text>
-              <rect class="bar-floor" x="18%" y="252" width="13.32%" height="14"/>
-              <text class="chart-val chart-val-floor" x="31.32%" dx="6" y="264">9</text>
-              </g>
-              <g class="chart-row">
-              <text class="chart-year" x="0" y="305">2565</text>
-              <rect class="bar-canal" x="18%" y="284" width="65.12%" height="14"/>
-              <text class="chart-val" x="83.12%" dx="6" y="296">44</text>
-              <rect class="bar-floor" x="18%" y="302" width="10.36%" height="14"/>
-              <text class="chart-val chart-val-floor" x="28.36%" dx="6" y="314">7</text>
-              </g>
-              <g class="chart-row">
-              <text class="chart-year" x="0" y="355">2567</text>
-              <rect class="bar-canal" x="18%" y="334" width="57.72%" height="14"/>
-              <text class="chart-val" x="75.72%" dx="6" y="346">39</text>
-              <rect class="bar-floor" x="18%" y="352" width="7.40%" height="14"/>
-              <text class="chart-val chart-val-floor" x="25.40%" dx="6" y="364">5</text>
-              </g>
-            </svg>
+            <!-- The year labels sit in their own fixed column (--chart-label-col), so
+                 they keep the same distance from their bars at every width. -->
+            <div class="chart-plotwrap" role="img" aria-labelledby="chart-title chart-desc">
+              <svg class="chart-years" height="384" aria-hidden="true" focusable="false">
+                <text class="chart-year" x="0" y="55">2555</text>
+                <text class="chart-year" x="0" y="105">2557</text>
+                <text class="chart-year" x="0" y="155">2559</text>
+                <text class="chart-year" x="0" y="205">2561</text>
+                <text class="chart-year" x="0" y="255">2563</text>
+                <text class="chart-year" x="0" y="305">2565</text>
+                <text class="chart-year" x="0" y="355">2567</text>
+              </svg>
+              <svg class="chart-svg" width="100%" height="384" aria-hidden="true" focusable="false">
+                <desc id="chart-desc">ข้อมูลสมมติเพื่อสาธิตการออกแบบ แผนภูมิแท่งแนวนอน 7 ปี วันที่น้ำล้นตลิ่งอยู่ระหว่าง 29 ถึง 44 วันต่อปีโดยไม่ลดลง สูงสุด 44 วันในปี 2565 ส่วนวันที่น้ำขึ้นถึงพื้นห้องนอนลดลงทุกช่วงจาก 31 วันในปี 2555 เหลือ 5 วันในปี 2567</desc>
+                <defs>
+                  <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                    <rect class="hatch-bg" width="6" height="6"/>
+                    <line class="hatch-line" x1="0" y1="0" x2="0" y2="6"/>
+                  </pattern>
+                </defs>
+                <line class="chart-grid" x1="0.00%" x2="0.00%" y1="26" y2="376"/>
+                <text class="chart-tick" x="0.00%" y="16" text-anchor="middle">0</text>
+                <line class="chart-grid" x1="18.00%" x2="18.00%" y1="26" y2="376"/>
+                <text class="chart-tick" x="18.00%" y="16" text-anchor="middle">10</text>
+                <line class="chart-grid" x1="36.00%" x2="36.00%" y1="26" y2="376"/>
+                <text class="chart-tick" x="36.00%" y="16" text-anchor="middle">20</text>
+                <line class="chart-grid" x1="54.00%" x2="54.00%" y1="26" y2="376"/>
+                <text class="chart-tick" x="54.00%" y="16" text-anchor="middle">30</text>
+                <line class="chart-grid" x1="72.00%" x2="72.00%" y1="26" y2="376"/>
+                <text class="chart-tick" x="72.00%" y="16" text-anchor="middle">40</text>
+                <line class="chart-grid" x1="90.00%" x2="90.00%" y1="26" y2="376"/>
+                <text class="chart-tick" x="90.00%" y="16" text-anchor="middle">50</text>
+                <g class="chart-row">
+                  <rect class="bar-canal" x="0" y="34" width="61.20%" height="14"/>
+                  <text class="chart-val" x="61.20%" dx="6" y="46">34</text>
+                  <rect class="bar-floor" x="0" y="52" width="55.80%" height="14"/>
+                  <text class="chart-val chart-val-floor" x="55.80%" dx="6" y="64">31</text>
+                </g>
+                <g class="chart-row">
+                  <rect class="bar-canal" x="0" y="84" width="52.20%" height="14"/>
+                  <text class="chart-val" x="52.20%" dx="6" y="96">29</text>
+                  <rect class="bar-floor" x="0" y="102" width="43.20%" height="14"/>
+                  <text class="chart-val chart-val-floor" x="43.20%" dx="6" y="114">24</text>
+                </g>
+                <g class="chart-row">
+                  <rect class="bar-canal" x="0" y="134" width="66.60%" height="14"/>
+                  <text class="chart-val" x="66.60%" dx="6" y="146">37</text>
+                  <rect class="bar-floor" x="0" y="152" width="39.60%" height="14"/>
+                  <text class="chart-val chart-val-floor" x="39.60%" dx="6" y="164">22</text>
+                </g>
+                <g class="chart-row">
+                  <rect class="bar-canal" x="0" y="184" width="73.80%" height="14"/>
+                  <text class="chart-val" x="73.80%" dx="6" y="196">41</text>
+                  <rect class="bar-floor" x="0" y="202" width="27.00%" height="14"/>
+                  <text class="chart-val chart-val-floor" x="27.00%" dx="6" y="214">15</text>
+                </g>
+                <g class="chart-row">
+                  <rect class="bar-canal" x="0" y="234" width="64.80%" height="14"/>
+                  <text class="chart-val" x="64.80%" dx="6" y="246">36</text>
+                  <rect class="bar-floor" x="0" y="252" width="16.20%" height="14"/>
+                  <text class="chart-val chart-val-floor" x="16.20%" dx="6" y="264">9</text>
+                </g>
+                <g class="chart-row">
+                  <rect class="bar-canal" x="0" y="284" width="79.20%" height="14"/>
+                  <text class="chart-val" x="79.20%" dx="6" y="296">44</text>
+                  <rect class="bar-floor" x="0" y="302" width="12.60%" height="14"/>
+                  <text class="chart-val chart-val-floor" x="12.60%" dx="6" y="314">7</text>
+                </g>
+                <g class="chart-row">
+                  <rect class="bar-canal" x="0" y="334" width="70.20%" height="14"/>
+                  <text class="chart-val" x="70.20%" dx="6" y="346">39</text>
+                  <rect class="bar-floor" x="0" y="352" width="9.00%" height="14"/>
+                  <text class="chart-val chart-val-floor" x="9.00%" dx="6" y="364">5</text>
+                </g>
+              </svg>
+            </div>
             <details class="chart-data">
               <summary><svg class="ico" aria-hidden="true"><use href="#i-chevron-down"/></svg>ดูตัวเลขเป็นตาราง</summary>
               <div class="table-scroll">
                 <table>
-                  <caption>จำนวนวันต่อปี <span class="keep">(ข้อมูลสมมติ)</span></caption>
-                  <thead><tr><th scope="col">ปี พ.ศ.</th><th scope="col">น้ำสูงเกิน<span class="keep">ตลิ่ง</span> (วัน)</th><th scope="col">น้ำถึงพื้น<span class="keep">ห้องนอน</span> (วัน)</th></tr></thead>
+                  <caption>จำนวนวันต่อปี</caption>
+                  <thead><tr><th scope="col">ปี พ.ศ.</th><th scope="col">น้ำสูงเกินตลิ่ง (วัน)</th><th scope="col">น้ำถึงพื้น<span class="keep">ห้องนอน</span> (วัน)</th></tr></thead>
                   <tbody>
                     <tr><th scope="row">2555</th><td>34</td><td>31</td></tr>
                     <tr><th scope="row">2557</th><td>29</td><td>24</td></tr>
@@ -1016,44 +1035,43 @@
                 </table>
               </div>
             </details>
-            <figcaption>ตัวเลขในแผนภาพนี้เป็นตัวเลขสมมติเพื่อสาธิตการออกแบบ ไม่ใช่<span class="keep">ข้อมูล</span>ระดับน้ำจริงของคลองใด ที่มาในเรื่องคือสมุดของ<span class="keep">ครูประเสริฐ พรหมมา</span> ซึ่งเป็น<span class="keep">ตัวละคร</span>สมมติ <span class="keep">ดู<a href="#fn3">เชิงอรรถ ๓</a></span></figcaption>
+            <figcaption>ที่มา: สมุดบันทึกระดับน้ำของ<span class="keep">ครูประเสริฐ</span> <span class="keep">พรหมมา</span> <span class="keep">ดู<a href="#fn3">เชิงอรรถ ๓</a></span></figcaption>
           </figure>
 
-          <p>ตัวเลขชุดแรกไม่ได้ดีขึ้นเลย <span class="keep">ปี 2565</span> <span class="keep">น้ำล้นตลิ่ง</span> <span class="keep">44 วัน</span> มากที่สุดเท่าที่เคยจด แต่ตัวเลขชุดหลังลดลงจาก <span class="keep">31 วัน</span>ใน<span class="keep">ปี 2555</span> เหลือ <span class="keep">5 วัน</span>ใน<span class="keep">ปี 2567</span> “คนชอบถามผมว่าน้ำลด<span class="keep">หรือยัง</span>” <span class="keep">ครูประเสริฐ</span>พูด “น้ำไม่ได้ลด เรา<span class="keep">ต่างหาก</span>ที่ย้ายออกมาจากทางของมัน”</p>
+          <p>ตัวเลขชุดแรกไม่ได้ดีขึ้นเลย <span class="keep">ปี 2565</span> น้ำล้นตลิ่ง <span class="keep">44 วัน</span> มากที่สุดเท่าที่เคยจด แต่ตัวเลขชุดหลังลดลงจาก <span class="keep">31 วัน</span>ใน<span class="keep">ปี 2555</span> เหลือ <span class="keep">5 วัน</span>ใน<span class="keep">ปี 2567</span> “คนชอบถามผมว่าน้ำลดหรือยัง” <span class="keep">ครูประเสริฐ</span>พูด “น้ำไม่ได้ลด เราต่างหากที่ย้ายออกมาจากทางของมัน”</p>
         </section>
 
         <section id="s4" aria-labelledby="s4-h">
-          <h2 id="s4-h"><span class="sec-num">๔</span><span>เวรเรือ</span></h2>
-          <p>บ้านที่ยกสูงแก้ปัญหา<span class="keep">ข้าวของ</span>จมน้ำได้ แต่ก็สร้างปัญหาใหม่ขึ้นมา <span class="keep">ผู้สูงอายุ</span>ที่อยู่บนบ้านสูงลงมาไม่ได้เมื่อซอยกลายเป็นคลอง ในชุมชนมี<span class="keep">ผู้สูงอายุ</span>ที่อยู่ลำพังหรืออยู่กับหลานเล็กๆ <span class="keep">23 คน</span> และในจำนวนนี้มี <span class="keep">7 คน</span>ที่ต้องไป<span class="keep">ฟอกไต</span>สัปดาห์ละ <span class="keep">2 ครั้ง</span></p>
-          <p>คำตอบคือ “เวรเรือ” ระบบที่<span class="keep">นวลจันทร์ สุขเจริญ</span> <span class="keep">พยาบาล</span>วัย <span class="keep">34 ปี</span>ซึ่งเติบโตในชุมชน เริ่มขึ้นใน<span class="keep">กลุ่มไลน์</span>เมื่อ<span class="keep">ปี 2561</span> <span class="keep">ชาวบ้าน</span>ที่มีเรือ <span class="keep">17 ลำ</span>ลงชื่อรับเวรเป็นช่วงละ <span class="keep">6 ชั่วโมง</span>ตลอด<span class="keep">ฤดูน้ำหลาก</span> <span class="keep">ผู้ป่วย</span>แต่ละคนมีเรือประจำ <span class="keep">2 ลำ</span> คือลำหลักกับลำสำรอง และมีป้าย<span class="keep">พลาสติก</span>สีเหลืองแขวนไว้<span class="keep">หน้าบ้าน</span> เมื่อต้องการ<span class="keep">ความช่วยเหลือ</span>ก็พลิกป้ายเป็นด้านสีแดง คนพายเรือผ่านเห็นได้แม้โทรศัพท์จะแบตหมดหรือไฟดับ</p>
-          <p>ปีที่แล้วเวรเรือรับส่ง<span class="keep">ผู้ป่วย</span>ไป<span class="keep">โรงพยาบาล</span> <span class="keep">212 เที่ยว</span> ไม่มีนัด<span class="keep">ฟอกไต</span>ครั้งไหนพลาด <span class="keep">นวลจันทร์</span>บอกว่าส่วนที่ยากที่สุดไม่ใช่การพายเรือ แต่คือการทำให้<span class="keep">ผู้สูงอายุ</span>ยอมพลิกป้ายแดง “<span class="keep">ผู้เฒ่าผู้แก่</span>บ้านเราไม่ชอบเป็น<span class="keep">ภาระ</span>ใคร หลายคนนั่งรอจน<span class="keep">อาการหนัก</span> เราเลยต้องพายผ่านทุกบ้านวันละ <span class="keep">2 รอบ</span> ไม่ว่าป้ายจะเป็นสีอะไร”</p>
-          <p>ป้ายเหลืองแดงนั้นเรียบง่ายจนดูเหมือนไม่ใช่<span class="keep">เทคโนโลยี</span> แต่มันออกแบบมาจากความล้มเหลวจริง <span class="keep">ปี 2560</span> <span class="keep">สัญญาณโทรศัพท์</span>ในซอยหายไป <span class="keep">2 วัน</span>เต็ม และ<span class="keep">ผู้ป่วย</span><span class="keep">เบาหวาน</span><span class="keep">คนหนึ่ง</span>ต้องรอจน<span class="keep">เพื่อนบ้าน</span>ได้ยินเสียงเคาะ<span class="keep">ฝาบ้าน</span> <span class="keep">ตั้งแต่นั้นมา</span> ทุกระบบในเวรเรือต้องทำงานได้แม้ไม่มี<span class="keep">ไฟฟ้า</span></p>
+          <h2 id="s4-h"><span class="sec-num">๔</span><span><span class="keep">เวรเรือ</span></span></h2>
+          <p>บ้านที่ยกสูงแก้ปัญหา<span class="keep">ข้าวของ</span><span class="keep">จมน้ำ</span>ได้ แต่ก็สร้างปัญหาใหม่ขึ้นมา <span class="keep">ผู้สูงอายุ</span>ที่อยู่บนบ้านสูงลงมาไม่ได้เมื่อซอยกลายเป็นคลอง ในชุมชนมี<span class="keep">ผู้สูงอายุ</span>ที่อยู่ลำพังหรืออยู่กับหลานเล็กๆ <span class="keep">23 คน</span> และในจำนวนนี้มี <span class="keep">7 คน</span>ที่ต้องไป<span class="keep">ฟอกไต</span><span class="keep">สัปดาห์ละ</span> <span class="keep">2 ครั้ง</span></p>
+          <p><span class="keep">คำตอบ</span>คือ “<span class="keep">เวรเรือ</span>” ระบบที่<span class="keep">นวลจันทร์</span> <span class="keep">สุขเจริญ</span> พยาบาลวัย <span class="keep">34 ปี</span>ซึ่งเติบโตในชุมชนนี้ ริเริ่มไว้ใน<span class="keep">กลุ่มแชต</span>ของชุมชนเมื่อ<span class="keep">ปี 2561</span> เจ้าของเรือ <span class="keep">17 ลำ</span>ลงชื่อรับเวรเป็น<span class="keep">ช่วงละ</span> <span class="keep">6 ชั่วโมง</span>ตลอดฤดู<span class="keep">น้ำหลาก</span> <span class="keep">ผู้ป่วย</span>แต่ละคนมีเรือประจำ <span class="keep">2 ลำ</span> คือ<span class="keep">ลำหลัก</span>กับ<span class="keep">ลำสำรอง</span> และมีป้ายพลาสติก<span class="keep">สีเหลือง</span>แขวนไว้หน้าบ้าน เมื่อต้องการ<span class="keep">ความช่วยเหลือ</span>ก็พลิกป้ายเป็นด้าน<span class="keep">สีแดง</span> คนพายเรือผ่านเห็นได้แม้โทรศัพท์จะแบตหมดหรือไฟดับ</p>
+          <p>ปีที่แล้ว<span class="keep">เวรเรือ</span>รับส่ง<span class="keep">ผู้ป่วย</span>ไป<span class="keep">โรงพยาบาล</span> <span class="keep">212 เที่ยว</span> ไม่มีนัด<span class="keep">ฟอกไต</span>ครั้งไหนพลาด <span class="keep">นวลจันทร์</span>บอกว่าส่วนที่ยากที่สุดไม่ใช่<span class="keep">การพายเรือ</span> แต่คือ<span class="keep">การทำให้</span><span class="keep">ผู้สูงอายุ</span>ยอมพลิกป้ายแดง “<span class="keep">ผู้เฒ่า</span><span class="keep">ผู้แก่</span>บ้านเราไม่ชอบเป็นภาระใคร <span class="keep">หลายคน</span>นั่งรอจนอาการหนัก เราเลยต้องพายผ่าน<span class="keep">ทุกบ้าน</span><span class="keep">วันละ</span> <span class="keep">2 รอบ</span> ไม่ว่าป้ายจะเป็นสีอะไร”</p>
+          <p>ป้ายเหลืองแดงนั้นเรียบง่ายจนดูไม่เหมือนเทคโนโลยี แต่ป้ายนี้มีที่มาจาก<span class="keep">ความล้มเหลว</span>ครั้งหนึ่ง <span class="keep">ปี 2560</span> สัญญาณโทรศัพท์ในซอยหายไป <span class="keep">2 วันเต็ม</span> และ<span class="keep">ผู้ป่วย</span><span class="keep">เบาหวาน</span><span class="keep">คนหนึ่ง</span>ต้องรอจน<span class="keep">เพื่อนบ้าน</span>ได้ยินเสียงเคาะ<span class="keep">ฝาบ้าน</span> ตั้งแต่นั้นมา ทุกระบบใน<span class="keep">เวรเรือ</span>ต้องทำงานได้แม้ไม่มีไฟฟ้า</p>
         </section>
 
         <section id="s5" aria-labelledby="s5-h">
           <h2 id="s5-h"><span class="sec-num">๕</span><span>สิ่งที่บ้านสูงแก้ไม่ได้</span></h2>
-          <p>ความสำเร็จของ<span class="keep">พลับพลึงเงิน</span>มีขอบเขตชัดเจน และคนในชุมชนเองก็พูดถึงมัน<span class="keep">ตรงไปตรงมา</span> บ้าน <span class="keep">41 หลัง</span>ที่ยกแล้วคิดเป็นไม่ถึง <span class="keep">1 ใน 3</span> ของทั้งชุมชน บ้านที่เหลือส่วนใหญ่เป็น<span class="keep">บ้านเช่า</span>ซึ่ง<span class="keep">เจ้าของ</span>ไม่ได้อยู่เอง และไม่มีเหตุผลที่จะลงทุน ผู้เช่าที่จ่าย<span class="keep">ค่าเช่า</span>เดือนละ <span class="keep">3,000 บาท</span>คือกลุ่มที่ยังต้องลุยน้ำ<span class="keep">ทุกปี</span></p>
-          <p><span class="keep">ดร.วรเชษฐ์ อินทร์แก้ว</span> <span class="keep">นักอุทกวิทยา</span>ที่อาสามาช่วยตรวจสมุดของ<span class="keep">ครูประเสริฐ</span> ชี้ว่าจำนวนวัน<span class="keep">น้ำล้นตลิ่ง</span>ที่ไม่ลดลงสอดคล้องกับ 2 เรื่องที่ชุมชนควบคุมไม่ได้ และเป็นที่รู้กันมานานใน<span class="keep">กรุงเทพฯ</span> คือ<span class="keep">แผ่นดิน</span>ที่<span class="keep">ทรุดตัว</span>ในหลายพื้นที่ และ<span class="keep">น้ำทะเลหนุน</span>ในช่วง<span class="keep">ปลายปี</span>ซึ่งทำให้น้ำในคลองระบายลงทะเลได้ช้า<sup class="fnref"><a id="fnref4" href="#fn4" aria-label="เชิงอรรถ ๔">๔</a></sup> “การยกบ้านซื้อเวลาได้ แต่ไม่ได้ซื้ออนาคต” เขาบอก “ถ้าระดับน้ำสูงขึ้นอีก <span class="keep">50 เซนติเมตร</span> บ้านที่ยกไว้วันนี้ก็จะกลับไปอยู่ในระดับเดียวกับบ้านที่ไม่ได้ยกเมื่อ <span class="keep">10 ปี</span>ก่อน”</p>
-          <p>ยังมีความตึงเครียดอีกเรื่องหนึ่ง <span class="keep">ข้อเสนอ</span>ให้สร้างแนวเขื่อน<span class="keep">คอนกรีต</span>ทึบตลอดริมคลองจะทำให้น้ำไหลเข้าออก<span class="keep">ใต้ถุน</span>บ้านไม่ได้อีกต่อไป <span class="keep">คณะกรรมการ</span>ชุมชนจึงทำ<span class="keep">หนังสือ</span>ขอให้ออกแบบใหม่เป็น<span class="keep">คันดิน</span>ที่เว้น<span class="keep">ช่องระบาย</span>ทุก <span class="keep">20 เมตร</span> ถึงวันที่เราเขียนเรื่องนี้ยังไม่มีคำตอบ<sup class="fnref"><a id="fnref5" href="#fn5" aria-label="เชิงอรรถ ๕">๕</a></sup></p>
+          <p><span class="keep">ความสำเร็จ</span>ของ<span class="keep">พลับพลึงเงิน</span>มีขอบเขตชัดเจน และคนในชุมชนเองก็พูดถึงขอบเขตนั้นอย่างตรงไปตรงมา บ้าน <span class="keep">41 หลัง</span>ที่ยกแล้วคิดเป็น<span class="keep">ไม่ถึง</span> <span class="keep">1 ใน 3</span> ของทั้งชุมชน บ้านที่เหลือ<span class="keep">ส่วนใหญ่</span>เป็นบ้านเช่าซึ่งเจ้าของไม่ได้อยู่เอง และไม่มีเหตุผลที่จะลงทุน <span class="keep">ผู้เช่า</span>ที่จ่าย<span class="keep">ค่าเช่า</span><span class="keep">เดือนละ</span> <span class="keep">3,000 บาท</span>คือกลุ่มที่ยังต้องลุยน้ำ<span class="keep">ทุกปี</span></p>
+          <p><span class="keep">ดร.วรเชษฐ์</span> <span class="keep">อินทร์แก้ว</span> นักอุทกวิทยาที่อาสามาช่วยตรวจสมุดของ<span class="keep">ครูประเสริฐ</span> ชี้ว่าจำนวนวันน้ำล้นตลิ่งที่ไม่ลดลงสอดคล้องกับ <span class="keep">2 เรื่อง</span>ที่ชุมชนควบคุมไม่ได้ และเป็นที่รู้กันมานานในเมืองนี้ คือ<span class="keep">แผ่นดิน</span>ที่ทรุดตัวในหลายพื้นที่ และน้ำทะเลหนุนในช่วงปลายปีซึ่งทำให้น้ำในคลองระบายลงทะเลได้ช้า<sup class="fnref"><a id="fnref4" href="#fn4" aria-label="เชิงอรรถ ๔">๔</a></sup> “<span class="keep">การยก</span>บ้านซื้อเวลาได้ แต่ไม่ได้ซื้ออนาคต” เขาบอก “ถ้าระดับน้ำสูงขึ้นอีก <span class="keep">50 เซนติเมตร</span> <span class="keep">น้ำท่วม</span>ขนาดเดียวกับเมื่อ <span class="keep">15 ปี</span>ก่อน จะขึ้นมาถึงพื้นใหม่ที่วันนี้ยังอยู่เหนือเส้นน้ำปีนั้น บ้านที่ยกแล้วก็จะกลับไป<span class="keep">จมน้ำ</span>เหมือนก่อนยก”</p>
+          <p>อีกเรื่องที่ยังตกลงกันไม่ได้คือข้อเสนอของ<span class="keep">หน่วยงาน</span><span class="keep">ท้องถิ่น</span>ที่จะสร้างแนวเขื่อนคอนกรีตทึบตลอดริมคลอง ซึ่งจะทำให้น้ำไหลเข้าออกใต้ถุนบ้านไม่ได้อีกต่อไป <span class="keep">คณะกรรมการ</span>ชุมชนจึงทำหนังสือขอให้ออกแบบใหม่เป็นคันดินที่เว้นช่องระบายทุก <span class="keep">20 เมตร</span> ถึงวันที่เราเขียนเรื่องนี้ยังไม่มี<span class="keep">คำตอบ</span><sup class="fnref"><a id="fnref5" href="#fn5" aria-label="เชิงอรรถ ๕">๕</a></sup></p>
         </section>
 
         <section id="s6" aria-labelledby="s6-h">
-          <h2 id="s6-h"><span class="sec-num">๖</span><span>ความรู้ที่ไม่มีใครเขียนไว้</span></h2>
-          <p>ตอนเย็นวันสุดท้ายที่เราอยู่ในชุมชน <span class="keep">ลุงเชิด</span>กำลังสอน<span class="keep">เด็กหนุ่ม</span> <span class="keep">2 คน</span>จากชุมชน<span class="keep">ข้างเคียง</span>วิธีวาง<span class="keep">แม่แรง</span>ให้แรงกดกระจายเท่ากันทุกเสา เขาไม่มี<span class="keep">แบบแปลน</span> ไม่มี<span class="keep">คู่มือ</span> มีแต่<span class="keep">เชือกขึงระดับ</span>กับ<span class="keep">สายยางใส</span>ใส่น้ำที่ใช้เทียบความสูงทั้ง <span class="keep">4 มุม</span>บ้าน ซึ่งเป็นวิธีที่ช่างรุ่นก่อนใช้ปรับระดับเรือนไม้มานานกว่าที่ใครในซอยจะจำได้</p>
-          <p>สิ่งที่<span class="keep">พลับพลึงเงิน</span>ทำไม่ใช่<span class="keep">นวัตกรรม</span>ในความหมายที่โครงการ<span class="keep">พัฒนาเมือง</span>ชอบใช้ มันคือการ<span class="keep">รื้อฟื้น</span>ความรู้เก่าที่เคยมีอยู่แล้ว แล้วเติมสิ่งที่คนรุ่นก่อนไม่เคยมี คือสมุดจดตัวเลขที่พิสูจน์ได้ว่ามัน<span class="keep">ได้ผล</span> กองทุนที่ทำให้คนรายได้น้อยเข้าถึงได้ และ<span class="keep">กลุ่มไลน์</span>ที่ทำให้ไม่มีใครถูกลืมไว้บนบ้านสูง</p>
-          <p>ก่อนเรากลับ <span class="keep">ป้าสายหยุด</span>พาเดินไปดูคราบน้ำบนผนัง<span class="keep">ศาลาวัด</span> เส้นบนสุดคือ<span class="keep">ปี 2554</span> สูงกว่า<span class="keep">ศีรษะ</span>ของป้า เส้นที่ต่ำลงมาเป็นของปีอื่นๆ ซึ่งใครสักคนเอา<span class="keep">ปากกาเมจิก</span>เขียนตัวเลขกำกับไว้ “เด็ก<span class="keep">รุ่นหลาน</span>จะไม่รู้จักบ้านที่ไม่มี<span class="keep">ใต้ถุน</span>” ป้าพูด “ซึ่งก็ดีแล้ว เพราะ<span class="keep">รุ่นปู่</span>ของป้าก็ไม่รู้จักเหมือนกัน”</p>
-          <p class="author-note"><strong><span class="keep">ปริยา จันทร์หอม</span></strong> เป็น<span class="keep">ผู้สื่อข่าว</span>โต๊ะเมืองของ<span class="keep">แผ่นดินต่ำ</span> เธอลงพื้นที่<span class="keep">พลับพลึงเงิน</span> <span class="keep">4 ครั้ง</span>ระหว่างเดือนมิถุนายนถึง<span class="keep">กันยายน 2569</span> และ<span class="keep">สัมภาษณ์</span><span class="keep">ชาวบ้าน</span> <span class="keep">26 คน</span>เพื่อทำเรื่องนี้</p>
+          <h2 id="s6-h"><span class="sec-num">๖</span><span><span class="keep">ความรู้</span>ที่ไม่มีใครเขียนไว้</span></h2>
+          <p>ตอนเย็นวันสุดท้ายที่เราอยู่ในชุมชน <span class="keep">ลุงเชิด</span>กำลังสอนเด็กหนุ่ม <span class="keep">2 คน</span>จากชุมชน<span class="keep">ข้างเคียง</span>วิธีวาง<span class="keep">แม่แรง</span>ให้<span class="keep">แรงกด</span>กระจายเท่ากันทุกเสา เขาไม่มี<span class="keep">แบบแปลน</span> ไม่มีคู่มือ มีแต่เชือกขึงระดับกับ<span class="keep">สายยาง</span>ใสใส่น้ำที่ใช้เทียบ<span class="keep">ความสูง</span>ทั้ง <span class="keep">4 มุม</span>บ้าน ซึ่งเป็นวิธีที่ช่างรุ่นก่อนใช้ปรับระดับ<span class="keep">เรือนไม้</span>มานานกว่าที่ใครในซอยจะจำได้</p>
+          <p>สิ่งที่<span class="keep">พลับพลึงเงิน</span>ทำไม่ใช่นวัตกรรมใน<span class="keep">ความหมาย</span>ที่โครงการพัฒนาเมืองชอบใช้ แต่เป็นการรื้อฟื้น<span class="keep">ความรู้</span>เก่าที่เคยมีอยู่แล้ว แล้วเติมสิ่งที่คนรุ่นก่อนไม่เคยมี คือสมุดจดตัวเลขที่พิสูจน์ได้ว่าวิธีนี้ได้ผล กองทุนที่ทำให้คนรายได้น้อยก็ยกบ้านได้ และ<span class="keep">กลุ่มแชต</span>ที่ทำให้ไม่มีใครถูกลืมไว้บนบ้านสูง</p>
+          <p>ก่อนเรากลับ <span class="keep">ป้าสายหยุด</span>พาเดินไปดูคราบน้ำบนผนังศาลาวัด เส้นบนสุดคือปี<span class="keep">น้ำท่วม</span>ใหญ่ สูงกว่าศีรษะของป้า เส้นที่ต่ำลงมาเป็นของปีอื่นๆ ซึ่งใครสักคนเอาปากกาเมจิกเขียนตัวเลขกำกับไว้ “เด็กรุ่นหลานจะไม่รู้จักบ้านที่ไม่มีใต้ถุน” ป้าพูด “ซึ่งก็ดีแล้ว เพราะ<span class="keep">รุ่นปู่</span>ของป้าก็ไม่รู้จักเหมือนกัน”</p>
+          <div class="author-note"><p><strong><span class="keep">ปริยา</span> <span class="keep">จันทร์หอม</span></strong> เป็น<span class="keep">ผู้สื่อข่าว</span>โต๊ะเมืองของ<span class="keep">แผ่นดินต่ำ</span> เธอลงพื้นที่<span class="keep">พลับพลึงเงิน</span> <span class="keep">4 ครั้ง</span>ระหว่างเดือนมิถุนายนถึงกันยายน 2569 และสัมภาษณ์<span class="keep">ชาวบ้าน</span> <span class="keep">26 คน</span>เพื่อทำเรื่องนี้</p></div>
         </section>
 
         <section class="notes" aria-labelledby="notes-h">
           <h2 id="notes-h">เชิงอรรถและที่มา</h2>
-          <p class="notes-lede">ที่มาด้านล่างเป็นตัวอย่างสมมติ แสดงวิธีจัดวางเชิงอรรถในงานเขียนขนาดยาว ไม่มีเอกสาร บุคคล หรือการ<span class="keep">สัมภาษณ์</span>เหล่านี้อยู่จริง</p>
           <ol>
-            <li id="fn1">เวลาจากประวัติข้อความในโทรศัพท์ของ<span class="keep">ครอบครัวศรีเมือง</span> และการ<span class="keep">สัมภาษณ์</span><span class="keep">เพื่อนบ้าน</span>อีก <span class="keep">4 ครัวเรือน</span> <span class="keep">(ตัวอย่างสมมติ)</span> <a class="backref" href="#fnref1" aria-label="กลับไปยังเชิงอรรถ ๑ ในเนื้อเรื่อง"><svg class="ico" aria-hidden="true"><use href="#i-chevron-up"/></svg></a></li>
-            <li id="fn2"><span class="keep">ข้อมูล</span>กองทุน<span class="keep">ออมทรัพย์</span>ชุมชน<span class="keep">พลับพลึงเงิน</span> ณ <span class="keep">เดือนกันยายน 2569</span> มีสมาชิก <span class="keep">118 ครัวเรือน</span> <span class="keep">เงินหมุนเวียน</span> <span class="keep">2.6 ล้านบาท</span> <span class="keep">(ตัวเลขสมมติ)</span> <a class="backref" href="#fnref2" aria-label="กลับไปยังเชิงอรรถ ๒ ในเนื้อเรื่อง"><svg class="ico" aria-hidden="true"><use href="#i-chevron-up"/></svg></a></li>
-            <li id="fn3">สมุดบันทึกระดับน้ำของ<span class="keep">ครูประเสริฐ พรหมมา</span> <span class="keep">เล่ม 1</span> ถึง 15 (<span class="keep">พ.ศ. 2555</span> ถึง 2569) <span class="keep">แผนภาพ ๑</span> แสดงปีเว้นปีตั้งแต่ <span class="keep">2555 ถึง 2567</span> <span class="keep">(ตัวอย่างสมมติ)</span> <a class="backref" href="#fnref3" aria-label="กลับไปยังเชิงอรรถ ๓ ในเนื้อเรื่อง"><svg class="ico" aria-hidden="true"><use href="#i-chevron-up"/></svg></a></li>
-            <li id="fn4">บันทึกการตรวจสมุดระดับน้ำโดย <span class="keep">ดร.วรเชษฐ์ อินทร์แก้ว</span> <span class="keep">(ตัวอย่างสมมติ)</span> <a class="backref" href="#fnref4" aria-label="กลับไปยังเชิงอรรถ ๔ ในเนื้อเรื่อง"><svg class="ico" aria-hidden="true"><use href="#i-chevron-up"/></svg></a></li>
-            <li id="fn5"><span class="keep">หนังสือ</span>ของ<span class="keep">คณะกรรมการ</span>ชุมชน<span class="keep">พลับพลึงเงิน</span>ถึง<span class="keep">หน่วยงานท้องถิ่น</span> และการติดตามทางโทรศัพท์ครั้งล่าสุดก่อน<span class="keep">เผยแพร่</span> <span class="keep">(ตัวอย่างสมมติ)</span> <a class="backref" href="#fnref5" aria-label="กลับไปยังเชิงอรรถ ๕ ในเนื้อเรื่อง"><svg class="ico" aria-hidden="true"><use href="#i-chevron-up"/></svg></a></li>
+            <li id="fn1">เวลาจากประวัติข้อความในโทรศัพท์ของครอบครัว<span class="keep">ศรีเมือง</span> และ<span class="keep">การสัมภาษณ์</span><span class="keep">เพื่อนบ้าน</span>อีก <span class="keep">4 ครัวเรือน <a class="backref" href="#fnref1" aria-label="กลับไปยังเชิงอรรถ ๑ ในเนื้อเรื่อง"><svg class="ico" aria-hidden="true"><use href="#i-chevron-up"/></svg></a></span></li>
+            <li id="fn2">ข้อมูลกองทุน<span class="keep">ออมทรัพย์</span>ชุมชน<span class="keep">พลับพลึงเงิน</span> ณ เดือนกันยายน 2569 มีสมาชิก <span class="keep">118 ครัวเรือน</span> เงินหมุนเวียน <span class="keep">2.6 ล้านบาท <a class="backref" href="#fnref2" aria-label="กลับไปยังเชิงอรรถ ๒ ในเนื้อเรื่อง"><svg class="ico" aria-hidden="true"><use href="#i-chevron-up"/></svg></a></span></li>
+            <li id="fn3">สมุดบันทึกระดับน้ำของ<span class="keep">ครูประเสริฐ</span> <span class="keep">พรหมมา</span> <span class="keep">เล่ม 1</span> ถึง 15 (<span class="keep">พ.ศ. 2555</span> ถึง 2569) <span class="keep">แผนภาพ ๑</span> แสดงปีเว้นปีตั้งแต่ 2555 ถึง <span class="keep">2567 <a class="backref" href="#fnref3" aria-label="กลับไปยังเชิงอรรถ ๓ ในเนื้อเรื่อง"><svg class="ico" aria-hidden="true"><use href="#i-chevron-up"/></svg></a></span></li>
+            <li id="fn4">บันทึก<span class="keep">การตรวจ</span>สมุดระดับน้ำโดย <span class="keep">ดร.วรเชษฐ์</span> <span class="keep">อินทร์แก้ว <a class="backref" href="#fnref4" aria-label="กลับไปยังเชิงอรรถ ๔ ในเนื้อเรื่อง"><svg class="ico" aria-hidden="true"><use href="#i-chevron-up"/></svg></a></span></li>
+            <li id="fn5">หนังสือของ<span class="keep">คณะกรรมการ</span>ชุมชน<span class="keep">พลับพลึงเงิน</span>ถึง<span class="keep">หน่วยงาน</span><span class="keep">ท้องถิ่น</span> และ<span class="keep">การติดตาม</span>ทางโทรศัพท์ครั้งล่าสุดก่อน<span class="keep">เผยแพร่ <a class="backref" href="#fnref5" aria-label="กลับไปยังเชิงอรรถ ๕ ในเนื้อเรื่อง"><svg class="ico" aria-hidden="true"><use href="#i-chevron-up"/></svg></a></span></li>
           </ol>
         </section>
       </div>
@@ -1063,7 +1081,7 @@
   <section class="series wrap" id="series" aria-labelledby="series-h">
     <div class="series-head">
       <h2 id="series-h">เมืองกับน้ำ</h2>
-      <p>ชุดงานเขียน <span class="keep">4 ตอน</span>ว่าด้วยคน<span class="keep">กรุงเทพฯ</span> ที่อยู่ต่ำกว่าระดับที่น้ำอยากไป ตอนใหม่ออกทุก <span class="keep">2 สัปดาห์</span>ในวันจันทร์</p>
+      <p>ชุดงานเขียน <span class="keep">4 ตอน</span>ว่าด้วยคนในเมืองที่อยู่ต่ำกว่าระดับที่น้ำ<span class="keep">อยากไป</span> <span class="keep">ตอนใหม่</span>ออกทุก <span class="keep">2 สัปดาห์</span><span class="keep">ในวันจันทร์</span></p>
     </div>
     <div class="series-grid">
       <article class="next-part" aria-labelledby="part2-h">
@@ -1077,9 +1095,9 @@
           <path class="il-level" d="M40 108 Q 70 56 96 62 M224 62 Q 250 56 280 108"/>
         </svg>
         <p class="part-kicker">ตอนต่อไป <span class="keep">ตอนที่ ๒</span></p>
-        <h3 id="part2-h">ใต้ถนนมีคลองอีกสาย</h3>
-        <p><span class="keep">กรุงเทพฯ</span> ถมคลองหลายสายเป็นถนนตลอดศตวรรษที่ผ่านมา บางสายยังไหลอยู่ในท่อใต้ผิวถนน ตอนต่อไปถามว่าน้ำที่เคยมีทางไป <span class="keep">ทุกวัน</span>นี้ไปอยู่ที่ไหน</p>
-        <p class="part-date"><span class="keep">เผยแพร่</span> <time datetime="2026-11-09">วันจันทร์ที่ <span class="keep">9 พฤศจิกายน 2569</span></time></p>
+        <h3 id="part2-h">ใต้ถนนมี<span class="keep">คลองอีกสาย</span></h3>
+        <p>เมืองนี้ถมคลองหลายสายเป็นถนนตลอดศตวรรษที่ผ่านมา บางสายยังไหลอยู่ในท่อใต้<span class="keep">ผิวถนน</span> ตอนต่อไปถามว่าน้ำที่เคยมีทางไป <span class="keep">ทุกวันนี้</span>ไปอยู่ที่ไหน</p>
+        <p class="part-date"><span class="keep">เผยแพร่</span> <time datetime="2026-11-09"><span class="keep">วันจันทร์ที่ 9</span> <span class="keep">พฤศจิกายน 2569</span></time></p>
       </article>
       <ol class="parts" aria-label="ตอนทั้งหมดในชุด">
         <li>
@@ -1090,11 +1108,11 @@
         <li>
           <p class="part-kicker"><span class="keep">ตอนที่ ๓</span></p>
           <h3><span class="keep">ค่าเช่า</span>ของคนที่ยังลุยน้ำ</h3>
-          <p class="part-date">ผู้เช่าริมคลองจ่าย<span class="keep">ค่าเช่า</span>เท่าเดิม แต่รับ<span class="keep">ความเสี่ยง</span>ไว้ทั้งหมด <span class="keep">เผยแพร่</span> <time datetime="2026-11-23"><span class="keep">23 พฤศจิกายน 2569</span></time></p>
+          <p class="part-date"><span class="keep">ผู้เช่า</span>ริมคลองจ่าย<span class="keep">ค่าเช่า</span>เท่าเดิม แต่รับ<span class="keep">ความเสี่ยง</span>ไว้ทั้งหมด <span class="keep">เผยแพร่</span> <time datetime="2026-11-23"><span class="keep">23 พฤศจิกายน 2569</span></time></p>
         </li>
         <li>
           <p class="part-kicker"><span class="keep">ตอนที่ ๔</span></p>
-          <h3>แผนที่น้ำท่วมที่<span class="keep">ชาวบ้าน</span>วาดเอง</h3>
+          <h3>แผนที่<span class="keep">น้ำท่วม</span>ที่<span class="keep">ชาวบ้าน</span>วาดเอง</h3>
           <p class="part-date">ชุมชนริมน้ำทำแผนที่<span class="keep">ความเสี่ยง</span>ของ<span class="keep">ตัวเอง</span>อย่างไร <span class="keep">เผยแพร่</span> <time datetime="2026-12-07"><span class="keep">7 ธันวาคม 2569</span></time></p>
         </li>
       </ol>
@@ -1106,10 +1124,10 @@
   <div class="wrap footer-grid">
     <div class="footer-brand">
       <p class="footer-mark footer-lede"><span class="keep">แผ่นดินต่ำ</span></p>
-      <p class="footer-lede">นิตยสารรายสัปดาห์ว่าด้วยเมือง น้ำ และคนที่อยู่ระหว่างนั้น</p>
+      <p class="footer-lede">นิตยสาร<span class="keep">รายสัปดาห์</span>ว่าด้วยเมือง น้ำ และคนที่อยู่ระหว่างนั้น</p>
     </div>
     <div class="footer-copy">
-      <p>ตัวอย่างงานออกแบบที่สร้างด้วย <span lang="en" class="keep">ux-ui-agent-skills</span> <span class="keep">สิ่งพิมพ์</span> ชุมชน บุคคล และตัวเลขในหน้านี้แต่งขึ้นทั้งหมด <span class="keep">ภาษาภาพ</span>ดัดแปลงจาก spec ชื่อ <span lang="en" class="keep">financial-times</span> ในคลังของ<span class="keep">ชุดเครื่องมือ</span> และตรวจด้วยเกตด้านการเข้าถึงและความถูกต้องของ<span class="keep">ชุดเครื่องมือ</span></p>
+      <p>ตัวอย่างงานออกแบบที่สร้างด้วย <span lang="en" class="keep">ux-ui-agent-skills</span> สิ่งพิมพ์ ชุมชน บุคคล และตัวเลขในหน้านี้แต่งขึ้นทั้งหมด ภาษาภาพดัดแปลงจาก spec ชื่อ <span lang="en" class="keep">financial-times</span> ในคลังของ<span class="keep">ชุดเครื่องมือ</span> ส่วน<span class="keep">ความคมชัด</span>ของสี การใช้<span class="keep">คีย์บอร์ด</span> และ<span class="keep">การจัดวาง</span> ผ่าน<span class="keep">การทดสอบ</span><span class="keep">อัตโนมัติ</span>ของ<span class="keep">ชุดเครื่องมือ</span></p>
       <p lang="en">Built with <a class="keep" href="https://github.com/plugin87/ux-ui-agent-skills">ux-ui-agent-skills</a> by Thientan Soparat.</p>
       <div class="footer-links">
         <a href="../../index.html" lang="en"><svg class="ico" aria-hidden="true"><use href="#i-chevron-left"/></svg>All examples</a>

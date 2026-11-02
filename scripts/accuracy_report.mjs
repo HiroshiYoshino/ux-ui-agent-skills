@@ -231,10 +231,11 @@ const checks = [
     {"command":"node","args":["scripts/lint_intent.mjs","examples/component-states"]},
     {"command":"node","args":["scripts/lint_intent.mjs","--dark","examples/component-states"]}
   ]],
-  ["Content overflow and spacing: no clipped text, no overlapping or touching controls, rows of cards share a height, every page (light + dark)", [
+  ["Content overflow, spacing and Thai text: no clipped text, no overlapping or touching controls, rows of cards share a height, no Thai compound or count split across lines, Thai lines far enough apart, every page (light + dark)", [
     {"command":"node","args":["scripts/verify_overflow.mjs","examples/component-states"]},
     {"command":"node","args":["scripts/verify_spacing.mjs","examples","examples/templates","examples/component-states","examples/sample-app","examples/showcase","examples/terminal","examples/apple-demo","examples/brandkit-demo","examples/foldable","examples/sites/launch","examples/sites/store","examples/sites/journal","examples/sites/local","examples/sites/gov"]},
-    {"command":"node","args":["scripts/verify_spacing.mjs","--dark","examples","examples/templates","examples/component-states","examples/sample-app","examples/showcase","examples/terminal","examples/apple-demo","examples/brandkit-demo","examples/foldable","examples/sites/launch","examples/sites/store","examples/sites/journal","examples/sites/local","examples/sites/gov"]}
+    {"command":"node","args":["scripts/verify_spacing.mjs","--dark","examples","examples/templates","examples/component-states","examples/sample-app","examples/showcase","examples/terminal","examples/apple-demo","examples/brandkit-demo","examples/foldable","examples/sites/launch","examples/sites/store","examples/sites/journal","examples/sites/local","examples/sites/gov"]},
+    {"command":"node","args":["scripts/verify_thai.mjs","examples","examples/templates","examples/component-states","examples/sample-app","examples/showcase","examples/terminal","examples/apple-demo","examples/brandkit-demo","examples/foldable","examples/sites/launch","examples/sites/store","examples/sites/journal","examples/sites/local","examples/sites/gov"]}
   ]],
   ["Responsive under wider font metrics: every example holds at 280px with a 1.25x root font", [
     {"command":"node","args":["scripts/verify_responsive.mjs","examples/component-states","--scale=1.25"]},

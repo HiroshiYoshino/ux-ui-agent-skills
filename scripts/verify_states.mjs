@@ -11,6 +11,7 @@
 import { resolve } from 'node:path';
 import { requireTargets } from './_targets.mjs';
 import { loadPlaywright } from './_playwright.mjs';
+import { COLOR_INIT } from './_color.mjs';
 let chromium;
 try { ({ chromium } = loadPlaywright()); }
 catch {
@@ -30,16 +31,17 @@ if (!file) { console.log('usage: node scripts/verify_states.mjs <file.html> [--d
 function lin(c) { c /= 255; return c <= .03928 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4; }
 function L([r, g, b]) { return .2126 * lin(r) + .7152 * lin(g) + .0722 * lin(b); }
 function ratio(a, b) { const l1 = L(a), l2 = L(b), hi = Math.max(l1, l2), lo = Math.min(l1, l2); return (hi + .05) / (lo + .05); }
-const parse = s => { const m = s && s.match(/[\d.]+/g); return m ? m.slice(0, 3).map(Number) : null; };
+const parse = c => (c ? c.slice(0, 3) : null);
 
 const browser = await chromium.launch({ channel: 'chrome' }).catch(() => chromium.launch());
 const page = await browser.newPage({ viewport: { width: 1000, height: 800 } });
+await page.addInitScript(COLOR_INIT);
 await page.goto('file://' + resolve(file), { waitUntil: 'networkidle' }).catch(() => {});
 await page.addStyleTag({ content: '*{transition:none!important;animation:none!important}' });
 if (dark) await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'));
 
 const read = el => {
-  const transparent = c => { const a = c.match(/[\d.]+/g); return !c || c === 'rgba(0, 0, 0, 0)' || (a && a.length === 4 && parseFloat(a[3]) === 0); };
+  const transparent = c => { const a = window.__dsRGBA(c); return !c || c === 'rgba(0, 0, 0, 0)' || (a && a[3] === 0); };
   const eff = n => { while (n) { const c = getComputedStyle(n).backgroundColor; if (!transparent(c)) return c; n = n.parentElement; } return getComputedStyle(document.body).backgroundColor; };
   const cs = getComputedStyle(el);
   // skip non-text form controls (checkbox/radio/switch render natively via accent-color,
@@ -52,7 +54,7 @@ const read = el => {
   // graphical / icon-only control: no DIRECT text node (only an <svg> or nothing) →
   // WCAG 1.4.11 non-text contrast applies (3:1), not the 4.5 text rule.
   const graphical = ![...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim());
-  return { skip, graphical, color: cs.color, bg: own, label: (el.textContent || el.value || el.getAttribute('aria-label') || '').trim().slice(0, 18), px: parseFloat(cs.fontSize), bold: (parseInt(cs.fontWeight, 10) || 400) >= 700 };
+  return { skip, graphical, color: window.__dsRGBA(cs.color), bg: window.__dsRGBA(own), label: (el.textContent || el.value || el.getAttribute('aria-label') || '').trim().slice(0, 18), px: parseFloat(cs.fontSize), bold: (parseInt(cs.fontWeight, 10) || 400) >= 700 };
 };
 
 const handles = await page.$$('button, a[href], input, select, textarea, [role="button"], [role="switch"]');

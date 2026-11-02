@@ -27,6 +27,7 @@
 import { resolve } from 'node:path';
 import { requireTargets } from './_targets.mjs';
 import { loadPlaywright } from './_playwright.mjs';
+import { COLOR_INIT } from './_color.mjs';
 let chromium;
 try { ({ chromium } = loadPlaywright()); }
 catch {
@@ -49,6 +50,7 @@ let high = 0;
 
 for (const f of files) {
   const page = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  await page.addInitScript(COLOR_INIT);
   await page.goto('file://' + resolve(f), { waitUntil: 'networkidle' }).catch(() => {});
   await page.addStyleTag({ content: '*{transition:none!important;animation:none!important}' });
   if (dark) await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'));
@@ -60,7 +62,7 @@ for (const f of files) {
       return r.width > 1 && r.height > 1 && s.visibility !== 'hidden' && +s.opacity !== 0;
     };
     const box = el => { const r = el.getBoundingClientRect(); return r.width > 40 && r.height > 20; };
-    const rgb = c => { const m = (c || '').match(/-?\d+\.?\d*/g); return m ? m.slice(0, 4).map(Number) : null; };
+    const rgb = c => { const m = (window.__dsRGBString(c) || '').match(/-?\d+\.?\d*/g); return m ? m.slice(0, 4).map(Number) : null; };
     const hue = (r, g, b) => {
       r /= 255; g /= 255; b /= 255;
       const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
@@ -154,13 +156,13 @@ for (const f of files) {
         // generic default stack: small offsets + 10%-black
         if (/rgba\(0,\s*0,\s*0,\s*0\.1\d?\)/.test(bs) && /(^|\s)0px\s+1px\s+(2|3)px/.test(bs)) genericShadow++;
         // opaque / heavy black shadow
-        const sc = bs.match(/rgba?\([^)]*\)/);
+        const sc = bs.match(/(?:rgba?|oklch|oklab|lch|lab|color)\([^)]*\)/);
         if (sc) { const a = rgb(sc[0]); if (a && a[0] === 0 && a[1] === 0 && a[2] === 0 && (a[3] === undefined || a[3] >= 0.4)) blackShadow++; }
       }
 
       // pure black text on an element that directly renders text
       const directText = [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim().length > 1);
-      if (directText && s.color === 'rgb(0, 0, 0)') blackText++;
+      if (directText && window.__dsRGBString(s.color) === 'rgb(0, 0, 0)') blackText++;
 
       const bg = rgb(s.backgroundColor);
       if (bg && (bg[3] === undefined || bg[3] > 0.9)) {

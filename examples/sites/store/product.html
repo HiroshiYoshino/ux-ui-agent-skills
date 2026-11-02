@@ -66,7 +66,7 @@
   }
   .swatch .face {
     inline-size: 100%; block-size: 100%; border-radius: var(--radius-button);
-    box-shadow: inset 0 0 0 var(--border-width-thin) var(--mat-line);
+    box-shadow: inset 0 0 0 var(--border-width-thin) var(--color-border-strong);
     transition: box-shadow var(--transition-micro), transform var(--transition-micro);
   }
   .swatch .mark {
@@ -85,7 +85,8 @@
     background: linear-gradient(135deg, transparent calc(50% - 1px), var(--color-surface-card) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)); }
   .swatch .face { position: relative; }
 
-  .sizes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 6rem), 1fr)); gap: var(--space-2); }
+  /* One row of sizes at every width, so three sizes never wrap to two and one */
+  .sizes { display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); gap: var(--space-2); }
   .size-opt {
     position: relative; display: grid; gap: var(--space-0-5); align-content: start; padding: var(--space-3);
     border: var(--border-width-thin) solid var(--color-border-strong); border-radius: var(--radius-button);
@@ -137,17 +138,20 @@
   }
   @media (min-width: 80rem) { .pdp { gap: var(--space-16); } }
 
-  /* Specs: an index, label left and value right */
+  /* Specs: an index, label left and value right. Wide, both lower sections use the
+     product area's 7/5 split and gap, so the lists start on the buy column's line. */
   .specs { margin-block-start: var(--section-gap); display: grid; gap: var(--space-8); grid-template-columns: minmax(0, 1fr); }
   .specs h2, .later h2 { margin-block-start: var(--space-2); font-size: var(--text-3xl); line-height: var(--leading-tight); letter-spacing: var(--tracking-tight); font-weight: var(--weight-regular); max-inline-size: 18ch; }
   .spec-list div { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-1); padding-block: var(--space-4); border-block-start: var(--border-width-thin) solid var(--color-border-default); }
   .spec-list div:last-child { border-block-end: var(--border-width-thin) solid var(--color-border-default); }
   .spec-list dt { font-family: var(--font-mono); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: var(--tracking-mono); color: var(--color-text-secondary); padding-block-start: var(--space-0-5); }
   @media (min-width: 40rem) { .spec-list div { grid-template-columns: minmax(0, 2fr) minmax(0, 5fr); gap: var(--space-6); } }
-  @media (min-width: 56rem) { .specs { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--space-16); } .specs h2, .later h2 { font-size: var(--text-5xl); } }
+  @media (min-width: 56rem) { .specs { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--space-12); } .specs h2, .later h2 { font-size: var(--text-5xl); } }
 
   /* Later: a wide tile with the piece at each size, or flat-packed */
-  .later { margin-block-start: var(--section-gap); display: grid; gap: var(--space-8); grid-template-columns: minmax(0, 1fr); }
+  .later { margin-block-start: var(--section-gap); display: grid; gap: var(--space-8); grid-template-columns: minmax(0, 1fr); grid-template-areas: "copy" "art"; }
+  .later-copy { grid-area: copy; }
+  .later-art { grid-area: art; }
   .later-copy p { margin-block-start: var(--space-4); color: var(--color-text-secondary); max-inline-size: 46ch; }
   .later-art { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 5rem), 1fr)); gap: var(--space-2); padding: var(--space-4); border-radius: var(--radius-tile); }
   .later-art figure { display: grid; gap: var(--space-2); min-inline-size: 0; }
@@ -156,7 +160,8 @@
   .later-art figcaption span + span { color: var(--color-text-on-product-secondary); }
   .later-art.single { grid-template-columns: minmax(0, 1fr); }
   .later-art.single .render { max-block-size: var(--size-hero-media-max); }
-  @media (min-width: 56rem) { .later { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--space-16); align-items: center; } }
+  @media (min-width: 56rem) { .later { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "art copy"; gap: var(--space-12); align-items: center; } }
+  @media (min-width: 80rem) { .specs, .later { gap: var(--space-16); } }
 </style>
 </head>
 <body>
@@ -209,7 +214,7 @@
 
       <div class="buy" id="buy">
         <div>
-          <p class="eyebrow" id="p-cat">Shelving, made to order</p>
+          <p class="eyebrow" id="p-cat">Shelving</p>
           <h1 id="p-name">Rook Bookcase</h1>
           <div class="price-row"><span class="price-big" id="p-price"></span><span class="price-note" id="p-price-note"></span></div>
         </div>
@@ -306,7 +311,7 @@
           </div>
         </div>
       </div>
-      <p class="about" id="about"><strong>About this example.</strong> Design example built with ux-ui-agent-skills. The shop, products and prices are fictional. Visual language adapted from the floyd spec in the kit's library. Checked by the kit's accessibility and correctness gates.</p>
+      <p class="about" id="about"><strong>About this example.</strong> Design example built with <span class="nowrap">ux-ui-agent-skills</span>. The shop, products and prices are fictional. Visual language adapted from the floyd spec in the kit's library. Contrast, keyboard use and layout were tested with the kit's automated checks.</p>
       <div class="credit">
         <span>Store example. Companies and figures are fictional.</span>
         <span>Built with <a href="https://github.com/plugin87/ux-ui-agent-skills">ux-ui-agent-skills</a> by Thientan Soparat. <a href="../../index.html">All examples</a></span>
@@ -340,7 +345,7 @@
   $('crumb-cat').textContent = p.cat;
   $('crumb-cat').href = `index.html?cat=${p.cat}#grid`;
   $('crumb-name').textContent = p.name;
-  $('p-cat').textContent = `${p.cat}, made to order`;
+  $('p-cat').textContent = p.cat;
   $('p-name').textContent = p.name;
   $('p-blurb').textContent = p.blurb;
 
@@ -352,6 +357,7 @@
       <span class="mark" aria-hidden="true">${P.icon('check')}</span>
     </label>`).join('');
   if (p.sizes.length < 2) $('size-group').hidden = true;
+  $('sizes').style.setProperty('--n', p.sizes.length);
 
   /* View tabs from the product's own views: no taken-apart view for a piece that arrives built */
   const VIEWS = P.viewsOf(p);
@@ -409,8 +415,11 @@
     renderSizes();
     const avail = $('avail'), add = $('add-btn'), acts = $('avail-actions');
     if (pz) {
-      /* The nearest thing we can make now, offered as one button */
-      const altS = p.sizes.find(s => !paused(st.finish, s.id));
+      /* The nearest thing we can make now, offered as one button: the closest size in
+         this finish first, then another finish in this size. */
+      const here = p.sizes.findIndex(s => s.id === st.size);
+      const altS = p.sizes.map((s, i) => ({ s, d: Math.abs(i - here) }))
+        .filter(x => x.d > 0 && !paused(st.finish, x.s.id)).sort((a, b) => a.d - b.d).map(x => x.s)[0];
       const altF = p.finishes.find(f => !paused(f, st.size));
       const alt = altS ? { size: altS.id, text: `Switch to ${altS.label}` } : altF ? { finish: altF, text: `Switch to ${fin(altF).toLowerCase()}` } : null;
       avail.className = 'status out';

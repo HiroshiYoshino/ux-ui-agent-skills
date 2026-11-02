@@ -17,6 +17,7 @@ import { readdirSync, statSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { requireTargets } from './_targets.mjs';
 import { loadPlaywright } from './_playwright.mjs';
+import { COLOR_INIT } from './_color.mjs';
 
 let chromium;
 try { ({ chromium } = loadPlaywright()); }
@@ -66,12 +67,13 @@ catch {
 let totalFail = 0;
 for (const f of files) {
   const page = await browser.newPage();
+  await page.addInitScript(COLOR_INIT);
   await page.goto('file://' + resolve(f));
   await page.addStyleTag({ content: '*{transition:none!important;animation:none!important}' });
   if (dark) await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'));
 
   const items = await page.evaluate(() => {
-    const toRGBA = s => { const m = s && s.match(/[\d.]+/g); return m ? [+m[0], +m[1], +m[2], m[3] !== undefined ? +m[3] : 1] : null; };
+    const toRGBA = s => window.__dsRGBA(s);
     function bgOf(el) {
       const stack = []; let n = el;
       while (n) { const c = toRGBA(getComputedStyle(n).backgroundColor); if (c && c[3] > 0) { stack.push(c); if (c[3] >= 1) break; } n = n.parentElement; }
@@ -87,6 +89,11 @@ for (const f of files) {
       if (!el.offsetParent && getComputedStyle(el).position !== 'fixed') continue; // not visible
       const cs = getComputedStyle(el);
       if (cs.visibility === 'hidden' || +cs.opacity === 0) continue;
+      // An .sr-only label is clipped to 1px: it has no visual presentation, so
+      // contrast (WCAG 1.4.3) does not apply. The old colour parser hid this by
+      // misreading the color-mix() cell behind one; reading colours right exposed it.
+      const box = el.getBoundingClientRect();
+      if (box.width <= 2 && box.height <= 2) continue;
       const col = toRGBA(cs.color); if (!col) continue;
       const px = parseFloat(cs.fontSize), bold = parseInt(cs.fontWeight, 10) >= 700;
       out.push({ tag: el.tagName.toLowerCase() + (el.className ? '.' + String(el.className).split(' ')[0] : ''),

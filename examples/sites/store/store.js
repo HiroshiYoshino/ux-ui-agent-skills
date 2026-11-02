@@ -81,7 +81,7 @@
       blurb: 'A slatted bed that needs no box spring. The headboard is pegged, and the side rails lock into the posts with wedged tusk tenons, so it can be taken down to move.',
       joinery: 'Pegged headboard, side rails on wedged tusk tenons', weight: '71 kg', delivered: 'Delivered in 5 parts and put together in your room',
       parts: ['HEADBOARD', 'FOOTBOARD', '2 RAILS', 'SLATS'], detail: 'PEGGED HEADBOARD JOINT', detailTab: 'Joint' },
-    { id: 'writing-desk', name: 'Writing Desk', type: 'desk', cat: 'Tables', added: '2025-09-15', rank: 5,
+    { id: 'writing-desk', name: 'Writing Desk', type: 'desk', cat: 'Tables', added: '2026-08-24', rank: 5,
       finishes: ['oak', 'walnut', 'ash'],
       sizes: [
         { id: '120', label: '120 cm', dim: 'W 120 x D 65 x H 74 cm', short: 'One drawer', price: 22500, units: 120 },
@@ -90,7 +90,7 @@
       blurb: 'A desk with one hand-cut dovetailed drawer that runs on waxed wooden runners. The legs are tenoned into the apron and pegged.',
       joinery: 'Dovetailed drawer, pegged apron', weight: '34 kg', delivered: 'Delivered built and carried in',
       detail: 'DOVETAILED DRAWER', detailTab: 'Drawer' },
-    { id: 'low-shelf', name: 'Long Low Shelf', type: 'shelf-low', cat: 'Shelving', added: '2025-10-01', rank: 6,
+    { id: 'low-shelf', name: 'Long Low Shelf', type: 'shelf-low', cat: 'Shelving', added: '2026-10-05', rank: 6,
       finishes: ['oak', 'walnut', 'ebonised'],
       sizes: [
         { id: '120', label: '120 cm', dim: 'W 120 x D 40 x H 56 cm', short: '3 sections', price: 16800, units: 3 },
@@ -266,7 +266,7 @@
       s += R(x0 + 10, 212, w - 20, 16, 'fabric', 'rx="3"') + R(x0 + 10, 224, w - 20, 4, 'fabric-shade');
       s += R(x0 + 10, 228, w - 20, 18, 'wood', 'rx="1"') + R(x0 + 10, 243, w - 20, 3, 'wood-shade');
       [x0 + 5, x0 + w - 5].forEach(x => { s += `<circle cx="${x}" cy="237" r="3" class="wood-shade"/>`; });
-      return { s, joint: { x: x0 + 5, y: 179 }, b: [x0, 150, w, G - 150] };
+      return { s, joint: { x: x0 + 5, y: 160 }, b: [x0, 150, w, G - 150] };
     },
     stool() {
       let s = shadow(64);
@@ -350,20 +350,26 @@
   };
 
   /* The collection hero: four pieces in one room, each in its own wood. */
-  const renderHero = (label) => {
-    const shelf = DRAW.shelf(3).s, sofa = DRAW.sofa(2).s, lamp = DRAW.lamp().s, ped = DRAW.pedestal().s;
-    return `<svg class="render" viewBox="0 0 600 300" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${label}" focusable="false">
+  /* The collection hero: four pieces in one room, each in its own wood, all drawn
+     to one scale. K is the bookcase's own scale (206 units for 190 cm). Each piece is
+     stretched to its real width and height at K, standing on the same floor line, and
+     placed left to right with clear floor between them. */
+  const K = 206 / 190;
+  const put = ({ s, b }, finish, wCm, hCm, x, bodyW = b[2]) => {
+    const sx = (wCm * K / bodyW).toFixed(3), sy = (hCm * K / b[3]).toFixed(3);
+    return `<g data-finish="${finish}" transform="translate(${x} ${G}) scale(${sx} ${sy}) translate(${-b[0]} ${-G})">${s}</g>`;
+  };
+  const renderHero = (label) => `<svg class="render" viewBox="0 0 600 300" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${label}" focusable="false">
       <rect x="0" y="0" width="600" height="${G}" class="wall"/>
       <rect x="0" y="${G}" width="600" height="${300 - G}" class="floor"/>
-      <rect x="250" y="40" width="92" height="104" class="window"/>
-      <path d="M296 40 V144 M250 92 H342" class="line"/>
-      <ellipse cx="380" cy="${G + 14}" rx="170" ry="10" class="shadow" opacity="0.5"/>
-      <g data-finish="oak" transform="translate(-74 0)">${shelf}</g>
-      <g data-finish="moss" transform="translate(196 0)">${sofa}</g>
-      <g data-finish="ash" transform="translate(322 0)">${lamp}</g>
-      <g data-finish="walnut" transform="translate(120 30) scale(0.88)">${ped}</g>
+      <rect x="290" y="44" width="92" height="104" class="window"/>
+      <path d="M336 44 V148 M290 96 H382" class="line"/>
+      <ellipse cx="340" cy="${G + 14}" rx="200" ry="10" class="shadow" opacity="0.5"/>
+      ${put(DRAW.shelf(3), 'oak', 120, 190, 60)}
+      ${put(DRAW.pedestal(), 'walnut', 42, 52, 218)}
+      ${put(DRAW.sofa(2), 'moss', 168, 76, 294)}
+      ${put(DRAW.lamp(), 'ash', 38, 160, 494, 100)}
     </svg>`;
-  };
 
   /* ------------------------------------------------------------------ theme */
   const store = {
@@ -432,6 +438,17 @@
   const site = document.querySelector('.site');
   let opener = null, highlight = null;
 
+  /* The empty cart counts what is really waiting in the workshop, from the stock data. */
+  const WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+  const emptyCopy = () => {
+    const n = PRODUCTS.filter(anyReady).length, all = PRODUCTS.length;
+    const say = (k) => WORDS[k] || String(k);
+    const lead = `Most pieces are made to order in ${LEAD}.`;
+    if (!n) return lead;
+    const who = say(n).charAt(0).toUpperCase() + say(n).slice(1);
+    return `${lead} ${who} of the ${say(all)} also ${n === 1 ? 'has' : 'have'} a finished piece waiting in the workshop that ships this week.`;
+  };
+
   const renderDrawer = () => {
     const n = count(), sub = subtotal();
     drawer.querySelector('.n').textContent = `(${n})`;
@@ -443,8 +460,8 @@
       body.innerHTML = `<div class="drawer-empty">
         ${icon('bag', 'ico-xl')}
         <h3>Nothing in your cart yet.</h3>
-        <p>Most pieces are made to order in ${LEAD}. The Turned Floor Lamp and the Pedestal Side Table are ready and ship this week.</p>
-        <a class="btn btn-primary" href="index.html#grid">Shop the collection</a>
+        <p>${emptyCopy()}</p>
+        <a class="btn btn-primary" href="index.html#grid" data-shop>Shop the collection</a>
         <button class="text-btn" type="button" data-close>Close the cart</button>
       </div>`;
       return;
@@ -498,14 +515,14 @@
       else (drawer.querySelector('[data-close]')).focus();
     });
   };
-  const closeDrawer = () => {
+  const closeDrawer = (restore = true) => {
     if (!drawer.classList.contains('open')) return;
     drawer.classList.remove('open'); scrim.classList.remove('open');
     document.body.classList.remove('locked');
     if (site) site.inert = false;
     highlight = null;
     document.querySelectorAll('.cart-btn').forEach(b => b.setAttribute('aria-expanded', 'false'));
-    if (opener && document.contains(opener)) opener.focus();
+    if (restore && opener && document.contains(opener)) opener.focus();
   };
 
   drawer.addEventListener('keydown', e => {
@@ -516,8 +533,20 @@
     if (e.shiftKey && (document.activeElement === first || document.activeElement.id === 'cart-title')) { e.preventDefault(); last.focus(); }
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   });
-  scrim.addEventListener('click', closeDrawer);
+  scrim.addEventListener('click', () => closeDrawer());
   drawer.addEventListener('click', e => {
+    /* "Shop the collection" on the page that holds the collection: close the cart,
+       then take the reader to the grid and put focus on its heading. */
+    const shop = e.target.closest('a[data-shop]');
+    const grid = document.getElementById('grid');
+    if (shop && grid) {
+      e.preventDefault();
+      closeDrawer(false);
+      const title = document.getElementById('col-title');
+      grid.scrollIntoView({ block: 'start' });
+      if (title) { title.setAttribute('tabindex', '-1'); title.focus({ preventScroll: true }); }
+      return;
+    }
     const t = e.target.closest('button'); if (!t) return;
     if (t.hasAttribute('data-close')) { closeDrawer(); return; }
     if (t.hasAttribute('data-checkout')) {

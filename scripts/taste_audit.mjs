@@ -20,6 +20,7 @@
 import { resolve } from 'node:path';
 import { requireTargets } from './_targets.mjs';
 import { loadPlaywright } from './_playwright.mjs';
+import { COLOR_INIT } from './_color.mjs';
 let chromium;
 try { ({ chromium } = loadPlaywright()); }
 catch {
@@ -42,6 +43,7 @@ let high = 0;
 
 for (const f of files) {
   const page = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+  await page.addInitScript(COLOR_INIT);
   await page.goto('file://' + resolve(f), { waitUntil: 'networkidle' }).catch(() => {});
   await page.addStyleTag({ content: '*{transition:none!important;animation:none!important}' });
   if (dark) await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'));
@@ -94,7 +96,7 @@ for (const f of files) {
     // distinct accent (non-neutral) colors used on text/bg
     const hues = new Set();
     for (const el of document.querySelectorAll('body *')) {
-      for (const c of [getComputedStyle(el).color, getComputedStyle(el).backgroundColor]) {
+      for (const c of [getComputedStyle(el).color, getComputedStyle(el).backgroundColor].map(window.__dsRGBString)) {
         const m = c.match(/\d+/g); if (!m) continue; const [r, g, b] = m.map(Number);
         const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
         if (mx - mn > 40) hues.add([Math.round(r / 32), Math.round(g / 32), Math.round(b / 32)].join());
@@ -103,11 +105,11 @@ for (const f of files) {
     // pure black/white text or bg
     let pure = 0;
     for (const el of document.querySelectorAll('body *')) {
-      const s = getComputedStyle(el);
-      if (s.color === 'rgb(0, 0, 0)' || s.color === 'rgb(255, 255, 255)') {
+      const s = getComputedStyle(el), color = window.__dsRGBString(s.color), bg = window.__dsRGBString(s.backgroundColor);
+      if (color === 'rgb(0, 0, 0)' || color === 'rgb(255, 255, 255)') {
         // allowed on dark/black sections? flag pure text color usage
       }
-      if (s.backgroundColor === 'rgb(0, 0, 0)' || s.backgroundColor === 'rgb(255, 255, 255)') pure++;
+      if (bg === 'rgb(0, 0, 0)' || bg === 'rgb(255, 255, 255)') pure++;
     }
     return { texts, uniform, uniformKey, hues: hues.size };
   });

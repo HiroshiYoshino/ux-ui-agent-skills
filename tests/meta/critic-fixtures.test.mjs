@@ -98,6 +98,7 @@ const BROWSER_GATES = [
   ['verify_target_size.mjs', []],
   ['verify_overflow.mjs', []],
   ['verify_spacing.mjs', []],
+  ['verify_thai.mjs', []],
   ['verify_reduced_motion.mjs', []],
   ['verify_interactive.mjs', []],
   ['lint_intent.mjs', []],

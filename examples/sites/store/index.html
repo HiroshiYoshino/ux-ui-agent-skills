@@ -19,6 +19,7 @@
     font-size: var(--text-display); line-height: var(--leading-display); letter-spacing: var(--tracking-display);
     font-weight: var(--weight-regular);
   }
+  .hero h1 span { display: block; }
   .hero .lede { max-inline-size: 46ch; font-size: var(--text-lg); color: var(--color-text-secondary); }
   .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3) var(--space-6); margin-block-start: var(--space-6); }
   .facts {
@@ -32,12 +33,12 @@
     .hero { padding-block: var(--space-10) var(--space-16); }
     .hero-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-areas: "head head" "copy media"; gap: var(--space-8) var(--space-12); align-items: start; }
     .hero h1 { max-inline-size: none; }
-    .hero h1 span { display: block; }
     .hero-copy { padding-block-start: var(--space-2); }
     .facts { grid-template-columns: repeat(3, auto); justify-content: start; gap: var(--space-6); }
   }
 
   /* Collection head: no eyebrow here, the count sits on the heading's baseline */
+  .col-head h2:focus { outline: none; }
   .col-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-2) var(--space-8); }
   .col-head h2, .how h2 {
     font-size: var(--text-3xl); line-height: var(--leading-tight);
@@ -79,11 +80,18 @@
   .card-name a:focus-visible::after { box-shadow: var(--shadow-focus-ring); }
   .card-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); font-size: var(--text-sm); color: var(--color-text-secondary); }
   .card-note { font-size: var(--text-sm); color: var(--color-text-secondary); }
-  /* Phone: price on its own line, the action full width, so every footer lines up */
-  .card-foot { display: grid; gap: var(--space-2); margin-block-start: auto; padding-block-start: var(--space-2); }
+  /* One footer at every width: the price on its own line, the action under it on one
+     line. Every label fits its column, so footers in a row end and start together.
+     Under 30rem the two longer labels have a short form. */
+  .card-foot { display: grid; justify-items: stretch; gap: var(--space-2); margin-block-start: auto; padding-block-start: var(--space-2); }
   .card-foot .btn { inline-size: 100%; }
+  .lbl-long { display: none; }
+  @media (min-width: 30rem) {
+    .lbl-short { display: none; }
+    .lbl-long { display: inline; }
+  }
   @media (min-width: 48rem) {
-    .card-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+    .card-foot { justify-items: start; }
     .card-foot .btn { inline-size: auto; }
   }
   .price { font-family: var(--font-mono); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
@@ -104,19 +112,35 @@
     .card.lead { grid-column: span 2; grid-row: span 2; grid-template-rows: minmax(0, 1fr) auto; }
     .card.lead .card-media { aspect-ratio: auto; min-block-size: 18rem; }
     .card.lead .card-name { font-size: var(--text-4xl); }
-    .card.lead .card-foot { justify-content: flex-start; gap: var(--space-3) var(--space-6); }
+    .card.lead .card-foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3) var(--space-6); }
   }
 
+  /* Two columns and an odd count: the last piece takes the full row, picture beside its
+     text on the same two columns as the grid, so no cell is left empty. */
+  .card.solo { grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: auto; column-gap: var(--space-3); align-items: start; }
+
+  /* The repairs tile ends where its row ends, with its link on the bottom edge. */
   .card-end {
-    display: grid; align-content: start; align-self: start; gap: var(--space-4); min-inline-size: 0;
+    display: grid; min-inline-size: 0; container-type: inline-size;
     padding: var(--space-5); border-radius: var(--radius-tile);
     border: var(--border-width-thin) solid var(--color-border-default); background: var(--color-surface-card);
   }
+  .end-in { display: grid; grid-template-areas: "head" "parts" "link"; grid-template-rows: auto auto minmax(0, 1fr); gap: var(--space-4); min-inline-size: 0; }
+  .end-in > div { grid-area: head; }
+  .end-in .parts { grid-area: parts; align-self: start; }
+  .end-in .link-arrow { grid-area: link; }
+  .end-note { display: none; margin-block-start: var(--space-3); font-size: var(--text-sm); color: var(--color-text-secondary); max-inline-size: 44ch; }
+  /* Wide enough: the heading and its link on the left, the price list on the right */
+  @container (min-width: 32rem) {
+    .end-in { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "head parts" "link parts"; grid-template-rows: auto minmax(0, 1fr); column-gap: var(--space-8); }
+    .end-note { display: block; }
+  }
   .card-end h3 { font-size: var(--text-xl); font-weight: var(--weight-regular); letter-spacing: var(--tracking-tight); line-height: var(--leading-snug); max-inline-size: 34ch; margin-block-start: var(--space-2); }
   .card-end.wide h3 { font-size: var(--text-2xl); }
+  .card-end .link-arrow { align-self: end; justify-self: start; }
   .parts { list-style: none; display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 var(--space-6); }
+  .parts li:last-child { border-block-end: var(--border-width-thin) solid var(--color-border-default); }
   .parts li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-1) var(--space-3); padding-block: var(--space-2); border-block-start: var(--border-width-thin) solid var(--color-border-default); font-size: var(--text-sm); }
-  .card-end.wide .parts { grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); }
 
   .empty {
     display: grid; gap: var(--space-4); justify-items: start; margin-block-start: var(--space-6);
@@ -208,7 +232,7 @@
         </div>
         <figure class="hero-media">
           <div class="hero-tile product-surface" id="hero-render"></div>
-          <figcaption>Rook Bookcase, 120 cm in oiled oak. Settle Sofa in moss wool. Pedestal Side Table in walnut. Turned Floor Lamp in ash.</figcaption>
+          <figcaption>Drawn to one scale: Rook Bookcase, 120 cm in oiled oak. Pedestal Side Table in walnut. Settle Sofa in moss wool. Turned Floor Lamp in ash.</figcaption>
         </figure>
         <div class="hero-copy">
           <p class="lede">Ten pieces in solid oak, walnut and ash. Every frame is held by wooden joints, mortise and tenon, dovetails or wedges, and finished with oil. We cut each one after you order it, and repair it when it needs it.</p>
@@ -335,7 +359,7 @@
           </div>
         </div>
       </div>
-      <p class="about" id="about"><strong>About this example.</strong> Design example built with ux-ui-agent-skills. The shop, products and prices are fictional. Visual language adapted from the floyd spec in the kit's library. Checked by the kit's accessibility and correctness gates.</p>
+      <p class="about" id="about"><strong>About this example.</strong> Design example built with <span class="nowrap">ux-ui-agent-skills</span>. The shop, products and prices are fictional. Visual language adapted from the floyd spec in the kit's library. Contrast, keyboard use and layout were tested with the kit's automated checks.</p>
       <div class="credit">
         <span>Store example. Companies and figures are fictional.</span>
         <span>Built with <a href="https://github.com/plugin87/ux-ui-agent-skills">ux-ui-agent-skills</a> by Thientan Soparat. <a href="../../index.html">All examples</a></span>
@@ -352,10 +376,26 @@
   const P = window.Pellwood;
   const CATS = ['All furniture', 'Shelving', 'Seating', 'Tables', 'Lighting', 'Beds'];
   const REASON = { featured: 'Featured', new: 'Newest' };
-  const REPAIR_CATS = ['All furniture', 'Shelving', 'Tables'];
+  /* Repairs the workshop prices up front, by the kind of piece they apply to. The
+     tile shows the ones for the category on screen; All furniture shows one of each kind. */
+  const REPAIRS = [
+    { t: 'Re-oil a tabletop', price: 1500, cats: ['Tables'], all: true },
+    { t: 'Re-glue a loose joint', price: 900, cats: ['Shelving', 'Seating', 'Tables', 'Beds'], all: true },
+    { t: 'Re-weave a cord seat', price: 1800, cats: ['Seating'], all: true },
+    { t: 'Re-wire a lamp', price: 1200, cats: ['Lighting'], all: true },
+    { t: 'Re-oil a bookcase', price: 2400, cats: ['Shelving'] },
+    { t: 'Cut a new shelf to match', price: 1600, cats: ['Shelving'] },
+    { t: 'Mend a wool cover', price: 1200, cats: ['Seating'] },
+    { t: 'Re-set a wedged joint', price: 700, cats: ['Tables'] },
+    { t: 'Re-paper a shade', price: 1600, cats: ['Lighting'] },
+    { t: 'Re-oil a turned stem', price: 600, cats: ['Lighting'] },
+    { t: 'Replace a cracked slat', price: 700, cats: ['Beds'] },
+    { t: 'Re-oil a bed frame', price: 2800, cats: ['Beds'] }
+  ];
+  const repairsFor = c => REPAIRS.filter(r => (c === 'All furniture' ? r.all : r.cats.includes(c)));
   const state = { cat: 'All furniture', sort: 'featured', ready: false };
 
-  document.getElementById('hero-render').innerHTML = P.renderHero('A room with a Rook Bookcase, a moss green Settle Sofa, a Pedestal Side Table and a Turned Floor Lamp');
+  document.getElementById('hero-render').innerHTML = P.renderHero('A room with a Rook Bookcase, a Pedestal Side Table, a moss green Settle Sofa and a Turned Floor Lamp, drawn to one scale');
 
   const rook = P.byId('rook-bookcase');
   document.getElementById('grow').innerHTML = rook.sizes.map(s => `<figure>${P.renderSVG(rook, { finish: 'oak', size: s.id, fit: false })}<figcaption><span>${s.label}</span><span>${P.money(s.price)}</span></figcaption></figure>`).join('');
@@ -366,7 +406,7 @@
     return `<li class="lb-opt" role="option" id="cat-${i}" data-value="${c}" data-label="${c}" aria-selected="${i === 0}">${P.icon('check')}<span>${c}</span><span class="n">${n}</span></li>`;
   }).join('');
 
-  const isNew = p => p.added >= '2025-09-01';
+  const isNew = p => p.added >= '2026-08-01';
   const woods = n => `${n} ${n === 1 ? 'finish' : 'finishes'}`;
 
   const cardHTML = (p, i, lead) => {
@@ -389,9 +429,11 @@
           <svg class="ico spinner" aria-hidden="true"><use href="#i-loader"/></svg><svg class="ico ico-idle" aria-hidden="true"><use href="#i-plus"/></svg>
           <span class="label">Add</span><span class="sr-only"> ${p.name} to cart</span></button>`;
     } else if (!avail) {
-      action = `<a class="btn btn-secondary btn-add" href="product.html?p=${p.id}">Tell me when it is back<span class="sr-only">: ${p.name}</span></a>`;
+      action = `<a class="btn btn-secondary btn-add" href="product.html?p=${p.id}"><span class="lbl-long">See when it is back</span><span class="lbl-short">See details</span><span class="sr-only">: ${p.name}</span></a>`;
+    } else if (lead) {
+      action = `<a class="btn btn-primary btn-lg" href="product.html?p=${p.id}">Choose options<span class="sr-only"> for ${p.name}</span></a>`;
     } else {
-      action = `<a class="btn ${lead ? 'btn-primary btn-lg' : 'btn-secondary btn-add'}" href="product.html?p=${p.id}">Choose options<span class="sr-only"> for ${p.name}</span></a>`;
+      action = `<a class="btn btn-secondary btn-add" href="product.html?p=${p.id}"><span class="lbl-long">Choose options</span><span class="lbl-short">See options</span><span class="sr-only"> for ${p.name}</span></a>`;
     }
     return `<li class="card${lead ? ' lead' : ''}" style="--i:${i}">
       <div class="card-media product-surface">${P.renderSVG(p, { finish: v.finish, size: v.size })}</div>
@@ -426,19 +468,18 @@
     if (REASON[state.sort] && list.length > 2) leadIdx = list.findIndex(P.available);
     if (leadIdx > 0) list.unshift(list.splice(leadIdx, 1)[0]);
     const hasLead = leadIdx >= 0;
-    const showRepairs = list.length && REPAIR_CATS.includes(state.cat);
-    grid.innerHTML = list.map((p, i) => cardHTML(p, i, hasLead && i === 0)).join('') + (showRepairs ? `
-      <li class="card-end" id="card-end">
+    /* The repairs tile closes every grid, so a short category never ends on a hole. */
+    const repairs = repairsFor(state.cat);
+    grid.innerHTML = list.map((p, i) => cardHTML(p, i, hasLead && i === 0)).join('') + (list.length && repairs.length ? `
+      <li class="card-end" id="card-end"><div class="end-in">
         <div><p class="eyebrow">Repairs at the workshop</p>
-        <h3>Bring it back and we mend it, priced before we start.</h3></div>
+        <h3>Bring it back and we mend it, priced before we start.</h3>
+        <p class="end-note">Hide glue lets a joint be opened and glued again, and an oil finish can be sanded and renewed in one spot. Most repairs take one to two weeks.</p></div>
         <ul class="parts">
-          <li><span>Re-oil a tabletop</span><span class="price">${P.money(1500)}</span></li>
-          <li><span>Re-glue a loose joint</span><span class="price">${P.money(900)}</span></li>
-          <li><span>Extra Rook shelf</span><span class="price">${P.money(1400)}</span></li>
-          <li><span>Re-weave a cord seat</span><span class="price">${P.money(1800)}</span></li>
+          ${repairs.map(r => `<li><span>${r.t}</span><span class="price">${P.money(r.price)}</span></li>`).join('')}
         </ul>
         <a class="link-arrow" href="#how">How repairs work <svg class="ico" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
-      </li>` : '');
+      </div></li>` : '');
     empty.hidden = list.length > 0;
     if (!list.length) document.getElementById('empty-title').textContent = `Nothing in ${state.cat === 'All furniture' ? 'the collection' : state.cat} ships this week.`;
     const scope = state.cat === 'All furniture' ? '' : ` in ${state.cat}`;
@@ -446,13 +487,23 @@
     lastCount = list.length; lastLead = hasLead; fitEnd();
   };
 
-  /* The repairs tile takes whatever cells the last row leaves, so the grid ends on a full row. */
+  /* The grid ends on a full row. At three or four columns the repairs tile takes
+     whatever cells the last row leaves, including the hole beside a lead card in a
+     short category. At two columns a single cell is too narrow for it, so the tile
+     takes the full row, and an odd last piece takes the row above it as a wide card. */
   function fitEnd() {
+    grid.querySelectorAll('.card.solo').forEach(c => c.classList.remove('solo'));
     const end = document.getElementById('card-end'); if (!end) return;
     const cols = getComputedStyle(grid).gridTemplateColumns.split(' ').filter(Boolean).length;
     const leadCells = lastLead ? (cols >= 3 ? 4 : cols) : 1;
     const cells = leadCells + (lastCount - 1);
-    const rem = cells % cols, span = rem ? cols - rem : cols;
+    const rem = cells % cols;
+    let span = rem ? cols - rem : cols;
+    if (cols <= 2) {
+      span = cols;
+      const cards = grid.querySelectorAll('.card');
+      if (rem && cards.length) cards[cards.length - 1].classList.add('solo');
+    }
     end.style.gridColumn = `span ${span}`;
     end.classList.toggle('wide', span >= 2);
   }

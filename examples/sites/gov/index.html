@@ -44,6 +44,10 @@
      ใบ|อนุญาต at a line end. A .nobr span keeps a compound whole; the script
      below wraps the known compounds, including in strings it builds. */
   .nobr{white-space:nowrap}
+  /* A unit too long for the narrowest column (a range in the fee table) keeps
+     whole only once the column can hold it. */
+  .nobr-wide{white-space:normal}
+  @media (min-width:20rem){ .nobr-wide{white-space:nowrap} }
   .ico{inline-size:var(--size-icon);block-size:var(--size-icon);flex:none}
   .ico-sm{inline-size:var(--size-icon-sm);block-size:var(--size-icon-sm)}
 
@@ -85,8 +89,9 @@
   .mark .m-bar{fill:var(--color-text-inverse)}
   .mark .m-dot{fill:var(--color-mark-dot)}
   .brand-text{display:grid;min-inline-size:0}
-  .brand-name{font-weight:var(--weight-bold);font-size:var(--text-base);line-height:var(--leading-tight)}
+  .brand-name{font-weight:var(--weight-bold);font-size:var(--text-base);line-height:var(--leading-heading)}
   .brand-sub{font-size:var(--text-xs);color:var(--color-text-secondary);line-height:var(--leading-heading)}
+  html[lang="en"] .brand-sub{display:none}
   .utils{flex:1 0 100%;display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-3)}
   .util{position:relative;display:flex;align-items:center;gap:var(--space-2)}
   .util-label{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -95,7 +100,7 @@
   .seg-btn,.util-btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);
     min-inline-size:var(--size-target);min-block-size:var(--size-target);padding-inline:var(--space-3);
     border:0;border-radius:var(--radius-sm);background:transparent;color:var(--color-text-primary);
-    font-weight:var(--weight-medium);font-size:var(--text-sm);cursor:pointer;line-height:var(--leading-tight);
+    font-weight:var(--weight-medium);font-size:var(--text-sm);cursor:pointer;line-height:var(--leading-heading);
     transition:background-color var(--transition-micro),color var(--transition-micro)}
   .seg-btn:hover,.util-btn:hover{background:var(--color-action-secondary-hover)}
   .seg-btn:active,.util-btn:active{background:var(--color-action-secondary-active)}
@@ -201,14 +206,17 @@
   /* The one marker for invented figures and contacts */
   .fic{display:inline-flex;align-items:center;padding:0 var(--space-2);border-radius:var(--radius-xs);
     border:var(--border-thin) solid var(--color-border-strong);color:var(--color-text-secondary);background:transparent;
-    font-size:var(--text-xs);font-weight:var(--weight-semibold);line-height:var(--leading-body);vertical-align:middle;
-    margin-inline-start:var(--space-2);white-space:nowrap}
+    font-size:var(--text-xs);font-weight:var(--weight-semibold);line-height:var(--leading-body);white-space:nowrap}
+  /* Text and its pill sit in a wrapping flex row: the gap separates them on one
+     line, and a pill that wraps starts on the text edge instead of a margin in. */
+  .with-tag{display:inline-flex;flex-wrap:wrap;align-items:center;gap:var(--space-3) var(--space-2);max-inline-size:100%}
+  .with-tag > :first-child{min-inline-size:0}
   .hero .fic,.site-footer .fic{border-color:var(--color-text-inverse-secondary);color:var(--color-text-inverse-secondary)}
 
   /* Buttons */
   .btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);
     min-block-size:var(--size-control);padding-inline:var(--space-6);border:var(--border-thin) solid transparent;
-    border-radius:var(--radius-md);font-weight:var(--weight-semibold);line-height:var(--leading-tight);cursor:pointer;
+    border-radius:var(--radius-md);font-weight:var(--weight-semibold);line-height:var(--leading-heading);cursor:pointer;
     text-decoration:none;text-align:center;
     transition:background-color var(--transition-micro),border-color var(--transition-micro),color var(--transition-micro),transform var(--transition-micro)}
   .btn[hidden]{display:none}
@@ -219,9 +227,12 @@
   .btn-secondary{background:transparent;color:var(--color-text-primary);border-color:var(--color-border-strong)}
   .btn-secondary:hover{background:var(--color-action-secondary-hover);color:var(--color-text-primary)}
   .btn-secondary:active{background:var(--color-action-secondary-active);color:var(--color-text-primary)}
-  .btn-ghost{background:transparent;color:var(--color-text-link);padding-inline:var(--space-4)}
-  .btn-ghost:hover{background:var(--color-action-secondary-hover);color:var(--color-text-link-hover)}
-  .btn-ghost:active{background:var(--color-action-secondary-active);color:var(--color-text-link-hover)}
+  /* The ghost is a text button: no inline padding, so its label lines up with
+     the text column it sits in, even when it wraps to the start of a row. */
+  .btn-ghost{background:transparent;color:var(--color-text-link);padding-inline:0;min-inline-size:var(--size-target);
+    text-decoration-line:underline;text-decoration-color:transparent;text-decoration-thickness:var(--border-medium);text-underline-offset:.22em}
+  .btn-ghost:hover{color:var(--color-text-link-hover);text-decoration-color:currentColor}
+  .btn-ghost:active{color:var(--color-text-link-hover);text-decoration-color:currentColor;text-decoration-thickness:var(--border-thick)}
   .btn:disabled{opacity:var(--opacity-disabled);cursor:not-allowed;pointer-events:none}
   .btn[aria-busy="true"]{cursor:progress}
   .spinner{inline-size:var(--size-icon);block-size:var(--size-icon);border-radius:var(--radius-full);
@@ -236,9 +247,9 @@
   .progress-row{display:grid;gap:var(--space-2)}
   .progress-text{font-size:var(--text-sm);font-weight:var(--weight-semibold);color:var(--color-text-secondary)}
   .progress{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--space-1)}
-  .progress span{block-size:var(--size-progress);border-radius:var(--radius-full);background:var(--color-border-default);
+  .progress > span{block-size:var(--size-progress);border-radius:var(--radius-full);background:var(--color-border-default);
     transition:background-color var(--duration-base) var(--ease-out)}
-  .progress span.is-done,.progress span.is-current{background:var(--color-action-primary)}
+  .progress > span.is-done,.progress > span.is-current{background:var(--color-action-primary)}
   .q{border:0;margin:0;padding:0;min-inline-size:0;display:grid;gap:var(--space-4)}
   .q[hidden]{display:none}
   .q legend{padding:0;float:left;inline-size:100%}
@@ -299,9 +310,9 @@
   .docs-count strong{font-size:var(--text-2xl);font-variant-numeric:tabular-nums}
   .docs-count.is-complete{color:var(--color-feedback-success-text)}
   .meter{block-size:var(--size-progress);border-radius:var(--radius-full);background:var(--color-border-default);overflow:hidden}
-  .meter span{display:block;block-size:100%;inline-size:calc(var(--done, 0) / var(--total, 4) * 100%);background:var(--color-action-primary);
+  .meter > span{display:block;block-size:100%;inline-size:calc(var(--done, 0) / var(--total, 4) * 100%);background:var(--color-action-primary);
     border-radius:var(--radius-full);transition:inline-size var(--duration-base) var(--ease-out)}
-  .docs-count.is-complete + .meter span{background:var(--color-feedback-success-text)}
+  .docs-count.is-complete + .meter > span{background:var(--color-feedback-success-text)}
   .checklist{list-style:none;background:var(--color-surface-card);border:var(--border-thin) solid var(--color-border-default);
     border-radius:var(--radius-lg)}
   .checklist li[hidden]{display:none}
@@ -327,9 +338,10 @@
   .doc input:focus-visible{box-shadow:none}
   .doc-text{display:grid;gap:var(--space-0-5);min-inline-size:0}
   .doc-name{font-weight:var(--weight-semibold);line-height:var(--leading-heading);padding-block-start:var(--space-0-5)}
+  .doc-name.with-tag{display:flex}
   .doc-note{font-size:var(--text-sm);color:var(--color-text-secondary)}
   .tag{display:inline-flex;align-items:center;padding:0 var(--space-2);border-radius:var(--radius-xs);font-size:var(--text-xs);
-    font-weight:var(--weight-semibold);line-height:var(--leading-body);vertical-align:middle;margin-inline-start:var(--space-2);white-space:nowrap}
+    font-weight:var(--weight-semibold);line-height:var(--leading-body);white-space:nowrap}
   .tag-neutral{background:var(--color-surface-raised);color:var(--color-text-secondary)}
   .tag-ok{background:var(--color-feedback-success-bg);color:var(--color-feedback-success-text)}
   .tag-info{background:var(--color-feedback-info-bg);color:var(--color-feedback-info-text)}
@@ -357,7 +369,7 @@
   .total{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--space-2) var(--space-4);margin-block-start:var(--space-8);
     padding:var(--space-5);background:var(--color-surface-brand);border-radius:var(--radius-md)}
   .total strong{font-size:var(--text-2xl);line-height:var(--leading-heading);font-weight:var(--weight-bold)}
-  .total span{color:var(--color-text-secondary)}
+  .total-note{color:var(--color-text-secondary)}
 
   /* Fees */
   .fees{inline-size:100%;border-collapse:separate;border-spacing:0;background:var(--color-surface-card);
@@ -419,7 +431,7 @@
   .call-label{display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-sm);color:var(--color-text-secondary)}
   .call p.phone{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2);color:var(--color-text-primary);font-size:min(var(--text-2xl), var(--text-phone-fluid));
     font-weight:var(--weight-bold);line-height:var(--leading-heading);font-variant-numeric:tabular-nums;letter-spacing:.04em}
-  .call p.phone .fic{letter-spacing:0;margin-inline-start:0}
+  .call p.phone .fic{letter-spacing:0}
   .call p{color:var(--color-text-secondary);max-inline-size:var(--measure-body)}
   .contact-side{display:grid;gap:var(--space-2);min-inline-size:0}
   .contact-list{display:grid}
@@ -468,19 +480,32 @@
   .site-footer .wrap{display:grid;gap:var(--space-8)}
   .foot-brand{display:flex;align-items:center;gap:var(--space-3)}
   .foot-brand .mark .m-bg{fill:var(--color-surface-inverse-raised)}
-  .foot-name{font-weight:var(--weight-bold);line-height:var(--leading-tight)}
-  .foot-name span{display:block;font-weight:var(--weight-regular);font-size:var(--text-sm);color:var(--color-text-inverse-secondary);margin-block-start:var(--space-1)}
+  .foot-name{font-weight:var(--weight-bold);line-height:var(--leading-heading)}
+  .foot-name .foot-sub{display:block;font-weight:var(--weight-regular);font-size:var(--text-sm);color:var(--color-text-inverse-secondary);margin-block-start:var(--space-1)}
   .about{display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--space-3);align-items:start;padding:var(--space-5);
     border:var(--border-thin) solid var(--color-border-inverse);border-radius:var(--radius-md);scroll-margin-block-start:var(--space-6)}
   .about .ico{margin-block-start:var(--space-1)}
   .about p{max-inline-size:var(--measure-body)}
   .about strong{display:block;font-size:var(--text-lg);margin-block-end:var(--space-1)}
-  .about span{color:var(--color-text-inverse-secondary)}
+  .about-body{color:var(--color-text-inverse-secondary)}
   .foot-links{display:flex;flex-wrap:wrap;gap:var(--space-1) var(--space-6);font-size:var(--text-sm)}
   .site-footer a{display:inline-flex;align-items:center;gap:var(--space-2);min-block-size:var(--size-target);color:var(--color-text-inverse);font-weight:var(--weight-medium)}
   .site-footer a:hover,.site-footer a:active{color:var(--color-text-inverse-secondary)}
   .site-footer a:focus-visible{box-shadow:var(--shadow-focus-ring-inverse)}
 
+  /* Largest text on a phone: the page text grows, the header chrome does not, so
+     the heading still reaches the first screen. Toggles and mark hold the 44px
+     target, both control groups share one row, the name sets one step smaller,
+     and its English sub-line (the same name again) steps aside. A narrow
+     refinement, so max-width. */
+  @media (max-width:39.9375rem){
+    html[data-text="xl"] .mark{inline-size:var(--size-target-compact);block-size:var(--size-target-compact)}
+    html[data-text="xl"] .brand-sub{display:none}
+    html[data-text="xl"] .brand-name{font-size:var(--text-sm)}
+    html[data-text="xl"] .seg-btn,html[data-text="xl"] .util-btn{min-inline-size:var(--size-target-compact);
+      min-block-size:var(--size-target-compact);padding-inline:var(--space-2)}
+    html[data-text="xl"] .header-row{padding-block:var(--space-3)}
+  }
   @media (min-width:30rem){
     .opts{grid-template-columns:repeat(2,minmax(0,1fr))}
     .opts.opts-stack{grid-template-columns:minmax(0,1fr)}
@@ -506,7 +531,9 @@
     .ch-list > .ch > :last-child{margin-block-start:auto}
     .step{grid-template-columns:var(--size-step) minmax(0,1fr) auto}
     .dur{grid-column:3;grid-row:1;margin-block-start:var(--space-1);align-self:start}
-    .contact{grid-template-columns:minmax(0,5fr) minmax(0,7fr);align-items:start}
+    .contact{grid-template-columns:minmax(0,5fr) minmax(0,7fr)}
+    .call{display:flex;flex-direction:column}
+    .call > :last-child{margin-block-start:auto}
     .fb-ask{grid-template-columns:minmax(0,1fr) auto;align-items:center}
     .docs-status{grid-template-columns:auto minmax(0,1fr);align-items:center;gap:var(--space-6)}
     .sec > h2{font-size:var(--text-3xl)}
@@ -558,7 +585,7 @@
 <div class="notice" role="note" aria-label="ประกาศ">
   <div class="wrap">
     <svg class="ico" aria-hidden="true"><use href="#i-alert-triangle"/></svg>
-    <p><strong data-i18n="notice">ตัวอย่างงานออกแบบสมมติ ไม่ใช่เว็บไซต์ของรัฐ</strong> <a href="#about" data-i18n="notice-link">เกี่ยวกับตัวอย่างนี้</a></p>
+    <p><strong data-i18n-html="notice">ตัวอย่างงานออกแบบสมมติ <span class="nobr">ไม่ใช่เว็บไซต์ของรัฐ</span></strong> <a href="#about" data-i18n="notice-link">เกี่ยวกับตัวอย่างนี้</a></p>
   </div>
 </div>
 
@@ -684,7 +711,7 @@
       <dl class="facts">
         <div class="fact">
           <dt data-i18n="fact-fee">ค่าธรรมเนียม</dt>
-          <dd><span class="nobr"><span class="figure">300</span><span data-i18n="fact-fee-unit">บาทต่อปี</span></span><span class="fic" data-i18n="fic">สมมติ</span>
+          <dd><span class="with-tag"><span class="nobr"><span class="figure">300</span><span data-i18n="fact-fee-unit">บาทต่อปี</span></span><span class="fic" data-i18n="fic">สมมติ</span></span>
             <span class="fact-note" data-i18n="fact-fee-note">ร้านเกิน 40 ตารางเมตร จ่าย 600 บาท</span></dd>
         </div>
         <div class="fact">
@@ -715,7 +742,7 @@
       <div class="content">
         <section class="sec" id="check" aria-labelledby="check-title">
           <h2 id="check-title" data-i18n="check-title">เช็กว่าคุณต่ออายุได้ไหม</h2>
-          <p class="sec-lede" data-i18n="check-lede">ตอบ 4 ข้อ ใช้เวลาไม่ถึง 1 นาที ไม่มีจำกัดเวลา ย้อนกลับไปแก้ได้ทุกข้อ และคำตอบไม่ถูกส่งไปที่ไหน</p>
+          <p class="sec-lede" data-i18n-html="check-lede">ตอบ 4 ข้อ ใช้เวลาไม่ถึง 1 นาที ไม่มีจำกัดเวลา ย้อนกลับไปแก้ได้ทุกข้อ และคำตอบ<span class="nobr">ไม่ถูกส่งไปที่ไหน</span></p>
           <div class="sec-body">
             <form class="checker" id="checker" novalidate aria-labelledby="check-title">
               <div class="progress-row">
@@ -790,7 +817,7 @@
 
         <section class="sec" id="docs" aria-labelledby="docs-title">
           <h2 id="docs-title" data-i18n="docs-title">เอกสารที่ต้องใช้</h2>
-          <p class="sec-lede" data-i18n="docs-lede">ติ๊กรายการที่เตรียมแล้วได้เลย หน้านี้จำไว้ในเครื่องของคุณเท่านั้น</p>
+          <p class="sec-lede" data-i18n-html="docs-lede">ติ๊กรายการที่เตรียมแล้วได้เลย หน้านี้จำไว้ใน<span class="nobr">เครื่องของคุณเท่านั้น</span></p>
           <div class="sec-body">
             <div class="docs-status">
               <p class="docs-count" id="docs-count" aria-live="polite">เอกสารหลักพร้อมแล้ว <span class="nobr"><strong>0</strong> จาก 4</span></p>
@@ -806,9 +833,9 @@
               <li><label class="doc"><input type="checkbox" name="doc" value="lease" data-required>
                 <span class="doc-text"><span class="doc-name">สัญญาเช่า หรือโฉนดของพื้นที่ร้าน</span><span class="doc-note">ใช้ฉบับที่ยังไม่หมดอายุ ถ้าเป็นที่ของคุณเอง ใช้สำเนาโฉนดหน้าแรก</span></span></label></li>
               <li id="doc-change-li" hidden><label class="doc"><input type="checkbox" name="doc" value="change">
-                <span class="doc-text"><span class="doc-name">แบบแก้ไขประเภทกิจการ 1 แผ่น<span class="tag tag-info">จากผลการเช็ก</span></span><span class="doc-note">เขียนประเภทสินค้าหรือบริการที่ร้านขายอยู่ตอนนี้ แล้วเซ็นชื่อเจ้าของร้าน</span></span></label></li>
+                <span class="doc-text"><span class="doc-name with-tag"><span>แบบแก้ไขประเภทกิจการ 1 แผ่น</span><span class="tag tag-info">จากผลการเช็ก</span></span><span class="doc-note">เขียนประเภทสินค้าหรือบริการที่ร้านขายอยู่ตอนนี้ แล้วเซ็นชื่อเจ้าของร้าน</span></span></label></li>
               <li><label class="doc"><input type="checkbox" name="doc" value="proxy">
-                <span class="doc-text"><span class="doc-name">หนังสือมอบอำนาจ<span class="tag tag-neutral">ถ้ามีคนยื่นแทน</span></span><span class="doc-note">เจ้าของร้านเซ็นชื่อ พร้อมสำเนาบัตรประชาชนของคนที่มายื่น</span></span></label></li>
+                <span class="doc-text"><span class="doc-name with-tag"><span>หนังสือมอบอำนาจ</span><span class="tag tag-neutral">ถ้ามีคนยื่นแทน</span></span><span class="doc-note">เจ้าของร้านเซ็นชื่อ พร้อมสำเนาบัตรประชาชนของคนที่มายื่น</span></span></label></li>
             </ul>
             <div class="docs-foot">
               <p>ไม่ต้องรับรองสำเนา และไม่ต้องใช้ทะเบียนบ้าน</p>
@@ -819,7 +846,7 @@
 
         <section class="sec" id="steps" aria-labelledby="steps-title">
           <h2 id="steps-title" data-i18n="steps-title">ขั้นตอนและเวลาที่ใช้</h2>
-          <p class="sec-lede" data-i18n="steps-lede">เวลาด้านล่างคือกรณียื่นออนไลน์และเอกสารครบ ยื่นที่สำนักงานจะเร็วกว่า เพราะเจ้าหน้าที่ตรวจเอกสารให้ต่อหน้า</p>
+          <p class="sec-lede" data-i18n-html="steps-lede">เวลาด้านล่างคือกรณียื่นออนไลน์และเอกสารครบ ยื่นที่สำนักงานจะเร็วกว่า เพราะเจ้าหน้าที่<span class="nobr">ตรวจเอกสารให้ต่อหน้า</span></p>
           <div class="sec-body">
             <ol class="steps">
               <li class="step">
@@ -843,7 +870,7 @@
                 <span class="dur"><svg class="ico" aria-hidden="true"><use href="#g-clock"/></svg><span>ภายใน 1 วันทำการ</span></span>
               </li>
             </ol>
-            <div class="total"><strong>รวมประมาณ 3 วันทำการ<span class="fic">สมมติ</span></strong><span>นับจากวันที่ยื่นออนไลน์จนได้ใบใหม่ในอีเมล</span></div>
+            <div class="total"><strong class="with-tag"><span>รวมประมาณ 3 วันทำการ</span><span class="fic">สมมติ</span></strong><span class="total-note">นับจากวันที่ยื่นออนไลน์จนได้ใบใหม่ในอีเมล</span></div>
           </div>
         </section>
 
@@ -852,11 +879,11 @@
           <p class="sec-lede" data-i18n="fees-lede">จ่ายครั้งเดียวต่อปี ทุกช่องทางจ่ายเท่ากัน ยื่นออนไลน์ไม่มีค่าบริการเพิ่ม</p>
           <div class="sec-body">
             <table class="fees">
-              <caption>ค่าธรรมเนียมต่ออายุ 1 ปี<span class="fic">สมมติ</span></caption>
+              <caption><span class="with-tag"><span>ค่าธรรมเนียมต่ออายุ 1 ปี</span><span class="fic">สมมติ</span></span></caption>
               <thead><tr><th scope="col">รายการ</th><th scope="col" class="num">จำนวนเงิน</th></tr></thead>
               <tbody>
                 <tr><th scope="row">ร้านพื้นที่ขายไม่เกิน <span class="nobr">40 <abbr title="ตารางเมตร">ตร.ม.</abbr></span><span class="cell-note">ร้านส่วนใหญ่อยู่ในกลุ่มนี้</span></th><td class="num">300 บาท</td></tr>
-                <tr><th scope="row">ร้านพื้นที่ขาย 41 ถึง <span class="nobr">120 <abbr title="ตารางเมตร">ตร.ม.</abbr></span></th><td class="num">600 บาท</td></tr>
+                <tr><th scope="row">ร้านพื้นที่ขาย <span class="nobr-wide">41 ถึง 120 <abbr title="ตารางเมตร">ตร.ม.</abbr></span></th><td class="num">600 บาท</td></tr>
                 <tr><th scope="row">ยื่นหลังใบเดิมหมดอายุ ไม่เกิน 90 วัน<span class="cell-note">คิดเพิ่มจากค่าต่ออายุ เช่น ร้าน 300 บาท จ่ายรวม 345 บาท</span></th><td class="num">เพิ่ม 15%</td></tr>
                 <tr><th scope="row">ส่งใบจริงทางไปรษณีย์<span class="cell-note">ไม่บังคับ ใบ PDF ใช้แทนได้</span></th><td class="num">50 บาท</td></tr>
                 <tr><th scope="row">ขอใบแทน เมื่อใบหายหรือชำรุด</th><td class="num">100 บาท</td></tr>
@@ -894,7 +921,7 @@
                   <span class="ch-icon"><svg class="ico" aria-hidden="true"><use href="#g-building"/></svg></span>
                   <h3 id="ch-office">ที่สำนักงาน</h3><span class="tag tag-neutral">ได้ใบเร็วที่สุด</span>
                 </div>
-                <address>อาคารบริการประชาชน ชั้น 1 ช่อง 4 ถึง 6<br>99 ถนนฟ้าคราม ย่านท่าน้ำเก่า นครฟ้าคราม<span class="fic">สมมติ</span></address>
+                <address>อาคารบริการประชาชน ชั้น 1 ช่อง 4 ถึง 6<br><span class="with-tag"><span>99 ถนนฟ้าคราม ย่านท่าน้ำเก่า นครฟ้าคราม</span><span class="fic">สมมติ</span></span></address>
                 <dl class="hours">
                   <div><dt>จันทร์ถึงศุกร์</dt><dd>08:30 ถึง 16:30 น. ไม่พักเที่ยง</dd></div>
                   <div><dt>เสาร์</dt><dd>09:00 ถึง 12:00 น.</dd></div>
@@ -908,7 +935,7 @@
                   <h3 id="ch-post">ทางไปรษณีย์</h3>
                 </div>
                 <p>ส่งแบบคำขอที่กรอกแล้วพร้อมสำเนาเอกสาร ถึง</p>
-                <address>ฝ่ายใบอนุญาตร้านค้า ตู้ไปรษณีย์ 99<br>นครฟ้าคราม<span class="fic">สมมติ</span></address>
+                <address>ฝ่ายใบอนุญาตร้านค้า ตู้ไปรษณีย์ 99<br><span class="with-tag"><span>นครฟ้าคราม</span><span class="fic">สมมติ</span></span></address>
                 <dl class="hours">
                   <div><dt>ได้ใบใหม่</dt><dd>7 ถึง 10 วันทำการ นับจากวันที่เราได้รับซอง</dd></div>
                 </dl>
@@ -920,11 +947,11 @@
 
         <section class="sec" id="related" aria-labelledby="related-title">
           <h2 id="related-title" data-i18n="related-title">บริการที่เกี่ยวข้อง</h2>
-          <p class="sec-lede" data-i18n="related-lede">ถ้าผลการเช็กบอกว่าคุณต้องใช้บริการอื่น เริ่มจากตรงนี้</p>
+          <p class="sec-lede" data-i18n-html="related-lede">ถ้าผลการเช็กบอกว่าคุณต้องใช้<span class="nobr">บริการอื่น</span> <span class="nobr">เริ่มจากตรงนี้</span></p>
           <div class="sec-body">
             <ul class="related">
-              <li id="new-licence"><h3>ขอใบอนุญาตร้านค้าใหม่<span class="fic">สมมติ</span></h3><p>สำหรับร้านที่เพิ่งเปิด หรือใบเดิมหมดอายุเกิน 90 วัน ใช้เอกสารชุดเดียวกับหน้านี้ เพิ่มแผนผังร้าน 1 แผ่น ในตัวอย่างนี้ยังไม่มีหน้าของบริการนี้</p></li>
-              <li id="medium-licence"><h3>ใบอนุญาตกิจการขนาดกลาง<span class="fic">สมมติ</span></h3><p>สำหรับร้านที่มีพื้นที่ขายเกิน 120 ตารางเมตร มีการนัดตรวจร้านก่อนต่ออายุ ในตัวอย่างนี้ยังไม่มีหน้าของบริการนี้</p></li>
+              <li id="new-licence"><h3 class="with-tag"><span>ขอใบอนุญาตร้านค้าใหม่</span><span class="fic">สมมติ</span></h3><p>สำหรับร้านที่เพิ่งเปิด หรือใบเดิมหมดอายุเกิน 90 วัน ใช้เอกสารชุดเดียวกับหน้านี้ เพิ่มแผนผังร้าน 1 แผ่น ในตัวอย่างนี้ยังไม่มีหน้าของบริการนี้</p></li>
+              <li id="medium-licence"><h3 class="with-tag"><span>ใบอนุญาตกิจการขนาดกลาง</span><span class="fic">สมมติ</span></h3><p>สำหรับร้านที่มีพื้นที่ขายเกิน 120 ตารางเมตร มีการนัดตรวจร้านก่อนต่ออายุ ในตัวอย่างนี้ยังไม่มีหน้าของบริการนี้</p></li>
             </ul>
           </div>
         </section>
@@ -941,9 +968,9 @@
             <div class="contact-side">
               <dl class="contact-list">
                 <div><dt><svg class="ico" aria-hidden="true"><use href="#g-mail"/></svg><span class="sr-only">อีเมล</span></dt>
-                  <dd><span class="k">อีเมล</span><span><a class="long" href="mailto:shop-licence@example.org">shop-licence@example.org</a><span class="fic">สมมติ</span></span><span class="v">ตอบภายใน 1 วันทำการ</span></dd></div>
+                  <dd><span class="k">อีเมล</span><span class="with-tag"><a class="long" href="mailto:shop-licence@example.org">shop-licence@example.org</a><span class="fic">สมมติ</span></span><span class="v">ตอบภายใน 1 วันทำการ</span></dd></div>
                 <div><dt><svg class="ico" aria-hidden="true"><use href="#g-map-pin"/></svg><span class="sr-only">ที่อยู่</span></dt>
-                  <dd><span class="k">สำนักงาน</span><address>99 ถนนฟ้าคราม ย่านท่าน้ำเก่า นครฟ้าคราม<span class="fic">สมมติ</span></address><span class="v">อาคารบริการประชาชน ชั้น 1 มีทางลาดและลิฟต์</span></dd></div>
+                  <dd><span class="k">สำนักงาน</span><address class="with-tag"><span>99 ถนนฟ้าคราม ย่านท่าน้ำเก่า นครฟ้าคราม</span><span class="fic">สมมติ</span></address><span class="v">อาคารบริการประชาชน ชั้น 1 มีทางลาดและลิฟต์</span></dd></div>
               </dl>
               <p class="complain"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-alert-circle"/></svg><span><strong>แจ้งเรื่องร้องเรียน</strong> โทร 0X XXX XXXX กด 9 ไม่ต้องบอกชื่อก็ได้ เราตอบกลับภายใน 5 วันทำการ</span></p>
             </div>
@@ -978,7 +1005,7 @@
           </div>
         </section>
 
-        <p class="updated">ปรับปรุงหน้านี้ล่าสุด 20 ตุลาคม 2569</p>
+        <p class="updated" data-i18n="updated">ปรับปรุงหน้านี้ล่าสุด 20 ตุลาคม 2569</p>
       </div>
     </div>
   </div>
@@ -994,12 +1021,12 @@
         <rect class="m-bar" x="10" y="28" width="10" height="4" rx="2"/>
         <circle class="m-dot" cx="31" cy="30" r="4"/>
       </svg>
-      <p class="foot-name">สำนักงานบริการใบอนุญาต<wbr><span class="nobr">นครฟ้าคราม</span><span lang="en">Fah Khram City Permit Office</span></p>
+      <p class="foot-name">สำนักงานบริการใบอนุญาต<wbr><span class="nobr">นครฟ้าคราม</span><span class="foot-sub" lang="en">Fah Khram City Permit Office</span></p>
     </div>
     <div class="about" id="about">
       <svg class="ico" aria-hidden="true"><use href="#i-info"/></svg>
-      <p><strong>เกี่ยวกับตัวอย่างนี้ ไม่ใช่เว็บไซต์ของรัฐ</strong>
-        <span>ตัวอย่างงานออกแบบที่สร้างด้วย ux-ui-agent-skills หน่วยงาน บริการ ค่าธรรมเนียม และกฎในหน้านี้แต่งขึ้นทั้งหมด ภาษาภาพดัดแปลงจาก spec ชื่อ korea-gov ในคลังของชุดเครื่องมือ และตรวจด้วยเกตด้านการเข้าถึงและความถูกต้องของชุดเครื่องมือ</span></p>
+      <p><strong>เกี่ยวกับตัวอย่างนี้ <span class="nobr">ไม่ใช่เว็บไซต์ของรัฐ</span></strong>
+        <span class="about-body">ตัวอย่างงานออกแบบที่สร้างด้วย <span class="nobr" lang="en">ux-ui-agent-skills</span> หน่วยงาน บริการ ค่าธรรมเนียม และกฎในหน้านี้แต่งขึ้นทั้งหมด ภาษาภาพดัดแปลงจาก spec ชื่อ <span class="nobr" lang="en">korea-gov</span> ในคลังของชุดเครื่องมือ ส่วนความคมชัดของสี การใช้ด้วยคีย์บอร์ด และการจัดวาง ผ่านการทดสอบอัตโนมัติของชุดเครื่องมือ</span></p>
     </div>
     <div class="foot-links">
       <a href="https://github.com/plugin87/ux-ui-agent-skills" lang="en">Built with ux-ui-agent-skills by Thientan Soparat</a>
@@ -1021,7 +1048,9 @@
   /* ---------- Keep Thai compounds whole at line ends ----------
      Chrome segments Thai by dictionary word, so a compound such as ใบอนุญาต
      can break as ใบ|อนุญาต. Known compounds are wrapped in .nobr, here and in
-     every string the script builds. Longest first, so ในหน้านี้ wins over หน้านี้. */
+     every string the script builds. Longest first, so ในหน้านี้ wins over หน้านี้.
+     The list only knows what it holds: a copy edit that adds a compound must add
+     it here too, and verify_thai.mjs is what finds the ones that were missed. */
   var WORDS = ('ใบอนุญาต ต่ออายุ หมดอายุ อายุ เจ้าหน้าที่ ค่าธรรมเนียม ที่อยู่ ไม่ได้ คำตอบ คำขอ ยื่นคำขอ เครื่องมือ ชุดเครื่องมือ ' +
     'หน่วยงาน ในหน้านี้ หน้านี้ วันทำการ ตารางเมตร ร้านค้า ร้านอาหาร ขนาดเล็ก ขนาดกลาง เอกสาร ออนไลน์ ไปรษณีย์ ' +
     'ตู้ไปรษณีย์ สำนักงาน บัตรประชาชน เจ้าของร้าน เจ้าของ ประเภท กิจการ ค่าปรับ ข้อถัดไป ย้อนกลับ ตัวอย่าง สมมติ ' +
@@ -1035,19 +1064,26 @@
     'วันหยุด พักเที่ยง ลางาน ตอบกลับ ภาษาไทย ภาษาอังกฤษ อังกฤษ เริ่มใหม่ เริ่มตอบใหม่ ล่าสุด ตุลาคม ปรับปรุง ' +
     'ครั้งเดียว ค่าบริการ ค่าใช้จ่าย เงินสด เร่งเรื่อง ชำรุด บังคับ แสดงในร้าน ทันที ตรวจร้าน นัดตรวจ เหตุผล ' +
     'หาไม่เจอ เข้าใจ ประโยค สะดวก ไม่แน่ใจ ใบอนุญาตร้านค้า นครฟ้าคราม ถัดไป วันทำการถัดไป ค่าส่ง ฟ้าคราม ท่าน้ำเก่า ที่สุด ' +
-    'ต่อปี บาทต่อปี เท่ากัน เกต ด้าน ด้านล่าง นานขึ้น เว็บจริง ได้รับ จำกัดเวลา ชุดเดียวกัน ชุดเดียวกับ จำไว้ ใช้แทน ใบหาย ร้านบริการ ขอใบอนุญาต ยังไม่เคยมี ช่องจ่ายเงิน').split(' ');
+    'ต่อปี บาทต่อปี เท่ากัน เกต ด้าน ด้านล่าง นานขึ้น เว็บจริง ได้รับ จำกัดเวลา ชุดเดียวกัน ชุดเดียวกับ จำไว้ ใช้แทน ใบหาย ร้านบริการ ขอใบอนุญาต ยังไม่เคยมี ช่องจ่ายเงิน ' +
+    'แบบแก้ไข ประเภทกิจการ คำขอเดิม บนเว็บจริง จำลองการส่ง คมชัด ใช้ด้วย คีย์บอร์ด จัดวาง ทดสอบ อัตโนมัติ').split(' ');
   WORDS.sort(function (a, b) { return b.length - a.length; });
   /* A number stays with its unit or classifier (45 วัน, 3 วันทำการ, 300 บาท,
      +15%), and a label stays with its number (ช่อง 4, กด 9). These run first in
      the alternation, so at a digit the number rule wins over any compound. */
   var UNITS = 'วันทำการ|วัน|นาที|บาท|ตารางเมตร|ปี|แผ่น|ชั่วโมง|หลัก|รูป|เรื่อง|อย่าง|ข้อ|คน|คูหา|น\\.|ตุลาคม(?: \\d+)?|จาก \\d+|of \\d+|' +
     'more working days|working days?|days?|minutes?|baht|square metres|years?|hours?|digits|questions?|documents|floor plan|business-type|things?\\(s\\)|extra things?';
-  var NUM = '0X XXX XXXX|(?:ชั้น|ช่อง|กด|ข้อ|ตู้ไปรษณีย์|Question) \\d+|\\+?\\d[\\d,.:]*%?(?: (?:' + UNITS + '))';
-  var KEEP = new RegExp('(' + NUM + '|' + WORDS.join('|') + ')', 'g');
+  /* A range stays whole with its unit (3 ถึง 5 วันทำการ, 08:30 ถึง 16:30 น.,
+     ช่อง 4 ถึง 6), so the line never ends on ถึง. It runs before the single number. */
+  var RANGE = '(?:(?:ชั้น|ช่อง|กด|ข้อ) )?\\d[\\d,.:]* ถึง \\d[\\d,.:]*(?: (?:' + UNITS + '))?';
+  var NUM = RANGE + '|0X XXX XXXX|(?:ชั้น|ช่อง|กด|ข้อ|ตู้ไปรษณีย์|Question) \\d+|\\+?\\d[\\d,.:]*%?(?: (?:' + UNITS + '))';
+  /* การ and ความ only ever start a noun (การ|ต่ออายุ, ความ|เห็น): a line never ends
+     on one, so each is kept with the known word that follows it. */
+  var BOUND = '(?:การ|ความ)(?:' + WORDS.join('|') + ')';
+  var KEEP = new RegExp('(' + NUM + '|' + BOUND + '|' + WORDS.join('|') + ')', 'g');
   function keep(scope) {
     var walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT, { acceptNode: function (n) {
       var p = n.parentElement;
-      if (!p || p.closest('script,style,textarea,svg,.nobr,abbr')) return NodeFilter.FILTER_REJECT;
+      if (!p || p.closest('script,style,textarea,svg,.nobr,.nobr-wide,abbr')) return NodeFilter.FILTER_REJECT;
       KEEP.lastIndex = 0;
       return KEEP.test(n.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
     } });
@@ -1109,14 +1145,15 @@
     'contact-title': 'Contact', 'contact-lede': 'Ask anything about renewing. Staff answer in Thai and English.',
     'fb-title': 'Did this page help you?', 'fb-yes': 'Yes, it helped', 'fb-no': 'Not yet',
     'fb-label': 'What could you not find, or not understand?', 'fb-hint': 'Do not include your name, ID number or phone number.',
-    'fb-err': 'Write one short sentence, or choose Skip.', 'fb-skip': 'Skip', 'fb-thanks': 'Thank you for telling us', 'fb-again': 'Change my answer'
+    'fb-err': 'Write one short sentence, or choose Skip.', 'fb-skip': 'Skip', 'fb-thanks': 'Thank you for telling us', 'fb-again': 'Change my answer',
+    'updated': 'Last updated 20 October 2026'
   };
   var S = {
     th: {
       progress: 'ข้อ {n} จาก {t}', result: 'ผลการเช็ก', next: 'ข้อถัดไป', see: 'ดูผล',
       docsCount: 'เอกสารหลักพร้อมแล้ว <span class="nobr"><strong>{d}</strong> จาก {t}</span>', docsDone: 'ครบแล้ว เอกสารหลัก <span class="nobr"><strong>{d}</strong> จาก {t}</span> พร้อมยื่น',
       applyMsg: 'หน้านี้เป็นตัวอย่าง จึงไม่มีระบบยื่นคำขอจริง บนเว็บจริง ปุ่มนี้จะพาไปหน้ากรอกคำขอที่บันทึกร่างได้',
-      send: 'ส่งความเห็น', sending: 'กำลังตรวจข้อความ',
+      send: 'ส่งความเห็น', sending: 'กำลังจำลองการส่ง',
       fbYes: 'ในตัวอย่างนี้คำตอบไม่ได้ถูกส่งไปที่ไหน บนเว็บจริง ทีมที่ดูแลหน้านี้จะนับคำตอบนี้',
       fbSkip: 'ในตัวอย่างนี้คำตอบไม่ได้ถูกส่งไปที่ไหน บนเว็บจริง ทีมที่ดูแลหน้านี้จะเห็นว่าหน้านี้ยังไม่ช่วยคุณ',
       fbSent: 'ในตัวอย่างนี้ข้อความไม่ได้ถูกส่ง บนเว็บจริง ทีมที่ดูแลหน้านี้จะอ่านข้อความของคุณ',
@@ -1140,7 +1177,7 @@
       progress: 'Question {n} of {t}', result: 'Your result', next: 'Next question', see: 'See result',
       docsCount: 'Main documents ready: <span class="nobr"><strong>{d}</strong> of {t}</span>', docsDone: 'All set: <span class="nobr"><strong>{d}</strong> of {t}</span> main documents ready',
       applyMsg: 'This page is an example, so there is no real application system. On a real site this button opens a form you can save as a draft.',
-      send: 'Send feedback', sending: 'Checking your message',
+      send: 'Send feedback', sending: 'Simulating the send',
       fbYes: 'In this example your answer is not sent anywhere. On a real site the team that looks after this page would count it.',
       fbSkip: 'In this example your answer is not sent anywhere. On a real site the team would see that this page did not help you yet.',
       fbSent: 'In this example your message is not sent. On a real site the team that looks after this page would read it.',
@@ -1191,8 +1228,8 @@
   var themeBtn = $('theme-toggle');
   function syncTheme() {
     var dark = root.getAttribute('data-theme') === 'dark';
+    /* The moon stays: the label says dark mode, and the pressed style says it is on. */
     themeBtn.setAttribute('aria-pressed', String(dark));
-    themeBtn.querySelector('use').setAttribute('href', dark ? '#i-sun' : '#i-moon');
   }
   themeBtn.addEventListener('click', function () {
     var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';

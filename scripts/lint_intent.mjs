@@ -32,6 +32,7 @@ import { readdirSync, statSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { requireTargets } from './_targets.mjs';
 import { loadPlaywright } from './_playwright.mjs';
+import { COLOR_INIT } from './_color.mjs';
 let chromium;
 try { ({ chromium } = loadPlaywright()); }
 catch {
@@ -81,7 +82,7 @@ const COLLECT = () => {
   const resolveToken = (name) => {
     probe.style.backgroundColor = '';
     probe.style.backgroundColor = `var(${name})`;
-    const v = getComputedStyle(probe).backgroundColor;
+    const v = window.__dsRGBString(getComputedStyle(probe).backgroundColor);
     return v && v !== 'rgba(0, 0, 0, 0)' ? v : null;
   };
   const theme = {
@@ -103,11 +104,11 @@ const COLLECT = () => {
     })
     .map((el) => {
       const cs = getComputedStyle(el);
-      const bg = cs.backgroundColor;
+      const bg = window.__dsRGBString(cs.backgroundColor);
       const alpha = (bg.match(/rgba?\(([^)]+)\)/) || [, '0,0,0,1'])[1].split(',')[3];
       const opaque = alpha === undefined || Number(alpha) > 0.1;
       // Filled control -> the fill is the accent. Ghost/outline -> the text is.
-      const accent = opaque ? bg : cs.color;
+      const accent = opaque ? bg : window.__dsRGBString(cs.color);
       const name = accessibleName(el);
       return {
         name: name.slice(0, 40),
@@ -155,6 +156,7 @@ let checked = 0;
 for (const f of files) {
   const name = f.split('/').pop();
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 }, colorScheme: dark ? 'dark' : 'light' });
+  await page.addInitScript(COLOR_INIT);
   await page.goto('file://' + f);
   if (dark) await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'));
   const { theme, controls } = await page.evaluate(COLLECT);

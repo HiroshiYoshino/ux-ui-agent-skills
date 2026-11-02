@@ -26,7 +26,9 @@
     font-weight:var(--weight-regular)}
   h1,h2,h3,p,ul,ol,dl,dd,figure{margin:0}
   ul,ol{padding:0;list-style:none}
-  :lang(th){font-family:var(--font-thai)}
+  :lang(th){font-family:var(--font-thai);line-height:var(--leading-thai);letter-spacing:normal}
+  /* keeps a number with its unit, a date or a name on one line */
+  .keep{white-space:nowrap}
   a{color:var(--color-text-link);text-decoration-thickness:var(--border-width-thin);text-underline-offset:.2em}
   a:hover{text-decoration-thickness:var(--border-width-medium)}
   a:focus-visible{outline:none;box-shadow:var(--shadow-focus-ring);border-radius:var(--radius-xs)}
@@ -66,7 +68,6 @@
 
   .notice{padding-block:var(--space-2);font-size:var(--text-xs);color:var(--color-text-secondary);
     border-block-end:var(--border-width-thin) solid var(--color-border-default)}
-  .notice p{max-inline-size:var(--measure-body)}
   .notice a{color:var(--color-text-primary);display:inline-flex;align-items:center;min-block-size:var(--size-touch-min)}
   .about-note{margin-block-start:var(--space-12);padding:var(--space-5);border-radius:var(--radius-card);
     border:var(--border-width-thin) solid var(--color-border-strong);display:grid;gap:var(--space-2);max-inline-size:var(--measure-body)}
@@ -79,9 +80,9 @@
   .brand{display:inline-flex;align-items:center;gap:var(--space-3);color:var(--color-text-primary);
     text-decoration:none;min-inline-size:0;border-radius:var(--radius-button)}
   .brand:hover{text-decoration:none}
-  .brand .mark{inline-size:var(--size-mark);block-size:var(--size-mark);flex:none;color:var(--color-accent-strong)}
+  .brand .mark{display:none;inline-size:var(--size-mark);block-size:var(--size-mark);flex:none;color:var(--color-accent-strong)}
   .brand-text{display:grid;line-height:var(--leading-tight);min-inline-size:0}
-  .brand-name{font-family:var(--font-display);font-size:var(--text-lg);letter-spacing:var(--tracking-tight)}
+  .brand-name{font-family:var(--font-display);font-size:var(--text-lg);letter-spacing:var(--tracking-tight);white-space:nowrap}
   .brand-th{font-size:var(--text-xs);color:var(--color-text-secondary)}
   .sections{display:none}
   .head-actions{display:flex;align-items:center;gap:var(--space-2);flex:none}
@@ -157,7 +158,7 @@
   .bowl .fill-nest-base{fill:var(--color-bowl-nest-line)}
   .bowl .nest-curl{fill:none;stroke:var(--color-bowl-nest);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
   .bowl .nest-dark{fill:none;stroke:var(--color-bowl-nest-line);stroke-width:2;stroke-linecap:round}
-  .bowl .fill-lime{fill:var(--color-accent-soft)}
+  .bowl .fill-lime{fill:var(--color-bowl-lime)}
   .bowl .steam{fill:none;stroke:var(--color-text-inverse-secondary);stroke-width:3;stroke-linecap:round;
     stroke-dasharray:1;stroke-dashoffset:0}
   .bowl.is-steaming .steam{animation:steam var(--duration-draw) var(--ease-out) both}
@@ -227,7 +228,10 @@
   .panel:not([hidden]){animation:fade var(--duration-base) var(--ease-out)}
   @keyframes fade{from{opacity:0}to{opacity:1}}
   .dishes{display:grid;grid-template-columns:minmax(0,1fr);gap:0;border-block-start:var(--border-width-thin) solid var(--color-border-default)}
-  .dish{display:grid;gap:var(--space-2);padding-block:var(--space-5);border-block-end:var(--border-width-thin) solid var(--color-border-default)}
+  /* name, description, then badges pushed to the bottom: in a row of two dishes the
+     description starts the same distance under each name and the badges end level */
+  .dish{display:grid;grid-template-rows:auto auto 1fr;gap:var(--space-2);padding-block:var(--space-5);
+    border-block-end:var(--border-width-thin) solid var(--color-border-default)}
   .dish-head{display:flex;justify-content:space-between;align-items:baseline;gap:var(--space-4)}
   .dish-name{font-family:var(--font-display);font-weight:var(--weight-regular);font-size:var(--text-xl);
     line-height:var(--leading-tight);letter-spacing:var(--tracking-tight);min-inline-size:0}
@@ -240,7 +244,7 @@
   .dish--lead .dish-name .th{font-size:var(--text-base)}
   .dish--lead .price{font-size:var(--text-xl);font-family:var(--font-display);font-weight:var(--weight-regular)}
   .dish--lead .dish-desc{font-size:var(--text-lg)}
-  .badges{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-block-start:var(--space-1)}
+  .badges{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-block-start:var(--space-1);align-self:end}
   .badge{display:inline-flex;align-items:center;gap:var(--space-1-5);padding:var(--space-0-5) var(--space-2);
     border:var(--border-width-thin) solid var(--color-border-default);border-radius:var(--radius-xs);
     font-size:var(--text-xs);font-weight:var(--weight-medium);color:var(--color-text-primary);background:var(--color-surface-card)}
@@ -257,10 +261,13 @@
   /* Find us: the address card comes first on phones, the map sits beside it on wide screens */
   .findus-section{background:var(--color-surface-raised)}
   .findus{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-6)}
-  .map{background:var(--color-map-paper);border-radius:var(--radius-card);padding:var(--space-3);
-    border:var(--border-width-thin) solid var(--color-border-default)}
+  /* On a phone the map runs edge to edge so its labels stay readable; the caption
+     comes back to the gutter. */
+  .map{background:var(--color-map-paper);margin-inline:calc(var(--gutter) * -1);padding-block:var(--space-3);
+    border-block:var(--border-width-thin) solid var(--color-border-default)}
+  .map-canvas{position:relative;overflow:hidden}
   .map svg{display:block;inline-size:100%;block-size:auto;max-block-size:var(--size-map-max)}
-  .map figcaption{font-size:var(--text-xs);color:var(--color-text-secondary);padding:var(--space-2) var(--space-1) 0}
+  .map figcaption{font-size:var(--text-xs);color:var(--color-text-secondary);padding:var(--space-2) var(--gutter) 0}
   .m-block{fill:var(--color-map-block)}
   .m-water{fill:var(--color-map-water);stroke:var(--color-map-water-line);stroke-width:1.5}
   .m-wave{fill:none;stroke:var(--color-map-water-line);stroke-width:1.5;stroke-linecap:round}
@@ -354,7 +361,16 @@
   .lb-pop{position:absolute;inset-inline:0;inset-block-start:calc(100% + var(--space-1));z-index:var(--z-popover);
     background:var(--color-surface-card);border:var(--border-width-thin) solid var(--color-border-strong);
     border-radius:var(--radius-card);box-shadow:var(--shadow-lg);padding:var(--space-2);
-    max-block-size:var(--size-popover-max);overflow-y:auto;animation:pop var(--duration-fast) var(--ease-out)}
+    max-block-size:var(--size-popover-max);overflow-y:auto;scroll-padding-block:var(--space-2) var(--space-12);animation:pop var(--duration-fast) var(--ease-out)}
+  /* a fade and a chevron on the last row say more seatings sit below the edge; the
+     cue overlays the list (its negative margin cancels its height) and leaves at the end */
+  .lb-more{position:sticky;inset-block-end:calc(var(--space-2) * -1);z-index:var(--z-raised);display:none;
+    align-items:end;justify-content:center;gap:var(--space-1);block-size:var(--space-12);
+    margin-block-start:calc(var(--space-12) * -1);margin-inline:calc(var(--space-2) * -1);
+    padding-block-end:var(--space-1);pointer-events:none;font-size:var(--text-xs);color:var(--color-text-secondary);
+    background:linear-gradient(to bottom, var(--color-surface-card-clear), var(--color-surface-card) 70%)}
+  .lb-more .ico{inline-size:var(--size-icon-sm);block-size:var(--size-icon-sm)}
+  .lb-pop.has-more .lb-more{display:flex}
   .lb-pop:focus{outline:none}
   .lb-pop:focus-visible{box-shadow:var(--shadow-lg),var(--shadow-focus-ring)}
   @keyframes pop{from{opacity:0;transform:translateY(calc(var(--space-1) * -1))}to{opacity:1;transform:none}}
@@ -408,7 +424,7 @@
   .done[hidden]{display:none}
   .done-badge{display:inline-flex;align-items:center;gap:var(--space-2);justify-self:start;padding:var(--space-1) var(--space-3);
     border-radius:var(--radius-full);background:var(--color-surface-raised);font-size:var(--text-sm);font-weight:var(--weight-semibold)}
-  .done h3{font-family:var(--font-display);font-weight:var(--weight-regular);font-size:var(--text-3xl);line-height:var(--leading-tight)}
+  .done h3{font-family:var(--font-display);font-weight:var(--weight-regular);font-size:var(--text-2xl);line-height:var(--leading-tight)}
   .done h3:focus{outline:none}
   .done h3:focus-visible{box-shadow:var(--shadow-focus-ring);border-radius:var(--radius-xs)}
   .done p{color:var(--color-text-secondary)}
@@ -431,8 +447,20 @@
     font-size:var(--text-sm);color:var(--color-text-secondary)}
   .credits a{display:inline-flex;align-items:center;min-block-size:var(--size-control-sm)}
 
+  @media (min-width:22.5rem){
+    .brand .mark{display:block}
+  }
+  @media (min-width:30rem){
+    .m-label{font-size:var(--text-map-label-md)}
+  }
   @media (min-width:40rem){
     :root{--gutter:1.5rem}
+    .map{margin-inline:0;padding:var(--space-3);border:var(--border-width-thin) solid var(--color-border-default);
+      border-radius:var(--radius-card)}
+    .map-canvas{border-radius:var(--radius-xs)}
+    .map figcaption{padding:var(--space-2) var(--space-1) 0}
+    .m-label{font-size:var(--text-map-label-wide)}
+    .done h3{font-size:var(--text-3xl)}
     .row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
     .days{grid-template-columns:repeat(6,minmax(0,1fr))}
     .form-card{padding:var(--space-8)}
@@ -457,15 +485,18 @@
     :root{--gutter:2.5rem}
     .hero{grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:var(--space-12);align-items:end;
       padding-block:var(--space-16) var(--space-24)}
-    .findus{grid-template-columns:repeat(12,minmax(0,1fr));gap:0}
-    .findus{column-gap:var(--space-8)}
-    .m-label{font-size:var(--text-map-label-wide)}
-    .map{grid-column:1 / 8;grid-row:1;align-self:start}
-    .m-label{font-size:var(--text-map-label-wide)}
-    .visit{grid-column:8 / 13;grid-row:1;position:relative;z-index:var(--z-raised);box-shadow:var(--shadow-md);padding:var(--space-8);
-      margin-block-start:var(--space-16)}
     .book{grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:var(--space-16)}
     .book-intro{position:sticky;inset-block-start:var(--space-8);align-self:start}
+  }
+  @media (min-width:64rem){
+    /* Map and address card share one row and end on one line: the card sets the
+       height, and the map fills it. The drawing keeps its proportions in the middle
+       and the streets drawn past its edges fill whatever is left. */
+    .findus{grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--space-8);row-gap:0}
+    .map{grid-column:1 / 8;grid-row:1;align-self:stretch;display:flex;flex-direction:column}
+    .map-canvas{flex:1 1 auto;min-block-size:var(--size-map-min)}
+    .map svg{position:absolute;inset:0;block-size:100%;max-block-size:none}
+    .visit{grid-column:8 / 13;grid-row:1;align-self:stretch;align-content:start;box-shadow:var(--shadow-md);padding:var(--space-8)}
   }
 
   @media (prefers-reduced-motion:reduce){
@@ -498,7 +529,7 @@
   <symbol id="i-utensils" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></symbol>
 </svg>
 
-<div class="notice wrap"><p>Fictional restaurant, a design example built with ux-ui-agent-skills. <a href="#about">About this example</a></p></div>
+<div class="notice wrap"><p>Fictional restaurant, a design example built with <span class="keep">ux-ui-agent-skills</span>. <a href="#about">About this example</a></p></div>
 <header class="masthead wrap">
   <a class="brand" href="#top" aria-label="Ton Makham, back to top">
     <svg class="mark" viewBox="0 0 40 40" aria-hidden="true">
@@ -624,10 +655,10 @@
   <section class="section wrap" id="menu" aria-labelledby="menu-h">
     <div class="section-head">
       <h2 id="menu-h">The menu <span class="th" lang="th">เมนู</span></h2>
-      <p>Northern food from Chiang Mai, Lampang and the hills around them, priced in Thai baht with service included. Most dishes use pork, fish sauce or shrimp paste; the ones marked vegan say how we make them.</p>
+      <p>Northern food from Chiang Mai, Lampang and the hills around them, priced in Thai baht with service included. Most dishes use pork, fish sauce or shrimp paste. Dishes marked vegan use none of them, and where only one version is vegan, the dish says how we make it.</p>
       <ul class="legend" aria-label="Dietary key">
         <li><svg class="ico ico-sm legend-plant" aria-hidden="true"><use href="#i-sprout"/></svg>Vegan</li>
-        <li><span class="chillies" aria-hidden="true"><svg class="ico" aria-hidden="true"><use href="#i-flame-fill"/></svg><svg class="ico" aria-hidden="true"><use href="#i-flame-fill"/></svg><svg class="ico off" aria-hidden="true"><use href="#i-flame"/></svg></span>Heat, from 0 to 3 chillies</li>
+        <li><span class="chillies" aria-hidden="true"><svg class="ico" aria-hidden="true"><use href="#i-flame-fill"/></svg><svg class="ico" aria-hidden="true"><use href="#i-flame-fill"/></svg><svg class="ico off" aria-hidden="true"><use href="#i-flame"/></svg></span>Heat, from none to 3&nbsp;flames</li>
       </ul>
     </div>
 
@@ -646,7 +677,7 @@
       <ul class="dishes">
         <li class="dish dish--lead">
           <div class="dish-head"><h3 class="dish-name">Nam prik num <span class="th" lang="th">น้ำพริกหนุ่ม</span></h3><p class="price">฿160</p></div>
-          <p class="dish-desc">Green chillies, shallots and garlic roasted over charcoal and pounded with salt into a smoky, rough relish. Served with pork crackling (khaep mu, แคบหมู) and steamed vegetables.</p>
+          <p class="dish-desc">Green chillies, shallots and garlic roasted over charcoal and pounded with salt into a smoky, rough relish. Served with pork crackling (khaep mu, <span lang="th">แคบหมู</span>) and steamed vegetables.</p>
           <ul class="badges" aria-label="Dietary and heat notes">
             <li class="badge badge--fav"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg>House favourite</li>
             <li class="badge badge--heat"><span class="chillies" aria-hidden="true"><svg class="ico" aria-hidden="true"><use href="#i-flame-fill"/></svg><svg class="ico" aria-hidden="true"><use href="#i-flame-fill"/></svg><svg class="ico" aria-hidden="true"><use href="#i-flame-fill"/></svg></span><span class="sr-only">Heat 3 of 3: </span>Hot</li>
@@ -744,7 +775,7 @@
         </li>
         <li class="dish">
           <div class="dish-head"><h3 class="dish-name">Khanom jeen nam ngiao <span class="th" lang="th">ขนมจีนน้ำเงี้ยว</span></h3><p class="price">฿180</p></div>
-          <p class="dish-desc">Fermented rice noodles in a pork rib and tomato broth with pork blood tofu and dried kapok flowers (dok ngiao), topped with crispy garlic. Lunch only.</p>
+          <p class="dish-desc">Fermented rice noodles in a pork rib and tomato broth with pork blood tofu and dried red cotton tree flowers (dok ngiao), topped with crispy garlic. Lunch only.</p>
           <ul class="badges" aria-label="Dietary and heat notes">
             <li class="badge badge--heat"><span class="chillies" aria-hidden="true"><svg class="ico" aria-hidden="true"><use href="#i-flame-fill"/></svg><svg class="ico" aria-hidden="true"><use href="#i-flame-fill"/></svg><svg class="ico off" aria-hidden="true"><use href="#i-flame"/></svg></span><span class="sr-only">Heat 2 of 3: </span>Medium heat</li>
           </ul>
@@ -797,54 +828,113 @@
           <address id="address">27 Tamarind Lane, off Market Road, Bangkok</address>
           <div class="visit-actions">
             <button type="button" class="btn btn-secondary btn-sm" id="copy-address"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-copy"/></svg>Copy address</button>
-            <a class="btn btn-secondary btn-sm" href="mailto:bookings@example.com"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-mail"/></svg><span>bookings@example.com</span></a>
+            <a class="btn btn-secondary btn-sm" href="mailto:bookings@example.com"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-mail"/></svg><span>Email us</span></a>
           </div>
           <p class="copy-status" id="copy-status" role="status"></p>
         </div>
         <ul class="ways">
           <li><span class="pip" aria-hidden="true"><svg class="ico ico-sm"><use href="#i-train"/></svg></span>
-            <div><h3>Train, 6 minutes on foot</h3><p>Market Road station, exit 2. Turn right and walk 400 m along Market Road, then turn left into Tamarind Lane at the yellow pharmacy.</p></div></li>
+            <div><h3>Train, 6&nbsp;minutes on foot</h3><p>Market Road station, exit&nbsp;2. Turn right and walk 400&nbsp;m along Market Road, then turn left into Tamarind Lane at the yellow pharmacy.</p></div></li>
           <li><span class="pip" aria-hidden="true"><svg class="ico ico-sm"><use href="#i-ship"/></svg></span>
-            <div><h3>Canal boat, 3 minutes on foot</h3><p>Get off at the temple pier and walk up Tamarind Lane away from the water. We are the fourth shophouse on your right, under the big tree.</p></div></li>
+            <div><h3>Canal boat, 3&nbsp;minutes on foot</h3><p>Get off at the temple pier and walk up Tamarind Lane away from the water. We are the fourth shophouse on your right, under the big tree.</p></div></li>
           <li><span class="pip" aria-hidden="true"><svg class="ico ico-sm"><use href="#i-bus"/></svg></span>
-            <div><h3>Bus</h3><p>Buses along Market Road stop at the morning market, 150 m east of the lane.</p></div></li>
+            <div><h3>Bus</h3><p>Buses along Market Road stop at the morning market, 150&nbsp;m east of the lane.</p></div></li>
           <li><span class="pip" aria-hidden="true"><svg class="ico ico-sm"><use href="#i-car"/></svg></span>
-            <div><h3>By car</h3><p>The lane has no parking. The market car park on Market Road is free after 17:00.</p></div></li>
+            <div><h3>By car</h3><p>The lane has no parking. The market car park on Market Road is free after&nbsp;17:00.</p></div></li>
         </ul>
       </div>
 
       <figure class="map">
+        <div class="map-canvas">
         <svg viewBox="0 0 450 390" role="img" aria-labelledby="map-t map-d">
           <title id="map-t">Hand-drawn street map around Ton Makham</title>
           <desc id="map-d">Market Road runs across the top with Market Road station at its west end. Tamarind Lane runs south from Market Road to the old canal. The restaurant is on the east side of the soi, under a large tree, about two thirds of the way down. A dotted walking route goes from the station along the main road and down the soi. A second short route comes up from the temple pier on the canal.</desc>
           <defs>
             <path id="road-main" d="M-10 74C90 64 200 82 300 70s120-4 160 2"/>
             <path id="road-soi7" d="M262 76c-4 66 8 136 0 222"/>
-            <path id="road-soi5" d="M110 70c6 70-10 150 2 228"/>
+            <path id="road-soi5" d="M110 70c6 70-10 150 2 220"/>
             <path id="road-canal" d="M-10 292c130-8 320 4 470-6"/>
+            <!-- streets past the drawing's edges: seen only where the frame is wider or taller than the drawing -->
+            <path id="road-main-w" d="M-500 82C-330 76-160 80-10 74"/>
+            <path id="road-main-e" d="M460 72C580 78 720 70 950 76"/>
+            <path id="road-canal-w" d="M-500 296C-330 292-160 296-10 292"/>
+            <path id="road-canal-e" d="M460 286C600 282 760 290 950 286"/>
+            <path id="road-north" d="M-500 -56C-100 -62 300 -52 950 -60"/>
+            <path id="road-west" d="M-60 -520c6 200-6 400 0 806"/>
+            <path id="road-east" d="M500 -520c-6 200 6 400 0 800"/>
+            <path id="road-far" d="M-500 548c300-6 700 6 1450-2"/>
           </defs>
+          <!-- the blocks, water and streets around the drawing -->
+          <g class="m-bleed">
+            <rect class="m-block" x="-480" y="-360" width="404" height="148" rx="4"/>
+            <rect class="m-block" x="-46" y="-360" width="246" height="148" rx="4"/>
+            <rect class="m-block" x="216" y="-360" width="222" height="148" rx="4"/>
+            <rect class="m-block" x="454" y="-360" width="30" height="148" rx="4"/>
+            <rect class="m-block" x="516" y="-360" width="424" height="148" rx="4"/>
+            <rect class="m-block" x="-480" y="-196" width="404" height="124" rx="4"/>
+            <rect class="m-block" x="-46" y="-196" width="246" height="124" rx="4"/>
+            <rect class="m-block" x="216" y="-196" width="222" height="124" rx="4"/>
+            <rect class="m-block" x="454" y="-196" width="30" height="124" rx="4"/>
+            <rect class="m-block" x="516" y="-196" width="424" height="124" rx="4"/>
+            <rect class="m-block" x="16" y="-40" width="422" height="38" rx="4"/>
+            <rect class="m-block" x="-480" y="-40" width="404" height="96" rx="4"/>
+            <rect class="m-block" x="-46" y="-40" width="50" height="96" rx="4"/>
+            <rect class="m-block" x="454" y="-40" width="30" height="96" rx="4"/>
+            <rect class="m-block" x="516" y="-40" width="424" height="96" rx="4"/>
+            <rect class="m-block" x="-480" y="94" width="404" height="182" rx="4"/>
+            <rect class="m-block" x="-46" y="94" width="50" height="182" rx="4"/>
+            <rect class="m-block" x="454" y="92" width="30" height="182" rx="4"/>
+            <rect class="m-block" x="516" y="92" width="424" height="182" rx="4"/>
+            <path class="m-water" d="M-500 306c160-8 330 4 490-2c90-12 160 14 240 0s170-14 230-4c160-4 330 6 490 0V520c-240 8-480-6-720 2s-480-4-720-2z"/>
+            <path class="m-wave" d="M-200 430c10-6 20 6 30 0M90 450c10-6 20 6 30 0M250 470c10-6 20 6 30 0M520 420c10-6 20 6 30 0M700 460c10-6 20 6 30 0"/>
+            <rect class="m-block" x="-480" y="562" width="404" height="178" rx="4"/>
+            <rect class="m-block" x="-60" y="562" width="240" height="178" rx="4"/>
+            <rect class="m-block" x="196" y="562" width="224" height="178" rx="4"/>
+            <rect class="m-block" x="436" y="562" width="264" height="178" rx="4"/>
+            <rect class="m-block" x="716" y="562" width="224" height="178" rx="4"/>
+            <rect class="m-block" x="-480" y="756" width="404" height="184" rx="4"/>
+            <rect class="m-block" x="-60" y="756" width="240" height="184" rx="4"/>
+            <rect class="m-block" x="196" y="756" width="224" height="184" rx="4"/>
+            <rect class="m-block" x="436" y="756" width="264" height="184" rx="4"/>
+            <rect class="m-block" x="716" y="756" width="224" height="184" rx="4"/>
+            <use href="#road-north" class="m-casing" stroke-width="18"/>
+            <use href="#road-west" class="m-casing" stroke-width="16"/>
+            <use href="#road-east" class="m-casing" stroke-width="16"/>
+            <use href="#road-far" class="m-casing" stroke-width="12"/>
+            <use href="#road-north" class="m-road" stroke-width="14"/>
+            <use href="#road-west" class="m-road" stroke-width="12"/>
+            <use href="#road-east" class="m-road" stroke-width="12"/>
+            <use href="#road-far" class="m-road" stroke-width="8"/>
+          </g>
           <!-- city blocks -->
           <path class="m-block" d="M128 96c30-4 90 0 116 2 4 30 2 70 4 104-40 2-80-2-118 0-2-36-4-70-2-106z"/>
           <path class="m-block" d="M128 220c40-2 80 0 116 0 2 20 0 40 2 56-40 2-80 0-118 2 0-20-2-40 0-58z"/>
           <path class="m-block" d="M282 92c50 2 110-4 156 0 2 50-2 120 2 180-50 2-110-2-156 0 2-60-4-120-2-180z"/>
           <path class="m-block" d="M16 96c26-2 54 0 76-2 2 60-2 120 2 178-24 2-52 0-76 2 2-60-4-120-2-178z"/>
           <path class="m-block" d="M16 10c90-4 220 2 330-2 30 0 70 0 92 2v40c-120 4-270-2-422 4z"/>
-          <!-- canal -->
-          <path class="m-water" d="M-10 304c90-12 160 14 240 0s170-14 230-4v100H-10z"/>
+          <!-- canal: its water is the wide path above, so it carries on past the edges -->
           <path class="m-wave" d="M40 346c10-6 20 6 30 0M170 356c10-6 20 6 30 0M330 344c10-6 20 6 30 0"/>
           <!-- roads: a darker casing under a pale fill gives the inked edge -->
           <use href="#road-main" class="m-casing" stroke-width="22"/>
+          <use href="#road-main-w" class="m-casing" stroke-width="22"/>
+          <use href="#road-main-e" class="m-casing" stroke-width="22"/>
           <use href="#road-soi7" class="m-casing" stroke-width="16"/>
           <use href="#road-soi5" class="m-casing" stroke-width="16"/>
           <use href="#road-canal" class="m-casing" stroke-width="12"/>
+          <use href="#road-canal-w" class="m-casing" stroke-width="12"/>
+          <use href="#road-canal-e" class="m-casing" stroke-width="12"/>
           <use href="#road-main" class="m-road" stroke-width="18"/>
+          <use href="#road-main-w" class="m-road" stroke-width="18"/>
+          <use href="#road-main-e" class="m-road" stroke-width="18"/>
+          <use href="#road-canal-w" class="m-road" stroke-width="8"/>
+          <use href="#road-canal-e" class="m-road" stroke-width="8"/>
           <use href="#road-soi7" class="m-road" stroke-width="12"/>
           <use href="#road-soi5" class="m-road" stroke-width="12"/>
           <use href="#road-canal" class="m-road" stroke-width="8"/>
           <!-- road names -->
           <text class="m-label m-label-road"><textPath href="#road-main" startOffset="46%" text-anchor="middle" dy="5">Market Road</textPath></text>
           <text class="m-label m-label-road" transform="translate(252 282) rotate(-90)">Tamarind Lane</text>
-          <text class="m-label m-label-road" transform="translate(96 132) rotate(90)">Potters Lane</text>
+          <text class="m-label m-label-road" transform="translate(94 270) rotate(-90)">Potters Lane</text>
           <text class="m-label m-label-road" x="40" y="380">The old canal</text>
           <!-- walking routes -->
           <path class="m-route" d="M52 86c60-6 140 6 204-2 6 50 10 100 20 140"/>
@@ -864,7 +954,7 @@
           <!-- market -->
           <path class="m-ink" d="M372 122h56l-6 14h-44z M378 136v24M422 136v24M378 160h44"/>
           <path class="m-ink" d="M386 122v14M400 122v14M414 122v14"/>
-          <text class="m-label" x="306" y="182">Morning market</text>
+          <text class="m-label" x="292" y="182">Morning market</text>
           <!-- pier -->
           <path class="m-ink" d="M250 298v18h26v-18M256 316v10M270 316v10"/>
           <text class="m-label" x="284" y="330">Temple pier</text>
@@ -872,12 +962,13 @@
           <path class="m-tree" d="M292 240c-14 2-22-12-14-22-6-12 8-24 20-18 6-12 26-10 28 4 14 0 20 16 10 24 4 12-10 20-20 14-6 8-20 6-24-2z"/>
           <path class="m-pin" d="M300 230c0 10-12 20-12 20s-12-10-12-20a12 12 0 0 1 24 0z" transform="translate(4 -10)"/>
           <circle class="m-pin-dot" cx="292" cy="220" r="4"/>
-          <text class="m-label m-label-strong" x="296" y="266">Ton Makham</text>
-          <text class="m-label" x="296" y="283">No. 27</text>
+          <text class="m-label m-label-strong" x="286" y="270">Ton Makham</text>
+          <text class="m-label" x="346" y="232">No. 27</text>
           <!-- north -->
           <path class="m-ink" d="M426 30l-8 16 8-4 8 4z"/>
           <text class="m-label m-label-strong" x="421" y="22">N</text>
         </svg>
+        </div>
         <figcaption>Drawn by hand, not to scale. Fictional streets.</figcaption>
       </figure>
     </div>
@@ -887,7 +978,7 @@
     <div class="book">
       <div class="book-intro">
         <h2 id="book-h">Book a table</h2>
-        <p>Pick a day and a time and we will hold the table for 15 minutes. Online requests are for 1 to 8 guests; for 9 or more, or the room upstairs, write to bookings@example.com.</p>
+        <p>Pick a day and a time and we will hold the table for 15&nbsp;minutes. Online requests are for 1 to 8&nbsp;guests; for 9 or more, or the room upstairs, write to bookings@example.com.</p>
         <ul class="notes">
           <li><svg class="ico" aria-hidden="true"><use href="#i-clock"/></svg><span>Last seating is one hour before closing.</span></li>
           <li><svg class="ico" aria-hidden="true"><use href="#i-utensils"/></svg><span>The six bar seats are never booked. Come and wait for one.</span></li>
@@ -914,7 +1005,7 @@
                 </button>
                 <div class="lb-pop" id="time-list" role="listbox" tabindex="-1" aria-labelledby="time-label" hidden></div>
               </div>
-              <p class="hint" id="time-hint">Seatings every 30 minutes.</p>
+              <p class="hint" id="time-hint">Seatings every 30&nbsp;minutes.</p>
               <p class="error" id="time-err" hidden><svg class="ico" aria-hidden="true"><use href="#i-alert-circle"/></svg><span></span></p>
             </div>
 
@@ -925,7 +1016,7 @@
                 <output class="step-value" id="guests-out" aria-live="polite"><strong id="guests-n">2</strong><span id="guests-word">guests</span></output>
                 <button type="button" class="step" id="guests-plus" aria-label="One guest more" aria-controls="guests-out"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
               </div>
-              <p class="hint" id="guests-hint">1 to 8 online. For more, email us.</p>
+              <p class="hint" id="guests-hint">1 to 8&nbsp;online. For more, email us.</p>
             </div>
           </div>
 
@@ -938,7 +1029,7 @@
             <div class="field">
               <label class="label" for="phone">Mobile number</label>
               <input class="input" id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel"  aria-describedby="phone-hint phone-err" />
-              <p class="hint" id="phone-hint">10 digits, starting with 0. We text to confirm, nothing else.</p>
+              <p class="hint" id="phone-hint">A Thai mobile, 10&nbsp;digits from 0, or with +66. From abroad, start with + and your country code. We text to confirm, nothing else.</p>
               <p class="error" id="phone-err" hidden><svg class="ico" aria-hidden="true"><use href="#i-alert-circle"/></svg><span></span></p>
             </div>
           </div>
@@ -960,7 +1051,7 @@
         <div class="done" id="done" hidden>
           <p class="done-badge"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-info"/></svg>Demo: nothing was sent</p>
           <h3 id="done-h" tabindex="-1">Table requested</h3>
-          <p id="done-p">We hold every table for 15 minutes after the booked time.</p>
+          <p id="done-p">We will text you to confirm. We hold every table for 15&nbsp;minutes after the booked time.</p>
           <dl class="summary" id="summary"></dl>
           <button type="button" class="btn btn-secondary" id="again">Start a new request</button>
         </div>
@@ -975,7 +1066,7 @@
     <div class="foot-cols">
       <div>
         <h2>Open</h2>
-        <p>Tuesday to Saturday, 11:30 to 14:30 and from 17:30</p>
+        <p>Tuesday to Saturday, 11:30 to 14:30 and 17:30 to 22:00 (Friday and Saturday to&nbsp;23:00)</p>
         <p>Sunday, 11:00 to 21:00</p>
         <p>Closed Mondays</p>
       </div>
@@ -992,10 +1083,10 @@
     </div>
     <section class="about-note" id="about" aria-labelledby="about-h">
       <h2 id="about-h">About this example</h2>
-      <p>Design example built with ux-ui-agent-skills. The restaurant, places and prices are fictional. Visual language adapted from the savor spec in the kit's library. Checked by the kit's accessibility and correctness gates.</p>
+      <p>Design example built with <span class="keep">ux-ui-agent-skills</span>. The restaurant, places and prices are fictional. Visual language adapted from the savor spec in the kit's library. Contrast, keyboard use and layout were tested with the kit's automated checks.</p>
     </section>
     <div class="credits">
-      <a href="https://github.com/plugin87/ux-ui-agent-skills">Built with ux-ui-agent-skills by Thientan Soparat</a>
+      <a href="https://github.com/plugin87/ux-ui-agent-skills">Built with <span class="keep">ux-ui-agent-skills</span> by Thientan Soparat</a>
       <a href="../../index.html">All examples</a>
     </div>
   </div>
@@ -1082,12 +1173,15 @@
       note.textContent = 'Guests already seated can stay until ' + hhmm(win[1]) + '. ' + clock;
     } else {
       var n = nextOpening(now.dow, now.mins);
+      /* before the first service of the day, nothing is "over" yet */
+      var early = HOURS[now.dow].length > 0 && now.mins < HOURS[now.dow][0][0];
       status.setAttribute('data-open', 'false');
-      word.textContent = 'Closed now';
+      word.textContent = early ? 'Not open yet' : 'Closed now';
       var when = n.offset === 0 ? 'today' : n.offset === 1 ? 'tomorrow' : 'on ' + DAYS[n.dow];
       line.textContent = 'Opens ' + when + ' at ' + hhmm(n.at);
       var why;
       if (!HOURS[now.dow].length) why = 'We close on ' + DAYS[now.dow] + 's so the kitchen can rest.';
+      else if (early) why = 'The charcoal goes on at ' + hhmm(n.at) + '.';
       else if (n.offset === 0) why = 'Lunch is over; the charcoal goes back on for dinner.';
       else why = 'We have closed for the night.';
       note.textContent = why + ' ' + clock;
@@ -1281,9 +1375,22 @@
       timeHint.textContent = hhmm(state.time) + ' is not available on ' + dayName + '. Choose another time.';
       setTime(null);
     } else {
-      timeHint.textContent = 'Seatings every 30 minutes on ' + dayName + '.';
+      timeHint.textContent = 'Seatings every 30\u00a0minutes on ' + dayName + '.';
     }
+    /* an error already on screen must speak about the day now chosen, not the last one */
+    if (!document.getElementById('time-err').hidden) checkTime();
+    var more = document.createElement('div');
+    more.className = 'lb-more';
+    more.setAttribute('aria-hidden', 'true');
+    more.innerHTML = '<svg class="ico" aria-hidden="true"><use href="#i-chevron-down"/></svg>More times';
+    list.appendChild(more);
   }
+
+  /* The popup shows the cue while seatings sit below its edge. */
+  function moreCue() {
+    list.classList.toggle('has-more', list.scrollHeight - list.clientHeight - list.scrollTop > 1);
+  }
+  list.addEventListener('scroll', moreCue, { passive: true });
 
   function setTime(m) {
     state.time = m;
@@ -1305,6 +1412,7 @@
     if (!options.length) buildTimes();
     list.hidden = false;
     trigger.setAttribute('aria-expanded', 'true');
+    moreCue();
     var sel = options.findIndex(function (o) { return +o.dataset.m === state.time; });
     setActive(at === 'last' ? options.length - 1 : (sel >= 0 ? sel : 0));
     list.focus();
@@ -1372,7 +1480,7 @@
     gWord.textContent = state.guests === 1 ? 'guest' : 'guests';
     minus.disabled = state.guests <= 1;
     plus.disabled = state.guests >= 8;
-    gHint.textContent = state.guests >= 8 ? '8 is the most we take online. For 9 or more, email bookings@example.com.' : '1 to 8 online. For more, email us.';
+    gHint.textContent = state.guests >= 8 ? '8 is the most we take online. For 9 or more, email bookings@example.com.' : '1 to 8\u00a0online. For more, email us.';
   }
   minus.addEventListener('click', function () { if (state.guests > 1) { state.guests--; renderGuests(); if (minus.disabled) plus.focus(); } });
   plus.addEventListener('click', function () { if (state.guests < 8) { state.guests++; renderGuests(); if (plus.disabled) minus.focus(); } });
@@ -1398,16 +1506,27 @@
     if (key === 'time') trigger.setAttribute('aria-describedby', 'time-hint');
   }
   function checkName() {
-    if (nameEl.value.trim().length < 2) { showError('name', 'Enter the name we should hold the table under, at least 2 letters.'); return false; }
+    if (nameEl.value.trim().length < 2) { showError('name', 'Enter the name we should hold the table under, at least 2\u00a0letters.'); return false; }
     clearError('name'); return true;
   }
+  /* A Thai mobile is 10 digits from 0; +66 stands for that 0. Any other number from
+     abroad starts with + and its country code, 8 to 15 digits in all. */
   function checkPhone() {
     var v = phoneEl.value.trim();
     var digits = v.replace(/\D/g, '');
     if (!v) { showError('phone', 'Enter a mobile number so we can text you a confirmation.'); return false; }
-    if (/[^\d\s-]/.test(v)) { showError('phone', 'Use only digits and spaces: 10 digits, starting with 0.'); return false; }
-    if (digits.length !== 10) { showError('phone', 'That number has ' + digits.length + ' digits. Thai mobile numbers have 10, starting with 0.'); return false; }
-    if (digits.charAt(0) !== '0') { showError('phone', 'Thai mobile numbers start with 0. Check the first digit.'); return false; }
+    if (!/^\+?[\d\s().-]+$/.test(v)) { showError('phone', 'Use digits, spaces, hyphens or brackets, with + only at the start.'); return false; }
+    if (v.charAt(0) === '+') {
+      if (digits.indexOf('66') === 0) {
+        var rest = digits.slice(2).replace(/^0/, '');
+        if (rest.length !== 9) { showError('phone', 'After +66 a Thai mobile has 9\u00a0digits, and this has ' + rest.length + '. Check the number.'); return false; }
+      } else if (digits.length < 8 || digits.length > 15) {
+        showError('phone', 'With the country code a number has 8 to 15\u00a0digits, and this has ' + digits.length + '. Check the number.'); return false;
+      }
+      clearError('phone'); return true;
+    }
+    if (digits.length !== 10) { showError('phone', 'That number has ' + digits.length + '\u00a0digits. A Thai mobile has 10, starting with 0. From abroad, start with + and the country code.'); return false; }
+    if (digits.charAt(0) !== '0') { showError('phone', 'A Thai mobile starts with 0. Check the first digit, or start with + and the country code.'); return false; }
     clearError('phone'); return true;
   }
   function checkTime() {
@@ -1445,16 +1564,24 @@
       submit.removeAttribute('aria-busy');
       submitLabel.textContent = 'Request this table';
       var d = state.date;
+      /* the date and its month stay on one line */
+      var dateText = DAYS[d.getUTCDay()] + ' ' + d.getUTCDate() + '\u00a0' + MONTHS[d.getUTCMonth()];
       var rows = [
-        ['Day', DAYS[d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()]],
+        ['Day', dateText],
         ['Time', hhmm(state.time)],
         ['Guests', String(state.guests)],
         ['Name', nameEl.value.trim()],
         ['Mobile', phoneEl.value.trim()],
         ['Notes', document.getElementById('notes').value.trim() || 'None']
       ];
-      document.getElementById('done-h').textContent = 'Table requested for ' + DAYS[d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' +
-        MONTHS[d.getUTCMonth()] + ', ' + hhmm(state.time);
+      document.getElementById('done-h').textContent = 'Table requested for ' + dateText + ', ' + hhmm(state.time);
+      var doneP = document.getElementById('done-p');
+      var num = document.createElement('span');
+      num.className = 'keep';
+      num.textContent = phoneEl.value.trim();
+      doneP.textContent = 'We will text ';
+      doneP.appendChild(num);
+      doneP.appendChild(document.createTextNode(' to confirm. We hold every table for 15\u00a0minutes after the booked time.'));
       var summary = document.getElementById('summary');
       summary.innerHTML = '';
       rows.forEach(function (r) {

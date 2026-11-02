@@ -100,7 +100,7 @@
   --text-3xl:2.125rem;
   --text-display:2.75rem;                  /* 44px on a phone, 2.6x body */
   --text-display-wide:3.75rem;             /* 60px at desktop, 3.5x body */
-  --text-display-fluid:10.8vw;             /* below about 410px the H1 shrinks with the screen so it sets in 2 lines, not 4 */
+  --text-display-fluid:10.8vw;             /* below about 410px the H1 shrinks with the screen: 2 lines at 390px, 3 at 320px, not 4 */
   --text-display-fluid-wide:6vw;
   --text-figure:2.5rem;
   --text-figure-fluid:11vw;                /* the fee figure and its unit stay on one line down to 280px */
@@ -148,6 +148,7 @@
 
   /* sizes */
   --size-target:2.75rem;                   /* 44px, AAA 2.5.5 */
+  --size-target-compact:2rem;              /* 44px at the largest text size (root 137.5%): header toggles on a phone keep the AAA target without growing with the text */
   --size-control:3.25rem;
   --size-control-lg:4rem;                  /* KRDS hero button */
   --size-check:1.75rem;

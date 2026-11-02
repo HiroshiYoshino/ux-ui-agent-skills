@@ -61,6 +61,7 @@ const files = targets.flatMap(t => {
 const AUDIT = ({ MIN, LABEL_MIN }) => {
   const CONTROL = 'button,input,textarea,select,[role=button],[role=tab],[role=combobox],[role=switch],[role=checkbox],[role=radio],a.btn,.btn';
   const SECTIONING = 'section,header,footer,main,nav,aside,article';
+  const NOT_ROWS = 'table,svg,p,h1,h2,h3,h4,h5,h6,[role=img],[role=table],[role=grid],[role=row],[role=presentation],[role=listbox],[role=menu],[role=tablist]';
   const NOT_JUDGED = 'table,thead,tbody,tfoot,tr,ul,ol,dl,svg,p,h1,h2,h3,h4,h5,h6,[role=img],[role=table],[role=grid],[role=row],[role=presentation]';
   const name = (el) => {
     const c = (el.getAttribute('class') || '').trim().split(/\s+/)[0];
@@ -158,7 +159,11 @@ const AUDIT = ({ MIN, LABEL_MIN }) => {
 
   const rows = [], touching = [];
   for (const parent of document.querySelectorAll('body *')) {
-    if (parent.closest(CONTROL) || parent.closest(NOT_JUDGED) || !shown(parent)) continue;
+    if (parent.closest(CONTROL) || !shown(parent)) continue;
+    // A list of cards is still a row of cards: rows are judged in ul and ol too.
+    // Touching is not, since list rows stack by design.
+    const listOnly = parent.closest(NOT_JUDGED);
+    if (listOnly && (parent.closest(NOT_ROWS) || !parent.matches('ul,ol'))) continue;
     const pr = parent.getBoundingClientRect();
     const kids = [...parent.children].filter(el => shown(el) && !srOnly(el)).map(el => {
       const own = drawsBox(el) || isControl(el);
@@ -179,6 +184,43 @@ const AUDIT = ({ MIN, LABEL_MIN }) => {
       const hs = row.map(k => Math.round(k.r.height));
       if (Math.max(...hs) - Math.min(...hs) > 2) rows.push(`${name(parent)} > ${row.map((k, i) => `${name(k.el)} ${hs[i]}px`).join(' | ')}`);
     }
+
+    // A, mixed rows: a boxed card beside a card that draws no box of its own but
+    // carries a picture or a boxed part (a product card, a map). Both sit in one
+    // grid or flex row, so both end where the row ends. Compared by the layout box,
+    // margins included, so a card pushed down by a margin still counts as that row.
+    // Not judged: a sticky column, which has to sit at the start to stick, and a
+    // plain text column beside a card, which is copy, not a card.
+    const ps = getComputedStyle(parent);
+    if (ps.display.includes('grid') || (ps.display.includes('flex') && !ps.flexDirection.startsWith('column'))) {
+      const edge = (k) => {
+        const s = getComputedStyle(k.el), r = k.el.getBoundingClientRect();
+        return { top: r.top - parseFloat(s.marginTop), bottom: r.bottom + parseFloat(s.marginBottom) };
+      };
+      const cardish = (k) => {
+        const s = getComputedStyle(k.el);
+        if (s.position === 'sticky' || isControl(k.el) || spansRows(k.el)) return false;
+        const r = k.el.getBoundingClientRect();
+        if (r.width < 60 || r.height < 40) return false;
+        // A picture or a boxed part big enough to be the card's own: not an icon, a
+        // badge or a button.
+        const big = (d) => { const q = d.getBoundingClientRect(); return q.width >= 60 && q.height >= 40; };
+        return drawsBox(k.el) ? 'box'
+          : [...k.el.querySelectorAll('*')].some(d => shownAny(d) && !isControl(d) && !d.closest(CONTROL) && !(d.parentElement && d.parentElement.closest('svg'))
+              && (d.matches('img,svg,video,canvas,picture') || drawsBox(d)) && big(d)) ? 'media' : false;
+      };
+      const ks = kids.map(k => ({ k, kind: cardish(k), e: edge(k) })).filter(x => x.kind);
+      for (let i = 0; i < ks.length; i++) for (let j = i + 1; j < ks.length; j++) {
+        const a = ks[i], c = ks[j];
+        if (a.kind === 'box' && c.kind === 'box') continue;             // judged above
+        if (a.kind !== 'box' && c.kind !== 'box') continue;             // no card to judge
+        if (Math.abs(a.e.top - c.e.top) > 3) continue;                  // not one row
+        const d = Math.round(Math.abs(a.e.bottom - c.e.bottom));
+        if (d > 2) rows.push(`${name(parent)} > ${name(a.k.el)} ends ${d}px from ${name(c.k.el)} in the same row`);
+      }
+    }
+
+    if (listOnly) continue;
 
     // B. touching. Segments of one control may join inside the box drawing them.
     if (drawsBox(parent) && kids.length && kids.every(k => isControl(k.el))) continue;

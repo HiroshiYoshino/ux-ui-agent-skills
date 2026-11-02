@@ -294,6 +294,26 @@
   --shadow-lift:0 12px 32px rgba(0,0,0,0.4);
 }
 
+/* Dark mode, full-bleed closing band. Contained tiles (the price) keep the
+   cream inverse field; a band the full width of the screen would be the
+   brightest area of a dark page, so here the inverse tokens resolve to a
+   raised dark field with cream ink instead. Declared on the element itself,
+   so the .on-inverse focus ring below picks these values up. */
+:root[data-theme="dark"] .closing{
+  --color-surface-inverse:#1d1c1a;
+  --color-surface-inverse-raised:#2a2826;
+  --color-text-inverse:#f2efe6;
+  --color-text-inverse-secondary:#b5afa4;
+  --color-border-inverse:#4a4743;
+  --color-border-inverse-strong:#a39d92;
+  --color-action-on-inverse:#f2efe6;
+  --color-text-on-action-inverse:#191817;
+  --color-action-on-inverse-hover:#d6d1c6;
+  --color-action-on-inverse-active:#c9c4ba;
+  --color-accent-on-inverse:#9da2ff;
+  --color-focus-on-inverse:#8fb4ff;
+}
+
 /* Finishes. Physical paint, so the same in both themes. */
 [data-finish="basalt"]{
   --product-top:#3d3b37; --product-top-lo:#2f2d2a;

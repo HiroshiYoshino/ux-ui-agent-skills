@@ -101,6 +101,7 @@
   .iconbtn:focus-visible{outline:none;box-shadow:var(--shadow-focus-ring)}
 
   .cta-row{display:flex;flex-wrap:wrap;gap:var(--space-3)}
+  .cta-row .btn{flex:1 1 100%}
 
   /* ---- disclosure line ---- */
   .topline{background:var(--color-surface-tile);border-block-end:var(--border-hairline) solid var(--color-border-default);font-size:var(--text-xs);color:var(--color-text-secondary)}
@@ -177,8 +178,11 @@
   @keyframes arc-pulse{0%{opacity:0.2;transform:scale(0.96)}45%{opacity:1;transform:scale(1.02)}100%{opacity:1;transform:scale(1)}}
 
   /* ---- inside: exploded drawing ---- */
-  .inside-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-8)}
-  .inside-grid .sec-head{margin-block-end:0}
+  /* The section head keeps its 40px gap to the content, as in every section.
+     Below 60rem the parts become five numbered chips right under the drawing
+     and the description sits under the chips, so a tap and its result share
+     one screen on a small phone. */
+  .inside-grid{display:grid;grid-template-columns:minmax(0,1fr)}
   .exploded{background:var(--color-surface-tile);padding:var(--space-4);min-inline-size:0;align-self:start}
   .ex-art{inline-size:100%;block-size:auto;max-block-size:var(--media-max-block);aspect-ratio:1;margin-inline:auto}
   .ex-top{fill:var(--color-ex-top);stroke:var(--color-ex-line);stroke-width:1;vector-effect:non-scaling-stroke}
@@ -197,23 +201,19 @@
   .ex-badge.is-on circle{fill:var(--color-accent-line);stroke:var(--color-accent-line)}
   .ex-badge.is-on text{fill:var(--color-surface-page)}
 
-  .parts{display:grid;border-block-start:var(--border-hairline) solid var(--color-border-default)}
-  .parts li{border-block-end:var(--border-hairline) solid var(--color-border-default)}
-  .part-btn{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:var(--space-3);inline-size:100%;
-    min-block-size:var(--size-control-lg);padding:var(--space-3) var(--space-2);border:0;background:transparent;color:inherit;font:inherit;
-    text-align:start;cursor:pointer;border-radius:var(--radius-badge);transition:background-color var(--duration-fast) var(--ease-out)}
-  .part-btn:hover{background:var(--color-surface-tile)}
+  .parts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--space-2);margin-block-start:var(--space-4)}
+  .part-btn{display:grid;place-items:center;inline-size:100%;block-size:var(--size-control-md);padding:0;
+    border:var(--border-hairline) solid var(--color-border-strong);border-radius:var(--radius-full);background:transparent;color:inherit;font:inherit;
+    cursor:pointer;transition:background-color var(--duration-fast) var(--ease-out),border-color var(--duration-fast) var(--ease-out),color var(--duration-fast) var(--ease-out)}
+  .part-btn:hover{background:var(--color-surface-tile);border-color:var(--color-text-primary)}
   .part-btn:active{background:var(--color-surface-raised)}
   .part-btn:focus-visible{outline:none;box-shadow:var(--shadow-focus-ring)}
-  .part-num{display:grid;place-items:center;inline-size:var(--size-badge-dot);block-size:var(--size-badge-dot);border-radius:var(--radius-round);
-    border:var(--border-hairline) solid var(--color-border-strong);font-size:var(--text-sm);font-weight:var(--weight-medium);
-    transition:background-color var(--duration-fast) var(--ease-out),color var(--duration-fast) var(--ease-out)}
-  .part-name{font-size:var(--text-lg);min-inline-size:0}
-  .part-spec{font-size:var(--text-sm);color:var(--color-text-secondary);text-align:end}
-  .part-btn[aria-pressed="true"]{background:var(--color-surface-tile)}
-  .part-btn[aria-pressed="true"] .part-num{background:var(--color-accent-line);border-color:var(--color-accent-line);color:var(--color-surface-page)}
-  .part-btn[aria-pressed="true"] .part-name{color:var(--color-text-accent)}
-  .part-detail{display:grid;gap:var(--space-2);max-inline-size:var(--measure-lead);min-block-size:calc(var(--leading-body) * 5em)}
+  .part-num{font-size:var(--text-base);font-weight:var(--weight-medium)}
+  .part-name,.part-spec{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+  .parts li{position:relative;min-inline-size:0}
+  .part-btn[aria-pressed="true"]{background:var(--color-accent-line);border-color:var(--color-accent-line);color:var(--color-surface-page)}
+  .part-btn[aria-pressed="true"]:hover{background:var(--color-accent-line);border-color:var(--color-text-primary)}
+  .part-detail{display:grid;gap:var(--space-2);align-content:start;max-inline-size:var(--measure-lead);min-block-size:calc(var(--leading-body) * 5em);margin-block-start:var(--space-6)}
   .part-detail h3{font-size:var(--text-2xl);line-height:var(--leading-tight)}
   .part-detail p{color:var(--color-text-secondary)}
 
@@ -222,8 +222,6 @@
   .tile{background:var(--color-surface-tile);padding:var(--space-6) var(--space-5);min-inline-size:0;display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-4);align-content:start}
   .tile h3{font-size:var(--text-xl);line-height:var(--leading-tight)}
   .tile p{color:var(--color-text-secondary)}
-  .tile.on-inverse{background:var(--color-surface-inverse);color:var(--color-text-inverse)}
-  .tile.on-inverse p{color:var(--color-text-inverse-secondary)}
   .tile-lead{gap:var(--space-5)}
   .tile-lead h3{font-size:var(--text-2xl)}
   .chart-wrap{display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--space-2)}
@@ -243,8 +241,13 @@
   .is-scanning .scan{opacity:1}
   .chart-x{position:relative;block-size:var(--space-6);font-size:var(--text-xs);color:var(--color-text-secondary)}
   .chart-x span{position:absolute;inset-block-start:var(--space-1);transform:translateX(-50%);white-space:nowrap}
-  .x-20{inset-inline-start:0;transform:none} .x-100{inset-inline-start:23.3%} .x-1k{inset-inline-start:56.6%}
-  .x-10k{inset-inline-start:90%;display:none} .x-20k{inset-inline-start:auto;inset-inline-end:0;transform:none}
+  .x-100{inset-inline-start:23.3%} .x-1k{inset-inline-start:56.6%} .x-10k{inset-inline-start:90%;display:none}
+  /* 20 kHz ends on the axis end. 20 Hz ends on the axis start on a phone, in the
+     free space under the y labels, because centred or left-aligned it runs into
+     100 Hz at 280px; from 36rem there is room to centre it. The class pair
+     outranks .chart-x span. */
+  .chart-x .x-20{inset-inline-start:0;transform:translateX(-100%)}
+  .chart-x .x-20k{inset-inline-start:auto;inset-inline-end:0;transform:none}
   .legend{display:flex;flex-wrap:wrap;gap:var(--space-2) var(--space-5);font-size:var(--text-sm);color:var(--color-text-secondary)}
   .legend > span{display:inline-flex;align-items:center;gap:var(--space-2)}
   .legend-hint{font-style:normal}
@@ -270,16 +273,16 @@
   .ring-side{display:grid;gap:var(--space-3);justify-items:start;min-inline-size:0;inline-size:min(100%, 12rem)}
   .ring-side .btn{inline-size:100%}
   .ring-art{inline-size:var(--space-24);block-size:auto;aspect-ratio:1;flex:none}
-  .ring-face{fill:var(--color-surface-inverse-raised)}
-  .ring-glow{fill:none;stroke:var(--color-text-inverse-secondary);stroke-width:5;transition:stroke var(--duration-base) var(--ease-out)}
-  .ring-glyph{stroke:var(--color-text-inverse-secondary);transition:stroke var(--duration-base) var(--ease-out)}
+  .ring-face{fill:var(--color-surface-page);stroke:var(--color-border-default);stroke-width:1}
+  .ring-glow{fill:none;stroke:var(--color-border-strong);stroke-width:5;transition:stroke var(--duration-base) var(--ease-out)}
+  .ring-glyph{stroke:var(--color-text-secondary);transition:stroke var(--duration-base) var(--ease-out)}
   .ring-slash{opacity:0;transition:opacity var(--duration-base) var(--ease-out)}
-  .is-muted .ring-glyph{stroke:var(--color-accent-on-inverse)}
+  .is-muted .ring-glyph{stroke:var(--color-accent-line)}
   .is-muted .ring-slash{opacity:1}
-  .is-muted .ring-glow{stroke:var(--color-accent-on-inverse)}
-  .mic-state{display:inline-flex;align-items:center;gap:var(--space-2);font-size:var(--text-sm);color:var(--color-text-inverse)}
-  .mic-state .ico{color:var(--color-accent-on-inverse)}
-  .mic-state .ico-on{color:var(--color-text-inverse-secondary)}
+  .is-muted .ring-glow{stroke:var(--color-accent-line)}
+  .mic-state{display:inline-flex;align-items:center;gap:var(--space-2);font-size:var(--text-sm);color:var(--color-text-primary)}
+  .mic-state .ico{color:var(--color-text-accent)}
+  .mic-state .ico-on{color:var(--color-text-secondary)}
   .is-muted .mic-state .ico-on,.ring-demo:not(.is-muted) .mic-state .ico-off{display:none}
 
   .specs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,9rem),1fr));gap:var(--space-5) var(--space-6);background:var(--color-surface-tile);
@@ -333,7 +336,7 @@
   .btn-add[aria-pressed="true"] .ico{display:block}
 
   /* ---- questions ---- */
-  .faq-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-8)}
+  .faq-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-10)}
   .faq-grid .sec-head{margin-block-end:0;align-content:start}
   .faq{border-block-start:var(--border-hairline) solid var(--color-border-default)}
   .faq-item{border-block-end:var(--border-hairline) solid var(--color-border-default)}
@@ -378,13 +381,15 @@
   .foot-meta .foot-about{color:var(--color-footer-text);max-inline-size:var(--measure-lead)}
   .foot-h{font-size:var(--text-sm);font-weight:var(--weight-medium);margin-block-end:var(--space-2)}
   .foot-links{display:grid;gap:0}
-  .foot-links a,.foot-meta a{display:inline-flex;align-items:center;min-block-size:var(--size-control-sm);font-size:var(--text-sm);
+  .foot-links a,.foot-solo a{display:inline-flex;align-items:center;min-block-size:var(--size-control-sm)}
+  .nowrap{white-space:nowrap}
+  .foot-links a,.foot-meta a{font-size:var(--text-sm);
     color:var(--color-footer-text);text-decoration:underline;text-decoration-color:var(--color-footer-rule);text-underline-offset:0.25em;
     border-radius:var(--radius-badge);transition:text-decoration-color var(--duration-fast) var(--ease-out)}
   .foot-links a:hover,.foot-meta a:hover{text-decoration-color:var(--color-footer-text)}
   .foot-links a:active,.foot-meta a:active{color:var(--color-footer-text-secondary)}
   .foot-links a:focus-visible,.foot-meta a:focus-visible{outline:none;box-shadow:var(--shadow-focus-ring)}
-  .foot-meta{display:grid;gap:var(--space-1);align-content:start}
+  .foot-meta{display:grid;gap:var(--space-2);align-content:start}
   .foot-base{margin-block-start:var(--space-10);padding-block-start:var(--space-5);border-block-start:var(--border-hairline) solid var(--color-footer-rule);
     font-size:var(--text-xs);color:var(--color-footer-text-secondary)}
 
@@ -395,11 +400,12 @@
   .order::backdrop{background:var(--color-scrim)}
   .order[open]{animation:dialog-in var(--duration-base) var(--ease-out)}
   @keyframes dialog-in{from{opacity:0;transform:translateY(var(--rise))}}
-  .order-in{display:grid;gap:var(--space-5);padding:var(--space-5)}
+  .order-in{display:grid;gap:var(--space-4);padding:var(--space-4)}
+  .order-body{display:grid;gap:var(--space-4)}
   .order-head{display:flex;align-items:start;justify-content:space-between;gap:var(--space-3)}
   .order-head h2{font-size:var(--text-2xl);line-height:var(--leading-tight)}
   .summary{display:grid;gap:0;border-block-start:var(--border-hairline) solid var(--color-border-default)}
-  .summary div{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:var(--space-3);padding-block:var(--space-3);
+  .summary div{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:var(--space-3);padding-block:var(--space-2);
     border-block-end:var(--border-hairline) solid var(--color-border-default);font-size:var(--text-sm)}
   .summary dt{color:var(--color-text-secondary)}
   .summary dd{text-align:end;overflow-wrap:anywhere}
@@ -417,6 +423,7 @@
   .error .ico{margin-block-start:var(--space-0-5)}
   .error[hidden]{display:none}
   .order-actions{display:flex;flex-wrap:wrap;gap:var(--space-3)}
+  .order-actions .btn{flex:1 1 100%}
   .done{display:grid;gap:var(--space-4);justify-items:start}
   .done[hidden],.order-form[hidden]{display:none}
   .done-mark{display:grid;place-items:center;inline-size:var(--size-control-md);block-size:var(--size-control-md);border-radius:var(--radius-round);
@@ -431,6 +438,11 @@
     .head-order{display:inline-flex}
   }
   @media (min-width:36rem){
+    .cta-row .btn,.order-actions .btn{flex:0 1 auto}
+    .chart-x .x-20{transform:translateX(-50%)}
+    .order-in{gap:var(--space-5);padding:var(--space-5)}
+    .order-body{gap:var(--space-5)}
+    .summary div{padding-block:var(--space-3)}
     .tile,.plan,.specs{padding:var(--space-8) var(--space-6)}
     .buy{padding:var(--space-10) var(--space-8)}
   }
@@ -440,6 +452,7 @@
     .stage{padding:var(--space-8) var(--space-8) var(--space-6)}
     .bento{grid-template-columns:repeat(2,minmax(0,1fr))}
     .tile-lead,.specs{grid-column:1 / -1}
+    .specs{grid-template-columns:repeat(3,minmax(0,1fr))}
     .buy{grid-template-columns:minmax(0,7fr) minmax(0,5fr);column-gap:var(--space-12);align-items:end}
     .addons{grid-template-columns:repeat(2,minmax(0,1fr))}
     .addons-head{grid-template-columns:minmax(0,1fr) auto;align-items:end}
@@ -447,25 +460,40 @@
     .closing-grid{grid-template-columns:minmax(0,7fr) minmax(0,5fr)}
     .dial-art{inline-size:min(100%, 24rem)}
     .foot-grid{grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,2fr)}
-    .order-in{padding:var(--space-8)}
+    .order-in{gap:var(--space-5);padding:var(--space-8)}
   }
   @media (min-width:60rem){
     .head-nav{display:flex;gap:var(--space-1)}
-    .inside-grid{grid-template-columns:minmax(0,7fr) minmax(0,5fr);column-gap:var(--space-12);row-gap:var(--space-8);align-items:start}
+    .inside-grid{grid-template-columns:minmax(0,7fr) minmax(0,5fr);column-gap:var(--space-12);align-items:start}
     .inside-grid .exploded{grid-column:1;grid-row:1 / span 3;position:sticky;inset-block-start:var(--space-4);padding:var(--space-8)}
     .inside-grid .sec-head{grid-column:2;grid-row:1}
     .inside-grid .parts{grid-column:2;grid-row:2}
-    .inside-grid .part-detail{grid-column:2;grid-row:3}
+    .inside-grid .part-detail{grid-column:2;grid-row:3;margin-block-start:var(--space-8)}
+    .parts{display:grid;grid-template-columns:minmax(0,1fr);gap:0;margin-block-start:0;border-block-start:var(--border-hairline) solid var(--color-border-default)}
+    .parts li{position:static;border-block-end:var(--border-hairline) solid var(--color-border-default)}
+    .part-btn{grid-template-columns:auto minmax(0,1fr) auto;justify-items:stretch;gap:var(--space-3);block-size:auto;
+      min-block-size:var(--size-control-lg);padding:var(--space-3) var(--space-2);border:0;border-radius:var(--radius-badge);text-align:start}
+    .part-btn:hover{background:var(--color-surface-tile)}
+    .part-num{display:grid;place-items:center;inline-size:var(--size-badge-dot);block-size:var(--size-badge-dot);border-radius:var(--radius-round);
+      border:var(--border-hairline) solid var(--color-border-strong);font-size:var(--text-sm);
+      transition:background-color var(--duration-fast) var(--ease-out),color var(--duration-fast) var(--ease-out)}
+    .part-name,.part-spec{position:static;inline-size:auto;block-size:auto;overflow:visible;clip:auto;clip-path:none;white-space:normal}
+    .part-name{font-size:var(--text-lg);min-inline-size:0}
+    .part-spec{font-size:var(--text-sm);color:var(--color-text-secondary);text-align:end}
+    .part-btn[aria-pressed="true"]{background:var(--color-surface-tile);color:inherit}
+    .part-btn[aria-pressed="true"]:hover{background:var(--color-surface-tile)}
+    .part-btn[aria-pressed="true"] .part-num{background:var(--color-accent-line);border-color:var(--color-accent-line);color:var(--color-surface-page)}
+    .part-btn[aria-pressed="true"] .part-name{color:var(--color-text-accent)}
     .ex-art{max-block-size:var(--media-max-block)}
     .faq-grid{grid-template-columns:minmax(0,4fr) minmax(0,7fr);column-gap:var(--space-16)}
   }
+  /* From 64rem the headline takes the full width and the copy and the product
+     tile share the row under it, so the speaker is above the fold at 1024x768. */
   @media (min-width:64rem){
-    .hero-grid{grid-template-columns:minmax(0,5fr) minmax(0,7fr);column-gap:var(--space-10);row-gap:var(--space-8);align-items:start}
-    .hero-title{grid-column:1;grid-row:1}
+    .hero-grid{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:var(--space-10);row-gap:var(--space-8);align-items:start}
+    .hero-title{grid-column:1 / -1;grid-row:1}
     .hero-copy{grid-column:1;grid-row:2}
-    .stage{grid-column:2;grid-row:1 / span 2;align-self:stretch;align-content:space-between;padding:var(--space-6) var(--space-5) var(--space-5)}
-    .stage-art{max-block-size:var(--media-hero-block)}
-    .display-hero{font-size:var(--text-display-hero)}
+    .stage{grid-column:2;grid-row:2;padding:var(--space-6) var(--space-5) var(--space-5)}
     .sec-split{max-inline-size:none;grid-template-columns:minmax(0,8fr) minmax(0,4fr);column-gap:var(--space-12);align-items:end}
     .sec-split .eyebrow{grid-column:1 / -1}
     .sec-split .lead{padding-block-end:var(--space-2)}
@@ -475,10 +503,21 @@
     .tile-lead .chart{block-size:100%;min-block-size:16rem}
     .tile-watt{grid-column:9 / span 4;grid-row:1}
     .tile-calls{grid-column:9 / span 4;grid-row:2}
-    .specs{grid-column:1 / -1;grid-row:3;grid-template-columns:repeat(6,minmax(0,1fr))}
+    .specs{grid-column:1 / -1;grid-row:3}
+  }
+  /* From 72rem the headline fits in three lines beside the tile, so the tile
+     rises to span both rows. The art sits in a flexible row and is centred in
+     it, so any height the copy adds is shared above and below the speaker. */
+  @media (min-width:72rem){
+    .hero-grid{grid-template-columns:minmax(0,5fr) minmax(0,7fr)}
+    .hero-title{grid-column:1}
+    .stage{grid-row:1 / span 2;align-self:stretch;grid-template-rows:minmax(0,1fr) auto}
+    .stage-art{align-self:center;max-block-size:var(--media-hero-block)}
+    .display-hero{font-size:var(--text-display-hero)}
   }
   @media (min-width:80rem){
     .wrap{padding-inline:var(--space-12)}
+    .specs{grid-template-columns:repeat(6,minmax(0,1fr))}
   }
 
   /* ---- reduced motion: stop travel, keep every piece of content ---- */
@@ -490,7 +529,7 @@
 </head>
 <body>
 <a class="sr-only" href="#main">Skip to content</a>
-<p class="topline"><span class="wrap">Fictional product, a design example built with ux-ui-agent-skills. <a class="link" href="#about">About this example</a></span></p>
+<p class="topline"><span class="wrap">Fictional product, a design example built with <span class="nowrap">ux-ui-agent-skills</span>. <a class="link" href="#about">About this example</a></span></p>
 
 <header class="site-head">
   <div class="wrap">
@@ -657,27 +696,27 @@
           </g>
         </svg>
       </figure>
+        <ol class="parts" aria-label="Parts of Plinth">
+          <li><button class="part-btn" type="button" aria-pressed="true" aria-controls="part-detail" data-part="dial"><span class="part-num">1</span> <span class="part-name">Dial</span> <span class="part-spec">38 detents</span></button></li>
+          <li><button class="part-btn" type="button" aria-pressed="false" aria-controls="part-detail" data-part="ring"><span class="part-num">2</span> <span class="part-name">Light ring</span> <span class="part-spec">2 mm band</span></button></li>
+          <li><button class="part-btn" type="button" aria-pressed="false" aria-controls="part-detail" data-part="mics"><span class="part-num">3</span> <span class="part-name">Microphones</span> <span class="part-spec">3 mics</span></button></li>
+          <li><button class="part-btn" type="button" aria-pressed="false" aria-controls="part-detail" data-part="drivers"><span class="part-num">4</span> <span class="part-name">Drivers</span> <span class="part-spec">60 W</span></button></li>
+          <li><button class="part-btn" type="button" aria-pressed="false" aria-controls="part-detail" data-part="chassis"><span class="part-num">5</span> <span class="part-name">Chassis</span> <span class="part-spec">2.4 kg</span></button></li>
+        </ol>
         <div class="part-detail" id="part-detail" aria-live="polite">
           <h3 data-detail-title>Dial</h3>
           <p data-detail-body>Machined aluminium with 38 detents you can feel. Turn it for volume, press it to pause, hold it for a second to mute the microphones, double-press it to tune the room again.</p>
         </div>
-        <ol class="parts" aria-label="Parts of Plinth">
-          <li><button class="part-btn" type="button" aria-pressed="true" aria-controls="part-detail" data-part="dial"><span class="part-num" aria-hidden="true">1</span><span class="part-name">Dial</span><span class="part-spec">38 detents</span></button></li>
-          <li><button class="part-btn" type="button" aria-pressed="false" aria-controls="part-detail" data-part="ring"><span class="part-num" aria-hidden="true">2</span><span class="part-name">Light ring</span><span class="part-spec">2 mm band</span></button></li>
-          <li><button class="part-btn" type="button" aria-pressed="false" aria-controls="part-detail" data-part="mics"><span class="part-num" aria-hidden="true">3</span><span class="part-name">Microphones</span><span class="part-spec">3 mics</span></button></li>
-          <li><button class="part-btn" type="button" aria-pressed="false" aria-controls="part-detail" data-part="drivers"><span class="part-num" aria-hidden="true">4</span><span class="part-name">Drivers</span><span class="part-spec">60 W</span></button></li>
-          <li><button class="part-btn" type="button" aria-pressed="false" aria-controls="part-detail" data-part="chassis"><span class="part-num" aria-hidden="true">5</span><span class="part-name">Chassis</span><span class="part-spec">2.4 kg</span></button></li>
-        </ol>
     </div>
   </section>
 
-  <!-- 3. Tuning: a bento where one tile leads and the others stay quiet -->
+  <!-- 3. Tuning: a bento where the chart tile leads by size and the one accent curve; the others share its quiet surface -->
   <section class="section" id="tuning" aria-labelledby="tuning-title" style="padding-block-start:0">
     <div class="wrap">
       <header class="sec-head sec-split">
         <p class="eyebrow">Room tuning</p>
         <h2 class="title" id="tuning-title">Nine seconds, then the bass behaves.</h2>
-        <p class="lead">In the example setup below, a desk and the wall behind it add 7 dB at 54 Hz. Plinth measures that and takes it back out.</p>
+        <p class="lead">In the example setup below, a desk and the wall behind it add 7&nbsp;dB at 54&nbsp;Hz. Plinth measures that and takes it back out.</p>
       </header>
       <div class="bento">
         <article class="tile tile-lead on-tile" aria-labelledby="chart-title">
@@ -715,14 +754,14 @@
               <span class="when-idle" data-tune-label>Run a tuning pass</span>
               <span class="when-busy">Listening</span>
             </button>
-            <p class="readout" id="readout" aria-live="polite">Untuned, this desk adds 7 dB at 54 Hz. Run a pass and watch it flatten.</p>
+            <p class="readout" id="readout" aria-live="polite">Untuned, this desk adds 7&nbsp;dB at 54&nbsp;Hz. Run a pass and watch it flatten.</p>
           </div>
         </article>
 
         <article class="tile tile-watt">
           <p class="figure num">65 <small>W</small></p>
           <h3>One cable to the laptop</h3>
-          <p>USB-C carries sound to Plinth and 65 W of charge back to your laptop. The speaker replaces a charger instead of adding one more cable.</p>
+          <p>USB-C carries sound to Plinth and 65&nbsp;W of charge back to your laptop. The speaker replaces a charger instead of adding one more cable.</p>
           <svg class="cable" viewBox="0 0 260 80" aria-hidden="true">
             <path class="cable-line" d="M8 62 C70 62 86 22 150 22 H196"/>
             <rect class="cable-plug" x="194" y="12" width="44" height="20" rx="10"/>
@@ -730,7 +769,7 @@
           </svg>
         </article>
 
-        <article class="tile tile-calls on-inverse" aria-labelledby="calls-title">
+        <article class="tile tile-calls on-tile" aria-labelledby="calls-title">
           <h3 id="calls-title">Mute you can see</h3>
           <p>Hold the dial for a second. The ring lights up and the microphones stop listening, so everyone at the table can see you are muted.</p>
           <div class="ring-demo" id="ring-demo">
@@ -754,12 +793,12 @@
         </article>
 
         <dl class="specs" aria-label="Specifications">
-          <div><dt>Frequency range</dt><dd>45 Hz to 20 kHz</dd></div>
-          <div><dt>Amplification</dt><dd>60 W over three channels</dd></div>
-          <div><dt>Drivers</dt><dd>100 mm woofer, two 25 mm tweeters</dd></div>
+          <div><dt>Frequency range</dt><dd>45&nbsp;Hz to 20&nbsp;kHz</dd></div>
+          <div><dt>Amplification</dt><dd>60&nbsp;W over three channels</dd></div>
+          <div><dt>Drivers</dt><dd>100&nbsp;mm woofer, two 25&nbsp;mm tweeters</dd></div>
           <div><dt>Connections</dt><dd>USB-C audio, Bluetooth 5.3</dd></div>
           <div><dt>Size</dt><dd>32 × 12 × 11 cm</dd></div>
-          <div><dt>Weight</dt><dd>2.4 kg</dd></div>
+          <div><dt>Weight</dt><dd>2.4&nbsp;kg</dd></div>
         </dl>
       </div>
     </div>
@@ -770,7 +809,7 @@
     <div class="wrap">
       <header class="sec-head">
         <p class="eyebrow">Pricing</p>
-        <h2 class="title" id="pricing-title">Plinth is yours outright. Room+ is optional.</h2>
+        <h2 class="title" id="pricing-title">Plinth is yours outright. Each app plan is optional.</h2>
       </header>
 
       <article class="buy on-inverse" aria-labelledby="buy-title">
@@ -841,7 +880,7 @@
     <div class="wrap faq-grid">
       <header class="sec-head">
         <p class="eyebrow">Questions</p>
-        <h2 class="title" id="faq-title">Before you order</h2>
+        <h2 class="title" id="faq-title">Before you reserve</h2>
         <p class="lead">Still unsure? Write to <a class="link mail" href="mailto:hello@example.com">hello@example.com</a>.</p>
       </header>
       <div class="faq" id="faq">
@@ -863,7 +902,7 @@
         </div>
         <div class="faq-item">
           <h3 class="faq-q"><button class="faq-btn" type="button" id="q5" aria-expanded="false" aria-controls="a5">What if it does not suit my desk?<svg class="ico" aria-hidden="true"><use href="#i-chevron-down"/></svg></button></h3>
-          <div class="faq-panel" id="a5" role="region" aria-labelledby="q5"><div class="faq-inner"><p>Send it back within 30 nights of delivery for a full refund, shipping included both ways. Keep the box until then; the label prints from your order page.</p></div></div>
+          <div class="faq-panel" id="a5" role="region" aria-labelledby="q5"><div class="faq-inner"><p>Send it back within 30 nights of delivery for a full refund, shipping included both ways. Keep the box until then; we email you a prepaid return label when you ask for one.</p></div></div>
         </div>
       </div>
     </div>
@@ -947,9 +986,9 @@
       </nav>
       <div class="foot-meta">
         <h2 class="foot-h" id="about" tabindex="-1">About this example</h2>
-        <p class="foot-about">Design example built with ux-ui-agent-skills. The product, prices and company are fictional. Visual language adapted from the bang-olufsen spec in the kit&rsquo;s library. Checked by the kit&rsquo;s accessibility and correctness gates.</p>
-        <p>Built with <a href="https://github.com/plugin87/ux-ui-agent-skills">ux-ui-agent-skills</a> by Thientan Soparat</p>
-        <p><a href="../../index.html">All examples</a></p>
+        <p class="foot-about">Design example built with <span class="nowrap">ux-ui-agent-skills</span>. The product, prices and company are fictional. Visual language adapted from the bang-olufsen spec in the kit&rsquo;s library. Contrast, keyboard use and layout were tested with the kit&rsquo;s automated checks.</p>
+        <p>Built with <a href="https://github.com/plugin87/ux-ui-agent-skills"><span class="nowrap">ux-ui-agent-skills</span></a> by Thientan Soparat</p>
+        <p class="foot-solo"><a href="../../index.html">All examples</a></p>
       </div>
     </div>
   </div>
@@ -962,10 +1001,10 @@
       <button class="iconbtn" type="button" data-close aria-label="Close"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg></button>
     </div>
     <form class="order-form" id="order-form" novalidate>
-      <div style="display:grid;gap:var(--space-5)">
+      <div class="order-body">
         <dl class="summary">
           <div><dt>Finish</dt><dd data-sum-finish>Chalk</dd></div>
-          <div><dt>Plan</dt><dd data-sum-plan>Included features only</dd></div>
+          <div><dt>Plan</dt><dd data-sum-plan>No app plan</dd></div>
           <div><dt>Due today</dt><dd class="num">$0</dd></div>
           <div><dt>After you confirm</dt><dd class="num">$349</dd></div>
         </dl>
@@ -987,7 +1026,7 @@
     </form>
     <div class="done" id="order-done" hidden>
       <span class="done-mark" aria-hidden="true"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg></span>
-      <h3 id="done-title" tabindex="-1">Your place is held</h3>
+      <h3 id="done-title" tabindex="-1" data-done-title>Your place is held</h3>
       <p>A Plinth in <span data-done-finish>Chalk</span> is reserved for <strong data-done-email></strong>. <span data-done-plan></span> We will email you to confirm payment before it ships; nothing is charged until you do.</p>
       <button class="btn btn-primary" type="button" data-close>Done</button>
     </div>
@@ -1039,7 +1078,10 @@
     });
   }
 
-  var state = { finish: 'chalk', billing: 'monthly', plan: null };
+  var reduce = false;
+  try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { reduce = false; }
+
+  var state = { finish: 'chalk', billing: 'monthly', plan: null, reserved: null };
   var FINISH = { chalk: 'Chalk', basalt: 'Basalt', lake: 'Lake' };
   var PLAN = { roomplus: 'Room+', studio: 'Studio' };
 
@@ -1087,16 +1129,31 @@
     dTitle.textContent = t[0];
     dBody.textContent = t[1];
   }
+  /* On a phone the drawing, the chips and the description are taller than
+     some screens. After a tap, bring the whole group into view when it fits,
+     and at least the description when it does not. */
+  var exFig = document.querySelector('.exploded');
+  var detail = document.getElementById('part-detail');
+  var wide = null;
+  try { wide = matchMedia('(min-width: 60rem)'); } catch (e) { wide = null; }
+  function revealPart() {
+    if (wide && wide.matches) return;
+    var top = exFig.getBoundingClientRect().top;
+    var bottom = detail.getBoundingClientRect().bottom;
+    var vh = window.innerHeight;
+    if (top >= 0 && bottom <= vh) return;
+    var by = bottom - top <= vh ? (top < 0 ? top : bottom - vh) : bottom - vh;
+    if (by !== 0) window.scrollBy({ top: by, behavior: reduce ? 'auto' : 'smooth' });
+  }
   partBtns.forEach(function (b) {
     b.addEventListener('click', function () {
       var key = b.getAttribute('data-part');
       showPart(b.getAttribute('aria-pressed') === 'true' ? null : key);
+      revealPart();
     });
   });
 
   /* ---- tuning demo: a real loading state, then the corrected curve ---- */
-  var reduce = false;
-  try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { reduce = false; }
   var tune = document.getElementById('tune');
   var chart = document.getElementById('chart');
   var tile = document.querySelector('.tile-lead');
@@ -1185,7 +1242,7 @@
   });
 
   function planLine() {
-    if (!state.plan) return 'Included features only';
+    if (!state.plan) return 'No app plan';
     var el = document.querySelector('.amount[data-plan="' + state.plan + '"]');
     var y = state.billing === 'yearly';
     var price = y ? '$' + (Number(el.getAttribute('data-yearly')) * 12) + ' a year' : '$' + el.getAttribute('data-monthly') + ' a month';
@@ -1209,9 +1266,17 @@
   }
   function openOrder(btn) {
     opener = btn;
-    form.hidden = false; done.hidden = true;
     place.setAttribute('aria-busy', 'false');
     setError(false);
+    if (state.reserved) {
+      /* one place per visitor: a held place reopens as held, not as a blank form */
+      form.hidden = true; done.hidden = false;
+      dialog.querySelector('[data-done-title]').textContent = 'You already hold a place';
+      dialog.showModal();
+      document.getElementById('done-title').focus();
+      return;
+    }
+    form.hidden = false; done.hidden = true;
     dialog.querySelector('[data-sum-finish]').textContent = FINISH[state.finish];
     dialog.querySelector('[data-sum-plan]').textContent = planLine();
     dialog.showModal();
@@ -1247,6 +1312,8 @@
     place.setAttribute('aria-busy', 'true');
     setTimeout(function () {
       place.setAttribute('aria-busy', 'false');
+      state.reserved = v;
+      dialog.querySelector('[data-done-title]').textContent = 'Your place is held';
       dialog.querySelector('[data-done-finish]').textContent = FINISH[state.finish];
       dialog.querySelector('[data-done-email]').textContent = v;
       dialog.querySelector('[data-done-plan]').textContent = state.plan ? PLAN[state.plan] + ' is noted on the reservation and starts with a free month.' : '';

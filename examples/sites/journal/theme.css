@@ -111,7 +111,7 @@
   --color-illus-house: var(--p-paper-light);
   --color-illus-roof: var(--p-wheat);
 
-  /* Type families (no web fonts: system faces with good Thai coverage) */
+  /* Type families: the two self-hosted faces above, system Thai faces as the fallback */
   --font-display: "Journal Display", "Sukhumvit Set", "Noto Sans Thai", "Leelawadee UI", system-ui, sans-serif;
   --font-reading: "Journal Reading", "Noto Serif Thai", Tahoma, "Thonburi", "Leelawadee UI", serif;
   --font-ui: "Journal Display", "Sukhumvit Set", "Noto Sans Thai", "Leelawadee UI", system-ui, sans-serif;
@@ -142,9 +142,11 @@
   /* Line height. Thai stacks up to four tiers on one line: a below-base vowel
      (u, uu), the consonant, an above vowel (i, ii, ue, mai han-akat) and a tone
      mark above that. Latin's 1.5 lets a tone mark touch the below vowel of the
-     line over it, so Thai body runs at 1.85 and Thai display at 1.25, where a
-     Latin headline would sit at 1.05. */
-  --leading-display: 1.25;
+     line over it, so Thai body runs at 1.85 and Thai display at 1.4, where a
+     Latin headline would sit at 1.05. 1.4 is measured, not guessed: in Anuphan a
+     wrapped headline needs about 1.39 before the tone marks of one line reach the
+     below vowels of the line over it (scripts/verify_thai.mjs). */
+  --leading-display: 1.4;
   --leading-heading: 1.4;
   --leading-reading: 1.85;
   --leading-ui: 1.5;
@@ -190,6 +192,7 @@
   --readbar-offset: 4.5rem;
   --toc-panel-max: 22rem;
   --lead-art-max: 30rem;
+  --chart-label-col: 3.5rem;
 
   /* Shape: square, as the spec is. Buttons 2px, panels 4px, avatars round. */
   --radius-none: 0;

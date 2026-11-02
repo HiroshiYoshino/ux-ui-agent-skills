@@ -25,6 +25,23 @@ test('measure_render rejects text below 4.5:1 on the real render', () => {
   rejects(gate('measure_render.mjs', [F('bad/low-contrast.html')]), /2\.07:1|need 4\.5/);
 });
 
+test('measure_render reads an oklch colour as the colour it is', () => {
+  // The old parser read oklch(0.78 0 0) as rgb(0.78, 0, 0): every line 1.00:1,
+  // the heading included. The real grey is 2.01:1, and the black heading passes.
+  const r = rejects(gate('measure_render.mjs', [F('bad/oklch.html')]), /2\.0\d:1 \(need 4\.5\)/);
+  if (/<h1>/.test(r.out)) throw new Error(`the heading passes AA and was reported:\n${r.out}`);
+});
+
+for (const args of [[], ['--dark']]) {
+  const mode = args.length ? ' (dark)' : '';
+  test(`measure_render accepts a theme written in oklch${mode}`, () => {
+    accepts(gate('measure_render.mjs', [...args, F('good/oklch.html')]));
+  });
+  test(`verify_states accepts a theme written in oklch${mode}`, () => {
+    accepts(gate('verify_states.mjs', [...args, F('good/oklch.html')]));
+  });
+}
+
 test('verify_states rejects a button that only fails on hover', () => {
   // The specificity trap: fine at rest, broken on hover. measure_render alone misses it.
   const r = rejects(gate('verify_states.mjs', [F('bad/hover-fail.html')]), /hover/);
@@ -83,16 +100,30 @@ test('verify_keyboard rejects an interactive role Tab can never reach', () => {
   rejects(gate('verify_keyboard.mjs', [F('bad/div-button-no-tabindex.html')]), /A0 no tab stop/);
 });
 
-test('verify_spacing rejects unequal cards in a row, text on its buttons, and buttons 4px apart', () => {
+test('verify_spacing rejects unequal cards in a row, text on its buttons, buttons 4px apart, and a boxed tile short of its product row', () => {
   const r = rejects(gate('verify_spacing.mjs', [F('bad/spacing.html')]), /verify_spacing: FAIL/);
-  // Each of the three defects, not whichever one still happens to be caught.
-  for (const want of [/\[A unequal row\]/, /\[B touching\]  stacked .*p\.address/, /\[B touching\]  side by side 4\.0px/]) {
+  // Each of the four defects, not whichever one still happens to be caught.
+  for (const want of [/\[A unequal row\]  div\.row/, /\[B touching\]  stacked .*p\.address/, /\[B touching\]  side by side 4\.0px/, /\[A unequal row\]  ul\.shop .*> li .*li\.tile .*in the same row/]) {
     if (!want.test(r.out)) throw new Error(`missed ${want}\n${r.out}`);
   }
 });
 
-test('verify_spacing accepts the deliberate exceptions: a label 4px from its field, joined segments, a lead tile spanning rows', () => {
+test('verify_spacing accepts the deliberate exceptions: a label 4px from its field, joined segments, a lead tile spanning rows, a text or sticky column beside a card', () => {
   accepts(gate('verify_spacing.mjs', [F('good/spacing.html')]), /rows of cards share a height, nothing touches/);
+});
+
+test('verify_thai rejects a split compound, a prefix left at a line end, a count cut from its classifier, a word cut inside itself, and Thai lines set too close', () => {
+  const r = rejects(gate('verify_thai.mjs', [F('bad/thai.html')]), /verify_thai: FAIL/);
+  // Each of the five defects, not whichever one still happens to be caught.
+  for (const want of [/\[A compound split\]  p\.narrow: "ใบอนุญาต"/, /\[A compound split\]  p\.narrow: "ความ" left at a line end/, /\[A compound split\]  p\.cut: a word cut inside itself/,
+                      /\[B number split\]  p\.narrow: "คน"/, /\[C mark collision\]  h1: the Thai bands/]) {
+    if (!want.test(r.out)) throw new Error(`missed ${want}\n${r.out}`);
+  }
+});
+
+test('verify_thai accepts the same text kept whole and led for Thai, and breaks that only look like defects', () => {
+  // หนึ่ง after a classifier, and วัน / ที่ as "the day that": neither is a split.
+  accepts(gate('verify_thai.mjs', [F('good/thai.html')]), /no two Thai lines too close/);
 });
 
 test('verify_overflow rejects silently clipped text', () => {
@@ -163,6 +194,7 @@ const ACCEPTS = [
   ['verify_reduced_motion',       'verify_reduced_motion.mjs', [CLEAN]],
   ['verify_overflow',             'verify_overflow.mjs',     [CLEAN]],
   ['verify_spacing',              'verify_spacing.mjs',      [CLEAN]],
+  ['verify_thai',                 'verify_thai.mjs',         [CLEAN]],
   ['lint_intent',                 'lint_intent.mjs',         [CLEAN]],
   ['verify_interactive',          'verify_interactive.mjs',  [CLEAN]],
   ['verify_rtl',                  'verify_rtl.mjs',          [CLEAN]],
