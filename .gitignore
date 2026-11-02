@@ -1,5 +1,7 @@
-# Locally-installed agent skill bundles: never commit to this repo
-.agents/
+# Locally-installed agent skill bundles: never commit to this repo.
+# .agents/plugins/ is the exception: it is the Codex marketplace catalog this repo publishes.
+.agents/*
+!.agents/plugins/
 skills-lock.json
 
 # node / npm

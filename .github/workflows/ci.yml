@@ -155,3 +155,34 @@ jobs:
         # proves they can still fail: negative fixtures per gate, plus the guards
         # against a gate reporting green without having looked.
         run: npm run test:gates
+
+  codex-plugin:
+    # The Codex plugin on a real Codex client. REQUIRE_CODEX=1 turns a missing
+    # binary into a failure: a skipped run verified nothing.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generated Codex skills match their source
+        run: node scripts/build_codex_plugin.mjs --check
+
+      - name: Codex plugin contract (catalog, manifest, skills, MCP, hooks)
+        run: node scripts/validate_codex_plugin.mjs
+
+      - name: Install the Codex CLI (pinned)
+        run: npm install --prefix "$RUNNER_TEMP/codex" @openai/codex@0.164.0
+
+      - name: Codex plugin, static contract + real client
+        env:
+          REQUIRE_CODEX: "1"
+        run: |
+          export CODEX_BIN="$RUNNER_TEMP/codex/node_modules/.bin/codex"
+          node --test tests/meta/codex-plugin.test.mjs tests/cli/codex-plugin-live.test.mjs

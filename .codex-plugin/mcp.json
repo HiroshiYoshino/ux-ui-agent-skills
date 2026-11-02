@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "ux-ui-kit": {
+      "command": "node",
+      "args": ["mcp/server.mjs"],
+      "cwd": ".",
+      "env": {
+        "UX_UI_MCP_ABSOLUTE_PATHS": "1"
+      }
+    }
+  }
+}
