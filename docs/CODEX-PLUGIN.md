@@ -119,6 +119,41 @@ unchanged and can be used with the plugin. Do not also copy the same skills into
 `.agents/skills`: Codex would list each skill twice (plain and `ux-ui-agent-skills-codex:`
 namespaced). To migrate, remove the copied skill folders, then add the plugin.
 
+## Windows development
+
+Plugin users do not need to change Git's global settings or convert skill files.
+The repository keeps text files in LF with `.gitattributes`; the skill porter and
+Codex plugin validator also accept CRLF input. Generation checks tolerate line
+ending differences while still rejecting content changes. Library specs keep
+their exact LF bytes because their SHA-256 values are checked on download.
+
+For maintainers, `npm ci` installs `cross-spawn` as a development dependency.
+The test runner and extension builder use it for Windows npm shims, including
+paths containing spaces. The Codex client tests use the same launcher for
+`codex.cmd`, and compare discovered paths with either path separator.
+
+From PowerShell, with Node.js, Python 3 and the Codex CLI available:
+
+```powershell
+npm ci
+node scripts/build_codex_plugin.mjs --check
+node scripts/validate_codex_plugin.mjs
+node --test tests/unit/skill-portability.test.mjs tests/meta/codex-plugin.test.mjs
+$env:REQUIRE_CODEX = "1"
+node --test tests/cli/codex-plugin-live.test.mjs
+```
+
+`.github/workflows/windows.yml` runs the packaging and plugin regression tests
+on Windows, including the pinned real client through its npm `.cmd` shim.
+
+The shared `gate.mjs` wrapper and `observe` CLI compare native file paths when
+detecting direct invocation. A successful wrapper run must execute the gate and
+write its receipt; inability to record the measurement exits 2. The wrapper uses
+the project's working directory for Playwright unless `UX_UI_PROJECT_ROOT` is
+explicit. The common accuracy report now invokes commands without shell syntax
+and checks negative fixtures against their own expected exit code. Its smoke
+profile and the separate Bash integration are described in [tests/README.md](../tests/README.md).
+
 ## Verification record
 
 Automated (no real client): `node --test tests/meta/codex-plugin.test.mjs` covers schema,
@@ -140,7 +175,13 @@ path `/tmp/cx/利用先 project`):
 | local-path marketplace: MCP server start and tool list, update, remove, nonexistent plugin, unreachable git URL | behaved as described (`tests/cli/codex-plugin-live.test.mjs`, run with `REQUIRE_CODEX=1`) |
 | default-branch add without a ref | adds the upstream Claude catalog, not this plugin (see above) |
 
+Windows local verification (2026-11-02, Codex CLI 0.161.0, Node.js 24.18.0,
+Python 3.14.0): all ten real-client tests passed through `codex.cmd`, with an
+isolated `CODEX_HOME` and a project path containing spaces and Japanese. This
+covers discovery, install, skills, hooks, MCP startup, update, removal and failure
+cases. It does not verify an interactive model session or the desktop UI.
+
 Not verified: Codex desktop app, IDE extension, commit-SHA refs, an interactive session
 that invokes a skill with model output, the private-repository (authenticated) case, and
-macOS or Windows. Until the interactive real-client check is done, #11 stays open
+macOS. Until the interactive real-client check is done, #11 stays open
 (the PR uses `Refs #11`).

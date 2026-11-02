@@ -37,7 +37,7 @@ const PLUGIN_ROOT = '<plugin-root>';
 function portSkill(text, base, target = 'gemini') {
   const codex = target === 'codex';
   const renamed = codex ? RENAMED_CODEX : RENAMED;
-  let out = text;
+  let out = text.replace(/\r\n/g, '\n');
   for (const [from, to] of Object.entries(renamed)) {
     out = out.split(`${SKILL_ROOT}/${from}`).join(`${base}${to}`)
       .split(`(${from} → Verification Protocol)`).join(`(${to} → Verification)`);
@@ -121,6 +121,7 @@ const OPENING = {
 };
 
 function geminiBrief(agentsMd, where) {
+  agentsMd = agentsMd.replace(/\r\n/g, '\n');
   const cut = agentsMd.indexOf('\n---\n');
   if (cut < 0 || !OPENING[where]) throw new Error('cannot build GEMINI.md');
   const [title, persona] = agentsMd.slice(0, cut).split('\n\n');

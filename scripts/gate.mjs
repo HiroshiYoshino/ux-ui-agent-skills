@@ -88,7 +88,7 @@ function targetsFrom(args) {
  * files writes a receipt that outlives the measurement - which is the one
  * failure this whole mechanism exists to prevent.
  */
-export function writeReceipt({ gate, args = [], exit, files = [], values = {}, at }) {
+export function writeReceipt({ gate, args = [], exit, files = [], values = [], at }) {
   const targets = files.map(f => ({ path: resolve(f), sha256: hashFile(f) }))
     .filter(t => t.sha256);
   const receipt = {
@@ -197,7 +197,7 @@ function main(argv) {
       const stale = r.targets.filter(t => hashFile(t.path) !== t.sha256);
       const mark = stale.length ? `  [EXPIRED: ${stale.map(t => relative(ROOT, t.path)).join(', ')} changed since]` : '';
       console.log(`${r.at}  ${verdict.padEnd(8)} ${r.gate} ${r.targets.map(t => relative(ROOT, t.path)).join(' ')}${mark}`);
-      if (r.values.length) console.log(`           measured: ${r.values.join(', ')}`);
+      if (Array.isArray(r.values) && r.values.length) console.log(`           measured: ${r.values.join(', ')}`);
     }
     return 0;
   }
@@ -223,7 +223,10 @@ function main(argv) {
       return 1;
     }
     console.log(`OK: ${live.length} live receipt(s) for ${file}:`);
-    for (const r of live) console.log(`  ${r.at}  ${r.gate}  exit ${r.exit}  ${r.values.join(', ')}`);
+    for (const r of live) {
+      const values = Array.isArray(r.values) ? r.values.join(', ') : JSON.stringify(r.values || {});
+      console.log(`  ${r.at}  ${r.gate}  exit ${r.exit}  ${values}`);
+    }
     return 0;
   }
 
@@ -240,7 +243,7 @@ function main(argv) {
     return 2;
   }
 
-  const runner = gate.endsWith('.py') ? 'python3' : 'node';
+  const runner = gate.endsWith('.py') ? 'python3' : process.execPath;
   const started = new Date().toISOString();
   const targets = targetsFrom(rest);
   // Hash BEFORE the run: that is the state the numbers describe.
@@ -255,7 +258,7 @@ function main(argv) {
     env: {
       ...process.env,
       DS_REQUIRE_BROWSER: '1',
-      UX_UI_PROJECT_ROOT: process.env.UX_UI_PROJECT_ROOT || ROOT,
+      UX_UI_PROJECT_ROOT: process.env.UX_UI_PROJECT_ROOT || process.cwd(),
     },
   });
 
@@ -282,6 +285,7 @@ function main(argv) {
     // is that its absence is meaningful.
     console.error(`\ngate.mjs: could not write the receipt (${err.message}). `
       + 'Treat this run as unrecorded.');
+    return 2;
   }
 
   if (r.status === null) {
@@ -292,6 +296,6 @@ function main(argv) {
   return r.status;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   process.exit(main(process.argv.slice(2)));
 }

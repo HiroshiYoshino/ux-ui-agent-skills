@@ -24,6 +24,7 @@
  * .github/workflows/release.yml attaches exactly this archive.
  */
 import { execFileSync } from 'node:child_process';
+import spawn from 'cross-spawn';
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join, resolve } from 'node:path';
@@ -51,8 +52,11 @@ function build(out) {
   const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
 
   // The same command the registry sees, so the two cannot carry different files.
-  const packed = JSON.parse(execFileSync('npm', ['pack', '--dry-run', '--json'],
-    { cwd: ROOT, maxBuffer: 1 << 26, stdio: ['ignore', 'pipe', 'ignore'] }).toString())[0].files;
+  const pack = spawn.sync('npm', ['pack', '--dry-run', '--json'],
+    { cwd: ROOT, maxBuffer: 1 << 26, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  if (pack.error) throw pack.error;
+  if (pack.status !== 0) throw new Error(`npm pack failed: ${pack.stderr}`);
+  const packed = JSON.parse(pack.stdout)[0].files;
   let n = 0;
   for (const { path: rel } of packed) {
     if (LEFT_OUT.some(re => re.test(rel))) continue;

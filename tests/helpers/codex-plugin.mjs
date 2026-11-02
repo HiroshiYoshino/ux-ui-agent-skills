@@ -2,12 +2,14 @@
  * Helpers for the Codex plugin tests: an isolated copy of the repository (what a
  * git checkout hands Codex), and a driver for `codex app-server`.
  */
-import { spawn, spawnSync } from 'node:child_process';
+import spawn from 'cross-spawn';
 import { cpSync, mkdirSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import readline from 'node:readline';
 import { ROOT } from './run.mjs';
+
+const spawnSync = spawn.sync;
 
 /** A directory name with a space and Japanese, which is where paths go wrong. */
 export const AWKWARD = '取得先 cache';

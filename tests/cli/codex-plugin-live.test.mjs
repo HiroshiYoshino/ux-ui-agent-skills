@@ -63,7 +63,7 @@ test('the marketplace is added by path and Codex finds the catalog', opts, () =>
   assert.match(add.out, new RegExp(`Added marketplace \`${MARKET}\``));
   const list = cx(['plugin', 'list']);
   assert.equal(list.status, 0, list.out);
-  assert.ok(list.out.includes('.agents/plugins/marketplace.json'), `Codex used another catalog:\n${list.out}`);
+  assert.ok(list.out.replaceAll('\\', '/').includes('.agents/plugins/marketplace.json'), `Codex used another catalog:\n${list.out}`);
   assert.match(list.out, new RegExp(`${ID}\\s+not installed`));
 });
 
@@ -84,7 +84,7 @@ test('the skills are discovered from the project, under the plugin namespace', o
   assert.deepEqual(entry.errors, []);
   const ours = entry.skills.filter((s) => s.pluginId === ID);
   assert.deepEqual(ours.map((s) => s.name.replace(`${PLUGIN}:`, '')).sort(), wanted);
-  assert.ok(ours.every((s) => s.enabled && s.path.includes('/plugins/cache/')), 'a skill was read from somewhere other than the plugin cache');
+  assert.ok(ours.every((s) => s.enabled && s.path.replaceAll('\\', '/').includes('/plugins/cache/')), 'a skill was read from somewhere other than the plugin cache');
   assert.ok(ours.every((s) => !s.path.startsWith(kit)), 'the skills were read from the original checkout');
 });
 

@@ -27,7 +27,7 @@ const SPEC = (slug) => readFileSync(join(ROOT, 'design-systems/library', slug, '
 let work, pkg;
 
 before(() => {
-  work = mkdtempSync(join(tmpdir(), 'ds-lib-'));
+  work = mkdtempSync(join(tmpdir(), 'ds lib 日本語-'));
   const p = run('npm', ['pack', '--pack-destination', work, '--json'], { timeout: 300000 });
   assert.equal(p.status, 0, `npm pack failed:\n${p.out}`);
   const tgz = join(work, JSON.parse(p.stdout)[0].filename);

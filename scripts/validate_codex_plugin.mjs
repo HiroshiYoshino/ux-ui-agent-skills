@@ -59,7 +59,7 @@ function checkSkills(root, skillsDir, problems) {
   for (const name of names) {
     const file = join(skillsDir, name, 'SKILL.md');
     if (!existsSync(file)) { problems.push(`skill ${name} has no SKILL.md`); continue; }
-    const text = readFileSync(file, 'utf8');
+    const text = readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
     const fm = frontmatter(text);
     if (fm === null) { problems.push(`skill ${name}: no frontmatter`); continue; }
     if (fm.match(/^name:\s*(\S+)\s*$/m)?.[1] !== name) problems.push(`skill ${name}: frontmatter name does not match its directory`);
@@ -72,7 +72,7 @@ function checkSkills(root, skillsDir, problems) {
     }
     if (!text.includes('<plugin-root>')) problems.push(`skill ${name}: never says where the plugin root is`);
     const meta = join(skillsDir, name, 'agents', 'openai.yaml');
-    if (existsSync(meta) && !/^policy:\n {2}allow_implicit_invocation: false\n$/.test(readFileSync(meta, 'utf8'))) {
+    if (existsSync(meta) && !/^policy:\n {2}allow_implicit_invocation: false\n$/.test(readFileSync(meta, 'utf8').replace(/\r\n/g, '\n'))) {
       problems.push(`skill ${name}: agents/openai.yaml is not the one policy this build writes`);
     }
   }

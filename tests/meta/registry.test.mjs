@@ -12,7 +12,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { ROOT } from '../helpers/run.mjs';
 
-const read = (...p) => readFileSync(join(ROOT, ...p), 'utf8');
+const read = (...p) => readFileSync(join(ROOT, ...p), 'utf8').replace(/\r\n/g, '\n');
 
 /** Count top-level [ ... ] entries in an array literal, ignoring nested brackets. */
 function countEntries(src, opener) {
@@ -194,7 +194,7 @@ test('design-systems/catalog.md is what the library generates', () => {
   // 2,144 entries are too many to keep by hand. The file is generated, and this
   // is what stops a spec being added or removed without the catalog following.
   const want = execFileSync('python3', ['scripts/design_systems.py', 'catalog'],
-    { cwd: ROOT, maxBuffer: 1 << 26 }).toString('utf8');
+    { cwd: ROOT, maxBuffer: 1 << 26 }).toString('utf8').replace(/\r\n/g, '\n');
   assert.equal(read('design-systems', 'catalog.md'), want,
     'design-systems/catalog.md is stale: python3 scripts/design_systems.py catalog > design-systems/catalog.md');
 });
@@ -205,7 +205,7 @@ test('design-systems/library.json is what the library generates, at this version
   // index points at the wrong tag or refuses a spec that changed, and either way
   // the user gets nothing.
   const want = execFileSync('python3', ['scripts/design_systems.py', 'index'],
-    { cwd: ROOT, maxBuffer: 1 << 26 }).toString('utf8');
+    { cwd: ROOT, maxBuffer: 1 << 26 }).toString('utf8').replace(/\r\n/g, '\n');
   assert.equal(read('design-systems', 'library.json'), want,
     'design-systems/library.json is stale: python3 scripts/design_systems.py index > design-systems/library.json');
   const { version } = JSON.parse(read('package.json'));

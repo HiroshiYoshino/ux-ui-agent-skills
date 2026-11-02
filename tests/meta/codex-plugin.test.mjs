@@ -93,7 +93,7 @@ test('commands the user starts stay user-started: the model may not invoke them'
   const caps = json('.codex-plugin/capabilities.json');
   assert.ok(caps.skills.explicitInvocationOnly.length > 0);
   for (const n of caps.skills.explicitInvocationOnly) {
-    assert.equal(readFileSync(join(ROOT, SKILLS, n, 'agents/openai.yaml'), 'utf8'), 'policy:\n  allow_implicit_invocation: false\n');
+    assert.equal(readFileSync(join(ROOT, SKILLS, n, 'agents/openai.yaml'), 'utf8').replace(/\r\n/g, '\n'), 'policy:\n  allow_implicit_invocation: false\n');
   }
   for (const n of skillNames().filter((s) => !caps.skills.explicitInvocationOnly.includes(s))) {
     assert.ok(!existsSync(join(ROOT, SKILLS, n, 'agents')), `${n} gained a policy it never asked for`);
@@ -145,6 +145,20 @@ test('generation is reproducible: same input, byte-identical output', () => {
 });
 
 /* ------------------------------------------------ broken input is rejected */
+
+test('CRLF source skills, generated skills and policies satisfy the same contract', () => {
+  const kit = isolatedCheckout();
+  const convert = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const path = join(dir, entry.name);
+      if (entry.isDirectory()) convert(path);
+      else writeFileSync(path, readFileSync(path, 'utf8').replace(/\r?\n/g, '\r\n'));
+    }
+  };
+  convert(join(kit, '.claude/skills'));
+  convert(join(kit, SKILLS));
+  assert.deepEqual(validate(kit), []);
+});
 
 const breakIt = (name, mutate, expect) => test(`REJECTS: ${name}`, () => {
   const dir = scratch();
