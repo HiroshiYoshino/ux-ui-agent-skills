@@ -190,6 +190,9 @@ jobs:
         with:
           node-version: 20
 
+      - name: Install development dependencies
+        run: npm ci
+
       - name: Generated Codex skills match their source
         run: node scripts/build_codex_plugin.mjs --check
 

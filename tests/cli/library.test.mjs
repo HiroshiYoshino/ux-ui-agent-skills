@@ -16,6 +16,7 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:http';
+import { extract } from 'tar';
 import { mkdtempSync, rmSync, readFileSync, existsSync, writeFileSync, mkdirSync, readdirSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -26,13 +27,13 @@ const SPEC = (slug) => readFileSync(join(ROOT, 'design-systems/library', slug, '
 
 let work, pkg;
 
-before(() => {
+before(async () => {
   work = mkdtempSync(join(tmpdir(), 'ds lib 日本語-'));
   const p = run('npm', ['pack', '--pack-destination', work, '--json'], { timeout: 300000 });
   assert.equal(p.status, 0, `npm pack failed:\n${p.out}`);
   const tgz = join(work, JSON.parse(p.stdout)[0].filename);
-  const x = run('tar', ['-xzf', tgz, '-C', work]);
-  assert.equal(x.status, 0, `could not unpack the tarball:\n${x.out}`);
+  // Native Windows tar can lose non-ASCII paths under an English code page.
+  await extract({ file: tgz, cwd: work, strict: true });
   pkg = join(work, 'package');
 });
 
